@@ -3299,7 +3299,7 @@ function generateFallbackWebsite(productInfo: any) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta>="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${productInfo.title} - Get Yours Today!</title>
     <meta name="description" content="${productInfo.description}">
