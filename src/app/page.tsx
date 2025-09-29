@@ -52,6 +52,7 @@ export default function HomePage() {
           </div>
         </div>
       </nav>
+
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
@@ -173,4 +174,3 @@ export default function HomePage() {
     </div>
    )
 }
-

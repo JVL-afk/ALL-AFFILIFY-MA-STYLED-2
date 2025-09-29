@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
@@ -110,10 +110,14 @@ function SignupForm() {
   }
 
   return (
-    <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 shadow-xl">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-white mb-2">Create your account</h2>
-        <p className="text-gray-300">Start your affiliate marketing journey today</p>
+    <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-black flex items-center justify-center">
+      <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white border-opacity-20 w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-white font-bold text-2xl">⚡</span>
+          </div>
+          <h2 className="text-3xl font-bold text-white mb-2">Join AFFILIFY</h2>
+          <p className="text-gray-300">Start your affiliate marketing journey today</p>
         
         {/* Plan Selection Display */}
         {selectedPlan && (
@@ -270,6 +274,7 @@ function SignupForm() {
             Basic analytics
           </li>
         </ul>
+        </div>
       </div>
     </div>
   )

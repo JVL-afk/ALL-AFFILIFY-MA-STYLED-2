@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import Link from 'next/link'
 import { 
   Book, 
   Code, 
@@ -35,7 +36,7 @@ import {
   FileText,
   Video,
   Image,
-  Link,
+  Link as LinkIcon,
   Mail,
   Phone,
   MessageCircle,
@@ -219,36 +220,80 @@ console.log('Website created:', website.url);`
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900">
+      {/* Navbar */}
+      <nav className="bg-slate-900 border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex items-center">
+              <Link href="/" className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">⚡</span>
+                </div>
+                <span className="text-white text-xl font-bold">AFFILIFY</span>
+              </Link>
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:block">
+              <div className="ml-10 flex items-baseline space-x-4">
+                <Link href="/" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                  Home
+                </Link>
+                <Link href="/pricing" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                  Pricing
+                </Link>
+                <Link href="/docs" className="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">
+                  Documentation
+                </Link>
+                <Link href="/about-me" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                  About Me
+                </Link>
+                <Link href="/login" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                  Login
+                </Link>
+                <Link href="/signup" className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                  Get Started Free
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
       {/* Header */}
-      <section className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-6 py-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Documentation</h1>
-              <p className="text-lg text-gray-600">
-                Everything you need to know about using AFFILIFY
-              </p>
-            </div>
-            <div className="flex gap-4">
-              <button className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-200">
-                Get Started
-              </button>
-              <button className="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
-                API Reference
-              </button>
-            </div>
+      <section className="bg-white/10 backdrop-blur-lg border-b border-white/20">
+        <div className="container mx-auto px-6 py-16">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              <span className="bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 bg-clip-text text-transparent">
+                Documentation
+              </span>
+            </h1>
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+              Everything you need to know about using AFFILIFY
+            </p>
+          </div>
+          
+          <div className="flex gap-4 justify-center">
+            <Link href="/signup" className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105">
+              Get Started
+            </Link>
+            <Link href="/pricing" className="bg-white/10 backdrop-blur-lg hover:bg-white/20 text-white px-6 py-3 rounded-lg font-semibold border border-white/20 transition-all duration-200">
+              API Reference
+            </Link>
           </div>
 
           {/* Search */}
-          <div className="relative max-w-2xl">
+          <div className="relative max-w-2xl mx-auto mt-8">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Search documentation..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+              className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
             />
           </div>
         </div>
