@@ -163,7 +163,7 @@ export default function PricingPage() {
           </p>
           
           {/* Billing Toggle */}
-          <div className="inline-flex items-center bg-white/10 backdrop-blur-lg rounded-lg p-1 border border-white/20">
+          <div className="inline-flex items-center bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-1 border border-white border-opacity-20">
             <button
               onClick={() => setBillingPeriod('monthly')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -193,7 +193,7 @@ export default function PricingPage() {
         {/* Plans Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           {plans.map((plan) => (
-            <div key={plan.id} className={`relative bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 transition-all hover:bg-white/15 ${plan.popular ? 'ring-2 ring-orange-500' : ''}`}>
+            <div key={plan.id} className={`relative bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20 transition-all hover:bg-white bg-opacity-15 ${plan.popular ? 'ring-2 ring-orange-500' : ''}`}>
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <span className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-4 py-1 rounded-full text-sm font-medium">
@@ -274,7 +274,7 @@ export default function PricingPage() {
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold text-white text-center mb-8">Frequently Asked Questions</h2>
           <div className="space-y-6">
-            <div className="bg-white/10 backdrop-blur-lg rounded-lg p-6 border border-white/20">
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-6 border border-white border-opacity-20">
               <h3 className="font-semibold mb-2 text-white">Can I change my plan later?</h3>
               <p className="text-gray-300">
                 Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately, 
@@ -282,7 +282,7 @@ export default function PricingPage() {
               </p>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-lg rounded-lg p-6 border border-white/20">
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-6 border border-white border-opacity-20">
               <h3 className="font-semibold mb-2 text-white">Is there a free trial?</h3>
               <p className="text-gray-300">
                 We offer a 14-day free trial for all plans. No credit card required to get started. 
@@ -290,7 +290,7 @@ export default function PricingPage() {
               </p>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-lg rounded-lg p-6 border border-white/20">
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-6 border border-white border-opacity-20">
               <h3 className="font-semibold mb-2 text-white">What payment methods do you accept?</h3>
               <p className="text-gray-300">
                 We accept all major credit cards (Visa, MasterCard, American Express) and PayPal. 
@@ -298,7 +298,7 @@ export default function PricingPage() {
               </p>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-lg rounded-lg p-6 border border-white/20">
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-6 border border-white border-opacity-20">
               <h3 className="font-semibold mb-2 text-white">Can I cancel anytime?</h3>
               <p className="text-gray-300">
                 Yes, you can cancel your subscription at any time. Your account will remain active 

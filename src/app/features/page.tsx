@@ -549,7 +549,7 @@ export default function FeaturesPage() {
                   Start Demo
                 </button>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+              <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-6">
                 <div className="bg-white rounded-lg p-4 mb-4">
                   <div className="flex items-center gap-2 text-gray-600 mb-2">
                     <Globe className="w-4 h-4" />

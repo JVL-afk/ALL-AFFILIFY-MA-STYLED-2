@@ -2,10 +2,12 @@
 module.exports = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    './pages/**/*.{ts,tsx,js,jsx}',
+    './components/**/*.{ts,tsx,js,jsx}',
+    './app/**/*.{ts,tsx,js,jsx}',
+    './src/**/*.{ts,tsx,js,jsx}',
+    './src/app/**/*.{ts,tsx,js,jsx}',
+    './src/components/**/*.{ts,tsx,js,jsx}',
   ],
   prefix: "",
   theme: {
@@ -59,6 +61,21 @@ module.exports = {
           500: '#8b5cf6',
           600: '#7c3aed',
           700: '#6d28d9',
+          900: '#581c87',
+        },
+        orange: {
+          400: '#fb923c',
+          500: '#f97316',
+          600: '#ea580c',
+          700: '#c2410c',
+          800: '#9a3412',
+          900: '#7c2d12',
+        },
+        red: {
+          500: '#ef4444',
+          600: '#dc2626',
+          700: '#b91c1c',
+          900: '#7f1d1d',
         }
       },
       backgroundImage: {

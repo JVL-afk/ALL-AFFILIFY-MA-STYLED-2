@@ -183,11 +183,11 @@ export default function CreateWebsitePage() {
         
         {/* Plan Status */}
         <div className="mt-4 flex items-center gap-4">
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
+          <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white border-opacity-20">
             <span className="text-white/80">Current Plan: </span>
             <span className="text-white font-semibold">{planLimits[user.plan].name}</span>
           </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
+          <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white border-opacity-20">
             <span className="text-white/80">Websites: </span>
             <span className="text-white font-semibold">
               {user.websiteCount} / {planLimits[user.plan].websites === 999 ? '∞' : planLimits[user.plan].websites}
@@ -215,7 +215,7 @@ export default function CreateWebsitePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Create Website Form */}
         <div className="lg:col-span-2">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+          <Card className="bg-white bg-opacity-10 backdrop-blur-sm border-white border-opacity-20">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Wand2 className="w-5 h-5" />
@@ -239,7 +239,7 @@ export default function CreateWebsitePage() {
                     setProductUrl(e.target.value)
                     setError('')
                   }}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  className="bg-white bg-opacity-10 border-white border-opacity-20 text-white placeholder:text-white/50"
                   disabled={loading}
                 />
                 <p className="text-sm text-white/60">
@@ -366,7 +366,7 @@ export default function CreateWebsitePage() {
         {/* Sidebar - Features & Pricing */}
         <div className="space-y-6">
           {/* Features */}
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+          <Card className="bg-white bg-opacity-10 backdrop-blur-sm border-white border-opacity-20">
             <CardHeader>
               <CardTitle className="text-white">What You Get</CardTitle>
             </CardHeader>
@@ -399,12 +399,12 @@ export default function CreateWebsitePage() {
           </Card>
 
           {/* Pricing */}
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+          <Card className="bg-white bg-opacity-10 backdrop-blur-sm border-white border-opacity-20">
             <CardHeader>
               <CardTitle className="text-white">Pricing Plans</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className={`p-3 rounded-lg border ${user.plan === 'basic' ? 'border-orange-400 bg-orange-500/20' : 'border-white/20'}`}>
+              <div className={`p-3 rounded-lg border ${user.plan === 'basic' ? 'border-orange-400 bg-orange-500/20' : 'border-white border-opacity-20'}`}>
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-medium text-white">Basic</span>
                   <span className="text-green-400 font-bold">FREE</span>
@@ -412,7 +412,7 @@ export default function CreateWebsitePage() {
                 <div className="text-sm text-white/70">3 websites</div>
               </div>
 
-              <div className={`p-3 rounded-lg border ${user.plan === 'pro' ? 'border-purple-400 bg-purple-500/20' : 'border-white/20'}`}>
+              <div className={`p-3 rounded-lg border ${user.plan === 'pro' ? 'border-purple-400 bg-purple-500/20' : 'border-white border-opacity-20'}`}>
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-medium text-white">Pro</span>
                   <span className="text-white font-bold">$29</span>
@@ -420,7 +420,7 @@ export default function CreateWebsitePage() {
                 <div className="text-sm text-white/70">10 websites + advanced features</div>
               </div>
 
-              <div className={`p-3 rounded-lg border ${user.plan === 'enterprise' ? 'border-blue-400 bg-blue-500/20' : 'border-white/20'}`}>
+              <div className={`p-3 rounded-lg border ${user.plan === 'enterprise' ? 'border-blue-400 bg-blue-500/20' : 'border-white border-opacity-20'}`}>
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-medium text-white">Enterprise</span>
                   <span className="text-white font-bold">$99</span>

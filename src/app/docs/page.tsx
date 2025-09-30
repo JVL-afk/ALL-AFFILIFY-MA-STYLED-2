@@ -263,7 +263,7 @@ console.log('Website created:', website.url);`
       </nav>
 
       {/* Header */}
-      <section className="bg-white/10 backdrop-blur-lg border-b border-white/20">
+      <section className="bg-white bg-opacity-10 backdrop-blur-lg border-b border-white border-opacity-20">
         <div className="container mx-auto px-6 py-16">
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -280,7 +280,7 @@ console.log('Website created:', website.url);`
             <Link href="/signup" className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105">
               Get Started
             </Link>
-            <Link href="/pricing" className="bg-white/10 backdrop-blur-lg hover:bg-white/20 text-white px-6 py-3 rounded-lg font-semibold border border-white/20 transition-all duration-200">
+            <Link href="/pricing" className="bg-white bg-opacity-10 backdrop-blur-lg hover:bg-white/20 text-white px-6 py-3 rounded-lg font-semibold border border-white border-opacity-20 transition-all duration-200">
               API Reference
             </Link>
           </div>
@@ -293,7 +293,7 @@ console.log('Website created:', website.url);`
               placeholder="Search documentation..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+              className="w-full pl-12 pr-4 py-4 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
             />
           </div>
         </div>
@@ -498,7 +498,7 @@ console.log('Website created:', website.url);`
             Can't find what you're looking for? Our support team is here to help you succeed.
           </p>
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
+            <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-6">
               <MessageCircle className="w-8 h-8 mx-auto mb-4" />
               <h3 className="font-semibold mb-2">Live Chat</h3>
               <p className="text-sm opacity-90 mb-4">Get instant help from our support team</p>
@@ -506,7 +506,7 @@ console.log('Website created:', website.url);`
                 Start Chat
               </button>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
+            <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-6">
               <Mail className="w-8 h-8 mx-auto mb-4" />
               <h3 className="font-semibold mb-2">Email Support</h3>
               <p className="text-sm opacity-90 mb-4">Send us a detailed message</p>
@@ -514,7 +514,7 @@ console.log('Website created:', website.url);`
                 Send Email
               </button>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
+            <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-6">
               <Users className="w-8 h-8 mx-auto mb-4" />
               <h3 className="font-semibold mb-2">Community</h3>
               <p className="text-sm opacity-90 mb-4">Connect with other users</p>

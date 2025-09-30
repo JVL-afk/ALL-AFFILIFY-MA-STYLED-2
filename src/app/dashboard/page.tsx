@@ -135,19 +135,19 @@ export default function DashboardPage() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 text-center">
+          <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 text-center">
             <div className="text-3xl font-bold text-white mb-2">{stats?.totalWebsiteGenerations}</div>
             <div className="text-gray-300">Websites Created</div>
           </div>
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 text-center">
+          <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 text-center">
             <div className="text-3xl font-bold text-white mb-2">{stats?.totalClicks.toLocaleString()}</div>
             <div className="text-gray-300">Total Clicks</div>
           </div>
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 text-center">
+          <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 text-center">
             <div className="text-3xl font-bold text-white mb-2">${stats?.totalRevenue.toFixed(2)}</div>
             <div className="text-gray-300">Revenue Generated</div>
           </div>
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 text-center">
+          <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 text-center">
             <div className="text-3xl font-bold text-white mb-2">{stats?.conversionRate}</div>
             <div className="text-gray-300">Conversion Rate</div>
           </div>
@@ -156,7 +156,7 @@ export default function DashboardPage() {
         {/* Action Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           {/* Create Website */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 text-center">
+          <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20 text-center">
             <div className="w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="text-2xl">🚀</span>
             </div>
@@ -172,7 +172,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Analyze Website */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 text-center">
+          <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20 text-center">
             <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="text-2xl">📊</span>
             </div>
@@ -188,7 +188,7 @@ export default function DashboardPage() {
           </div>
 
           {/* My Websites */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 text-center">
+          <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20 text-center">
             <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="text-2xl">🌐</span>
             </div>
@@ -209,15 +209,15 @@ export default function DashboardPage() {
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-white text-center mb-8">Advanced Features</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Link href="/dashboard/advanced-analytics" className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all">
+              <Link href="/dashboard/advanced-analytics" className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-white bg-opacity-15 transition-all">
                 <h3 className="text-lg font-bold text-white mb-2">📈 Advanced Analytics</h3>
                 <p className="text-gray-300 text-sm">Deep insights into your website performance</p>
               </Link>
-              <Link href="/dashboard/reviews" className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all">
+              <Link href="/dashboard/reviews" className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-white bg-opacity-15 transition-all">
                 <h3 className="text-lg font-bold text-white mb-2">⭐ Reviews Management</h3>
                 <p className="text-gray-300 text-sm">Manage and display customer reviews</p>
               </Link>
-              <Link href="/dashboard/ab-testing" className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all">
+              <Link href="/dashboard/ab-testing" className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-white bg-opacity-15 transition-all">
                 <h3 className="text-lg font-bold text-white mb-2">🧪 A/B Testing</h3>
                 <p className="text-gray-300 text-sm">Optimize your conversion rates</p>
               </Link>
@@ -228,7 +228,7 @@ export default function DashboardPage() {
         {/* Upgrade CTA for Basic Plan */}
         {userInfo?.plan === 'Basic' && (
           <div className="text-center">
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 max-w-2xl mx-auto">
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20 max-w-2xl mx-auto">
               <h2 className="text-2xl font-bold text-white mb-4">Unlock More Features</h2>
               <p className="text-gray-300 mb-6">
                 Upgrade to Pro or Enterprise to access advanced analytics, A/B testing, and more!

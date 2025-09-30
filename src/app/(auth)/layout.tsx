@@ -51,9 +51,9 @@ export default function AuthLayout({
           </div>
           
           {/* Decorative Elements */}
-          <div className="absolute top-20 right-20 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
-          <div className="absolute bottom-20 left-20 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
-          <div className="absolute top-1/2 right-10 w-16 h-16 bg-white/10 rounded-full blur-xl"></div>
+          <div className="absolute top-20 right-20 w-32 h-32 bg-white bg-opacity-10 rounded-full blur-xl"></div>
+          <div className="absolute bottom-20 left-20 w-24 h-24 bg-white bg-opacity-10 rounded-full blur-xl"></div>
+          <div className="absolute top-1/2 right-10 w-16 h-16 bg-white bg-opacity-10 rounded-full blur-xl"></div>
         </div>
 
         {/* Right Side - Auth Form */}

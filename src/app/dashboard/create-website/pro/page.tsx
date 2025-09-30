@@ -137,7 +137,7 @@ export default function ProCreateWebsite() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Website Details Form */}
           <div className="lg:col-span-2">
-            <Card className="bg-white/10 border-white/20">
+            <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
               <CardHeader>
                 <CardTitle className="text-white">Website Details</CardTitle>
                 <CardDescription className="text-gray-300">
@@ -153,7 +153,7 @@ export default function ProCreateWebsite() {
                       placeholder="e.g., Ultimate Gaming Gear Reviews"
                       value={formData.websiteName}
                       onChange={(e) => handleInputChange('websiteName', e.target.value)}
-                      className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                      className="bg-white bg-opacity-10 border-white border-opacity-20 text-white placeholder-gray-400"
                       disabled={!canCreateWebsite}
                     />
                   </div>
@@ -165,7 +165,7 @@ export default function ProCreateWebsite() {
                       placeholder="e.g., yourdomain.com"
                       value={formData.customDomain}
                       onChange={(e) => handleInputChange('customDomain', e.target.value)}
-                      className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                      className="bg-white bg-opacity-10 border-white border-opacity-20 text-white placeholder-gray-400"
                       disabled={!canCreateWebsite}
                     />
                   </div>
@@ -174,7 +174,7 @@ export default function ProCreateWebsite() {
                 <div className="space-y-2">
                   <Label htmlFor="niche" className="text-white">Niche/Category</Label>
                   <Select value={formData.niche} onValueChange={(value) => handleInputChange('niche', value)} disabled={!canCreateWebsite}>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                    <SelectTrigger className="bg-white bg-opacity-10 border-white border-opacity-20 text-white">
                       <SelectValue placeholder="Select your niche" />
                     </SelectTrigger>
                     <SelectContent>
@@ -200,7 +200,7 @@ export default function ProCreateWebsite() {
                     placeholder="Describe your website's focus, target audience, and the products you'll promote..."
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
-                    className="bg-white/10 border-white/20 text-white placeholder-gray-400 min-h-[120px]"
+                    className="bg-white bg-opacity-10 border-white border-opacity-20 text-white placeholder-gray-400 min-h-[120px]"
                     disabled={!canCreateWebsite}
                   />
                 </div>
@@ -215,7 +215,7 @@ export default function ProCreateWebsite() {
                         className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                           formData.template === template.id
                             ? 'border-purple-500 bg-purple-600/20'
-                            : 'border-white/20 bg-white/5 hover:border-white/40'
+                            : 'border-white border-opacity-20 bg-white bg-opacity-5 hover:border-white/40'
                         } ${!canCreateWebsite ? 'opacity-50 cursor-not-allowed' : ''}`}
                         onClick={() => canCreateWebsite && handleInputChange('template', template.id)}
                       >
@@ -245,7 +245,7 @@ export default function ProCreateWebsite() {
                 <div className="space-y-4">
                   <Label className="text-white">Pro Features</Label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card className="bg-white/5 border-white/10">
+                    <Card className="bg-white bg-opacity-5 border-white/10">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
@@ -266,7 +266,7 @@ export default function ProCreateWebsite() {
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-white/5 border-white/10">
+                    <Card className="bg-white bg-opacity-5 border-white/10">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
@@ -325,7 +325,7 @@ export default function ProCreateWebsite() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Plan Limits */}
-            <Card className="bg-white/10 border-white/20">
+            <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
               <CardHeader>
                 <CardTitle className="text-white">Pro Plan Status</CardTitle>
               </CardHeader>
@@ -362,7 +362,7 @@ export default function ProCreateWebsite() {
             </Card>
 
             {/* Unsplash Integration */}
-            <Card className="bg-white/10 border-white/20">
+            <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
               <CardHeader>
                 <CardTitle className="text-white">Pro Image Library</CardTitle>
                 <CardDescription className="text-gray-300">
@@ -391,7 +391,7 @@ export default function ProCreateWebsite() {
             </Card>
 
             {/* Enterprise Benefits */}
-            <Card className="bg-white/10 border-white/20">
+            <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
               <CardHeader>
                 <CardTitle className="text-white">Upgrade to Enterprise</CardTitle>
                 <CardDescription className="text-gray-300">

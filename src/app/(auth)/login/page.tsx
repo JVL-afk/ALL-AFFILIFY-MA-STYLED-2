@@ -57,7 +57,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-black flex items-center justify-center">
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/20 w-full max-w-md">
+      <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white border-opacity-20 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-2xl">⚡</span>
@@ -86,7 +86,7 @@ export default function LoginPage() {
               onChange={handleChange}
               required
               disabled={isLoading}
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+              className="w-full px-4 py-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
             />
           </div>
 
@@ -104,7 +104,7 @@ export default function LoginPage() {
                 onChange={handleChange}
                 required
                 disabled={isLoading}
-                className="w-full px-4 py-3 pr-10 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-3 pr-10 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
               />
               <button
                 type="button"
@@ -172,7 +172,7 @@ export default function LoginPage() {
         </div>
 
         {/* Demo Accounts */}
-        <div className="mt-6 p-4 bg-white/5 rounded-lg">
+        <div className="mt-6 p-4 bg-white bg-opacity-5 rounded-lg">
           <p className="text-xs text-gray-300 mb-2 font-medium">Demo Accounts:</p>
           <div className="space-y-1 text-xs text-gray-400">
             <div>Basic: demo@basic.com / password123</div>

@@ -111,7 +111,7 @@ function SignupForm() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-black flex items-center justify-center">
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/20 w-full max-w-md">
+      <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white border-opacity-20 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-2xl">⚡</span>
@@ -150,7 +150,7 @@ function SignupForm() {
             id="name"
             type="text"
             required
-            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+            className="w-full px-4 py-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
             placeholder="Enter your full name"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -166,7 +166,7 @@ function SignupForm() {
             id="email"
             type="email"
             required
-            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+            className="w-full px-4 py-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
             placeholder="Enter your email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -182,7 +182,7 @@ function SignupForm() {
             id="password"
             type="password"
             required
-            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+            className="w-full px-4 py-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
             placeholder="Create a password"
             value={formData.password}
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -203,7 +203,7 @@ function SignupForm() {
             id="confirmPassword"
             type="password"
             required
-            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+            className="w-full px-4 py-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
             placeholder="Confirm your password"
             value={formData.confirmPassword}
             onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
@@ -215,7 +215,7 @@ function SignupForm() {
           <input
             id="terms"
             type="checkbox"
-            className="mt-1 w-4 h-4 text-orange-500 bg-white/10 border-white/20 rounded focus:ring-orange-500 focus:ring-2"
+            className="mt-1 w-4 h-4 text-orange-500 bg-white bg-opacity-10 border-white border-opacity-20 rounded focus:ring-orange-500 focus:ring-2"
             checked={agreedToTerms}
             onChange={(e) => setAgreedToTerms(e.target.checked)}
           />
@@ -252,7 +252,7 @@ function SignupForm() {
       </div>
 
       {/* Free Plan Features */}
-      <div className="mt-8 bg-white/5 backdrop-blur-sm rounded-lg p-6">
+      <div className="mt-8 bg-white bg-opacity-5 backdrop-blur-sm rounded-lg p-6">
         <h3 className="text-white font-semibold mb-4 flex items-center">
           🎉 Free Basic Plan Includes:
         </h3>

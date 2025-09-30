@@ -80,7 +80,7 @@ export default function HomePage() {
             <Link href="/signup" className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-105">
               Start Building Free
             </Link>
-            <Link href="/pricing" className="bg-white/10 backdrop-blur-lg hover:bg-white/20 text-white font-bold py-4 px-8 rounded-xl border border-white/20 transition-all duration-200">
+            <Link href="/pricing" className="bg-white bg-opacity-10 backdrop-blur-lg hover:bg-white/20 text-white font-bold py-4 px-8 rounded-xl border border-white border-opacity-20 transition-all duration-200">
               See How It Works
             </Link>
           </div>
@@ -90,7 +90,7 @@ export default function HomePage() {
         <div className="mb-20">
           <h2 className="text-3xl font-bold text-white text-center mb-12">Real Success Story</h2>
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20">
               <div className="text-center mb-6">
                 <h3 className="text-xl font-bold text-white mb-2">
                   See how AFFILIFY helped create a professional affiliate website that's already generating results
@@ -101,7 +101,7 @@ export default function HomePage() {
                 </div>
               </div>
               
-              <div className="bg-white/5 rounded-xl p-6 mb-6">
+              <div className="bg-white bg-opacity-5 rounded-xl p-6 mb-6">
                 <h4 className="text-lg font-bold text-white mb-2">FORZA Basketball Hoop</h4>
                 <p className="text-gray-300 mb-4">Professional affiliate marketing website</p>
                 <Link href="https://general-1750440900583-bdls9w.affilify.eu/" className="text-orange-400 hover:text-orange-300 underline">
@@ -126,7 +126,7 @@ export default function HomePage() {
           
           <div className="grid md:grid-cols-3 gap-8">
             {/* AI-Powered Generation */}
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 text-center">
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20 text-center">
               <div className="w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-2xl">🤖</span>
               </div>
@@ -137,7 +137,7 @@ export default function HomePage() {
             </div>
 
             {/* Performance Analytics */}
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 text-center">
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20 text-center">
               <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-2xl">📊</span>
               </div>
@@ -148,7 +148,7 @@ export default function HomePage() {
             </div>
 
             {/* One-Click Deployment */}
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 text-center">
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20 text-center">
               <div className="w-16 h-16 bg-yellow-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-2xl">🚀</span>
               </div>
