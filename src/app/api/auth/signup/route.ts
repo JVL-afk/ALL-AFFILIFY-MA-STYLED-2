@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createUser, generateToken } from '@/lib/auth'
 import { validateEmail } from '@/lib/utils'
+import { checkDatabaseConnection } from '@/lib/mongodb'
 
 export async function POST(request: NextRequest) {
   try {
+    // First check database connectivity
+    const isConnected = await checkDatabaseConnection()
+    if (!isConnected) {
+      console.error('Database connection failed during signup')
+      return NextResponse.json(
+        { error: 'Database connection error. Please try again later.' },
+        { status: 503 }
+      )
+    }
+
     const { name, email, password, confirmPassword } = await request.json()
 
     // Validation
@@ -41,6 +52,9 @@ export async function POST(request: NextRequest) {
       email: email.toLowerCase().trim(),
       password,
       plan: 'basic'
+    }).catch(err => {
+      console.error('Error in createUser:', err)
+      return null
     })
 
     if (!user) {
@@ -80,10 +94,10 @@ export async function POST(request: NextRequest) {
     return response
   } catch (error) {
     console.error('Signup error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error'
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: errorMessage },
       { status: 500 }
     )
   }
 }
-
