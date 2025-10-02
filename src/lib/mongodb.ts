@@ -10,9 +10,9 @@ console.log('MongoDB URI format:', uri.replace(/mongodb(\+srv)?:\/\/([^:]+):([^@
 
 // Connection options with increased timeouts and retry settings
 const options: MongoClientOptions = {
-  connectTimeoutMS: 30000,
-  socketTimeoutMS: 45000,
-  serverSelectionTimeoutMS: 30000,
+  connectTimeoutMS: 100000,
+  socketTimeoutMS: 120000,
+  serverSelectionTimeoutMS: 300000,
   maxPoolSize: 10,
   minPoolSize: 5,
   retryWrites: true,
