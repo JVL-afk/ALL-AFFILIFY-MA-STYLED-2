@@ -1,3 +1,5 @@
+'use client'
+
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { BarChart3, TrendingUp, Search, Target, Eye, Users, Globe, ArrowRight, CheckCircle } from 'lucide-react'

@@ -1,3 +1,5 @@
+'use client'
+
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Mail, Send, Clock, BarChart3, Users, ArrowRight, CheckCircle, Zap, Target, Settings } from 'lucide-react'

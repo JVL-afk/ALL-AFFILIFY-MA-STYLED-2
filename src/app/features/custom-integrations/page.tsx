@@ -1,3 +1,5 @@
+'use client'
+
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Puzzle, Zap, Settings, RefreshCw, ArrowRight, CheckCircle, Code, Lock, Database } from 'lucide-react'
@@ -270,15 +272,15 @@ export default function CustomIntegrationsPage() {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-white/60 text-xs">Product ID</span>
-                        <span className="text-white/80 text-xs">{{product_id}}</span>
+                        <span className="text-white/80 text-xs">{`{{product_id}}`}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-white/60 text-xs">Commission</span>
-                        <span className="text-white/80 text-xs">{{commission_amount}}</span>
+                        <span className="text-white/80 text-xs">{`{{commission_amount}}`}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-white/60 text-xs">Customer</span>
-                        <span className="text-white/80 text-xs">{{customer_email}}</span>
+                        <span className="text-white/80 text-xs">{`{{customer_email}}`}</span>
                       </div>
                     </div>
                   </div>
@@ -295,7 +297,7 @@ export default function CustomIntegrationsPage() {
                         <span className="text-white font-medium">Filter</span>
                       </div>
                       <div className="bg-white/10 rounded p-2 text-sm text-white/80">
-                        IF commission_amount > 10
+                        IF commission_amount &gt; 10
                       </div>
                     </div>
                     
@@ -340,15 +342,15 @@ export default function CustomIntegrationsPage() {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-white/60 text-xs">Email</span>
-                        <span className="text-white/80 text-xs">{{customer_email}}</span>
+                        <span className="text-white/80 text-xs">{`{{customer_email}}`}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-white/60 text-xs">First Name</span>
-                        <span className="text-white/80 text-xs">{{customer_name.first}}</span>
+                        <span className="text-white/80 text-xs">{`{{customer_name.first}}`}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-white/60 text-xs">Tags</span>
-                        <span className="text-white/80 text-xs">{{product_category}}</span>
+                        <span className="text-white/80 text-xs">{`{{product_category}}`}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-white/60 text-xs">List</span>

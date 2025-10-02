@@ -1,6 +1,8 @@
-import { motion } from 'framer-motion'
+'use client'
+
 import Link from 'next/link'
 import { BarChart3, PieChart, LineChart, ArrowUpRight, ArrowRight, CheckCircle, Download, Share2, Mail } from 'lucide-react'
+import { motion } from 'framer-motion'
 import Header from '@/components/Header'
 
 export default function AdvancedReportingPage() {

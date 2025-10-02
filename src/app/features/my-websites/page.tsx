@@ -1,3 +1,5 @@
+'use client'
+
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Globe, Edit, BarChart3, Trash2, Copy, Settings, ArrowRight, CheckCircle, Eye, Share2 } from 'lucide-react'

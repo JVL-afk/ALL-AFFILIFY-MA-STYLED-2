@@ -1,6 +1,8 @@
-import { motion } from 'framer-motion'
+'use client'
+
 import Link from 'next/link'
 import { FileText, Shield, Scale, AlertTriangle, CheckCircle } from 'lucide-react'
+import { motion } from 'framer-motion'
 import Header from '@/components/Header'
 
 export default function LegalPage() {

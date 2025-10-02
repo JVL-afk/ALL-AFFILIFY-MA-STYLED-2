@@ -1,3 +1,5 @@
+'use client'
+
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Users, MessageSquare, Shield, Clock, Share2, ArrowRight, CheckCircle, Lock, UserPlus, Settings } from 'lucide-react'

@@ -1,3 +1,5 @@
+'use client'
+
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Brain, Palette, Zap, Globe, CheckCircle, ArrowRight, Code, Smartphone, Monitor, Laptop } from 'lucide-react'
