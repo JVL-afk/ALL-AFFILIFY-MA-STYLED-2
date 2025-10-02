@@ -33,7 +33,7 @@ export default function Header() {
               Features
             </Link>
             <Link 
-              href="/pricing" 
+              href="/features" 
               className="nav-badge text-white hover:text-yellow-400 transition-colors font-medium"
               data-badge="4"
             >
