@@ -307,7 +307,7 @@ export async function getDashboardStats(userId: string): Promise<any> {
         totalViews,
         totalClicks,
         totalRevenue,
-        conversionRate: totalClicks > 0 ? ((totalClicks / totalViews) * 100).toFixed(2) : '0.00'
+        conversionRate: totalClicks > 0 ? ((totalClicks / totalViews) * 100)?.toFixed(2) || '0.00' : '0.00'
       },
       recent: {
         websites: recentWebsites,

@@ -232,7 +232,7 @@ export default function MyWebsitesPage() {
           <CardContent>
             <div className="text-2xl font-bold">{totalStats.clicks?.toLocaleString() || "0"}</div>
             <p className="text-xs text-muted-foreground">
-              {totalStats.views > 0 ? ((totalStats.clicks / totalStats.views) * 100).toFixed(2) : '0.00'}% CTR
+              {(totalStats?.views > 0 ? ((totalStats?.clicks / totalStats?.views) * 100)?.toFixed(2) : '0.00') || '0.00'}% CTR
             </p>
           </CardContent>
         </Card>
@@ -243,9 +243,9 @@ export default function MyWebsitesPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${totalStats.revenue.toFixed(2)}</div>
+            <div className="text-2xl font-bold">${(totalStats?.revenue?.toFixed(2) || "0.00")}</div>
             <p className="text-xs text-muted-foreground">
-              ${totalStats.clicks > 0 ? (totalStats.revenue / totalStats.clicks).toFixed(2) : '0.00'} per click
+              ${(totalStats?.clicks > 0 ? (totalStats?.revenue / totalStats?.clicks)?.toFixed(2) : '0.00') || '0.00'} per click
             </p>
           </CardContent>
         </Card>
@@ -356,7 +356,7 @@ export default function MyWebsitesPage() {
                     <div className="text-xs text-gray-500">Clicks</div>
                   </div>
                   <div>
-                    <div className="text-lg font-semibold">${website.revenue.toFixed(0)}</div>
+                    <div className="text-lg font-semibold">${(website?.revenue?.toFixed(0) || "0")}</div>
                     <div className="text-xs text-gray-500">Revenue</div>
                   </div>
                 </div>

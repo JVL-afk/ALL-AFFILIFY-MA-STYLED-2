@@ -344,7 +344,7 @@ export default function ABTestingPage() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">+{stats.averageUplift.toFixed(1)}%</div>
+              <div className="text-2xl font-bold">+{(stats?.averageUplift?.toFixed(1) || "0.0")}%</div>
               <p className="text-xs text-muted-foreground">
                 Conversion improvement
               </p>
@@ -358,7 +358,7 @@ export default function ABTestingPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {stats.completedTests > 0 ? ((stats.significantWins / stats.completedTests) * 100).toFixed(1) : '0'}%
+                {(stats?.completedTests > 0 ? ((stats?.significantWins / stats?.completedTests) * 100)?.toFixed(1) : '0') || '0'}%
               </div>
               <p className="text-xs text-muted-foreground">
                 Significant results
@@ -501,7 +501,7 @@ export default function ABTestingPage() {
                       </div>
                       <div className="flex justify-between text-sm">
                         <span>Conv. Rate:</span>
-                        <span className="font-medium">{variant.conversionRate.toFixed(2)}%</span>
+                        <span className="font-medium">{(variant?.conversionRate?.toFixed(2) || "0.00")}%</span>
                       </div>
                       
                       {!variant.isControl && (
@@ -512,7 +512,7 @@ export default function ABTestingPage() {
                               ? 'text-green-600'
                               : 'text-red-600'
                           }`}>
-                            {((variant.conversionRate / test.variants.find(v => v.isControl)!.conversionRate - 1) * 100).toFixed(1)}%
+                            {(((variant?.conversionRate || 0) / (test?.variants?.find(v => v.isControl)?.conversionRate || 1) - 1) * 100)?.toFixed(1) || "0.0"}%
                           </span>
                         </div>
                       )}

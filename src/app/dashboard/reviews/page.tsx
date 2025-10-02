@@ -332,7 +332,7 @@ export default function ReviewsPage() {
               <Star className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.averageRating.toFixed(1)}</div>
+              <div className="text-2xl font-bold">{(stats?.averageRating?.toFixed(1) || "0.0")}</div>
               <div className="flex items-center mt-1">
                 {renderStars(Math.round(stats.averageRating))}
               </div>
@@ -346,7 +346,7 @@ export default function ReviewsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {stats.total > 0 ? ((stats.approved / stats.total) * 100).toFixed(1) : '0'}%
+                {(stats?.total > 0 ? ((stats?.approved / stats?.total) * 100)?.toFixed(1) : '0') || '0'}%
               </div>
               <p className="text-xs text-muted-foreground">
                 {stats.rejected} rejected

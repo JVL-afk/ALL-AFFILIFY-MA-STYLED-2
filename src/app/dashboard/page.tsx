@@ -144,7 +144,7 @@ export default function DashboardPage() {
             <div className="text-gray-300">Total Clicks</div>
           </div>
           <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 text-center">
-            <div className="text-3xl font-bold text-white mb-2">${stats?.totalRevenue.toFixed(2)}</div>
+            <div className="text-3xl font-bold text-white mb-2">${(stats?.totalRevenue?.toFixed(2) || "0.00")}</div>
             <div className="text-gray-300">Revenue Generated</div>
           </div>
           <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 text-center">
