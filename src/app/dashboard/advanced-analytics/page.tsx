@@ -284,7 +284,7 @@ export default function AdvancedAnalyticsPage() {
               <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex-1">
                   <h4 className="font-medium">{page.page}</h4>
-                  <p className="text-sm text-gray-600">{page.views.toLocaleString()} views</p>
+                  <p className="text-sm text-gray-600">{page.views?.toLocaleString() || "0"} views</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium">{page.bounceRate}% bounce rate</p>

@@ -217,7 +217,7 @@ export default function MyWebsitesPage() {
             <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalStats.views.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{totalStats.views?.toLocaleString() || "0"}</div>
             <p className="text-xs text-muted-foreground">
               Across all websites
             </p>
@@ -230,7 +230,7 @@ export default function MyWebsitesPage() {
             <MousePointer className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalStats.clicks.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{totalStats.clicks?.toLocaleString() || "0"}</div>
             <p className="text-xs text-muted-foreground">
               {totalStats.views > 0 ? ((totalStats.clicks / totalStats.views) * 100).toFixed(2) : '0.00'}% CTR
             </p>
@@ -348,11 +348,11 @@ export default function MyWebsitesPage() {
               <CardContent>
                 <div className="grid grid-cols-3 gap-4 mb-4 text-center">
                   <div>
-                    <div className="text-lg font-semibold">{website.views.toLocaleString()}</div>
+                    <div className="text-lg font-semibold">{website.views?.toLocaleString() || "0"}</div>
                     <div className="text-xs text-gray-500">Views</div>
                   </div>
                   <div>
-                    <div className="text-lg font-semibold">{website.clicks.toLocaleString()}</div>
+                    <div className="text-lg font-semibold">{website.clicks?.toLocaleString() || "0"}</div>
                     <div className="text-xs text-gray-500">Clicks</div>
                   </div>
                   <div>

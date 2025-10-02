@@ -339,7 +339,7 @@ export default function AnalyzeWebsitePage() {
                       <div>
                         <h4 className="font-medium">{competitor.url}</h4>
                         <p className="text-sm text-gray-600">
-                          {competitor.traffic.toLocaleString()} monthly visitors
+                          {competitor.traffic?.toLocaleString() || "0"} monthly visitors
                         </p>
                       </div>
                       <div className={`text-lg font-bold ${getScoreColor(competitor.score)}`}>

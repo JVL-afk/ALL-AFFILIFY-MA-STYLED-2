@@ -77,7 +77,7 @@ export default function EnterpriseDashboard() {
               <Eye className="h-4 w-4 text-blue-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.totalViews.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-white">{stats.totalViews?.toLocaleString() || "0"}</div>
               <p className="text-xs text-gray-400">+24% from last month</p>
             </CardContent>
           </Card>
@@ -88,7 +88,7 @@ export default function EnterpriseDashboard() {
               <MousePointer className="h-4 w-4 text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.totalClicks.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-white">{stats.totalClicks?.toLocaleString() || "0"}</div>
               <p className="text-xs text-gray-400">+19% from last month</p>
             </CardContent>
           </Card>
@@ -110,7 +110,7 @@ export default function EnterpriseDashboard() {
               <TrendingUp className="h-4 w-4 text-yellow-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">${stats.revenue.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-white">${stats.revenue?.toLocaleString() || "0"}</div>
               <p className="text-xs text-gray-400">+31% from last month</p>
             </CardContent>
           </Card>

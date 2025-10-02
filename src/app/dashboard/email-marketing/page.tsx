@@ -246,7 +246,7 @@ export default function EmailMarketingPage() {
                   
                   <div className="flex items-center space-x-6">
                     <div className="text-center">
-                      <p className="text-sm font-medium">{campaign.recipients.toLocaleString()}</p>
+                      <p className="text-sm font-medium">{campaign.recipients?.toLocaleString() || "0"}</p>
                       <p className="text-xs text-gray-500">Recipients</p>
                     </div>
                     

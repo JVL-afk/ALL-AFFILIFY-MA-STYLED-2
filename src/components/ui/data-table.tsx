@@ -126,7 +126,7 @@ const CellRenderer = ({ value, type, column, row, index }: any) => {
     case 'currency':
       return (
         <span className="font-medium text-gray-900">
-          ${typeof value === 'number' ? value.toLocaleString() : value}
+          ${typeof value === 'number' ? value?.toLocaleString() || "0" : value}
         </span>
       )
     
@@ -162,7 +162,7 @@ const CellRenderer = ({ value, type, column, row, index }: any) => {
     case 'number':
       return (
         <span className="font-medium text-gray-900">
-          {typeof value === 'number' ? value.toLocaleString() : value}
+          {typeof value === 'number' ? value?.toLocaleString() || "0" : value}
         </span>
       )
     

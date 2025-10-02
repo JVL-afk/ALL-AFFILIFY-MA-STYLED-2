@@ -327,7 +327,7 @@ export default function ApiManagementPage() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <p className="text-gray-600">Requests</p>
-                        <p className="font-medium">{apiKey.requestCount.toLocaleString()}</p>
+                        <p className="font-medium">{apiKey.requestCount?.toLocaleString() || "0"}</p>
                       </div>
                       <div>
                         <p className="text-gray-600">Rate Limit</p>

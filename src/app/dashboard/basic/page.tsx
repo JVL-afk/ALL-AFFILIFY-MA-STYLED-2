@@ -69,7 +69,7 @@ export default function BasicDashboard() {
               <Eye className="h-4 w-4 text-blue-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.totalViews.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-white">{stats.totalViews?.toLocaleString() || "0"}</div>
               <p className="text-xs text-gray-400">
                 +12% from last month
               </p>

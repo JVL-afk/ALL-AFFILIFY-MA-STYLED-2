@@ -331,7 +331,7 @@ export default function ABTestingPage() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalVisitors.toLocaleString()}</div>
+              <div className="text-2xl font-bold">{stats.totalVisitors?.toLocaleString() || "0"}</div>
               <p className="text-xs text-muted-foreground">
                 Across all tests
               </p>
@@ -493,11 +493,11 @@ export default function ABTestingPage() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>Visitors:</span>
-                        <span className="font-medium">{variant.visitors.toLocaleString()}</span>
+                        <span className="font-medium">{variant.visitors?.toLocaleString() || "0"}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span>Conversions:</span>
-                        <span className="font-medium">{variant.conversions.toLocaleString()}</span>
+                        <span className="font-medium">{variant.conversions?.toLocaleString() || "0"}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span>Conv. Rate:</span>
