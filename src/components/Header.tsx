@@ -26,16 +26,23 @@ export default function Header() {
               Home
             </Link>
             <Link 
+              href="/features" 
+              className="nav-badge text-white hover:text-green-400 transition-colors font-medium"
+              data-badge="3"
+            >
+              Features
+            </Link>
+            <Link 
               href="/pricing" 
               className="nav-badge text-white hover:text-yellow-400 transition-colors font-medium"
-              data-badge="3"
+              data-badge="4"
             >
               Pricing
             </Link>
             <Link 
               href="/docs" 
               className="nav-badge text-white hover:text-purple-400 transition-colors font-medium"
-              data-badge="4"
+              data-badge="5"
             >
               Documentation
             </Link>
@@ -43,14 +50,14 @@ export default function Header() {
             <Link 
               href="/login" 
               className="nav-badge text-white hover:text-pink-400 transition-colors font-medium"
-              data-badge="6"
+              data-badge="7"
             >
               Login
             </Link>
             <Link 
               href="/signup" 
               className="nav-badge btn-primary text-white px-6 py-2 rounded-lg font-medium"
-              data-badge="7"
+              data-badge="8"
             >
               Get Started Free
             </Link>
@@ -77,6 +84,13 @@ export default function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
+              </Link>
+              <Link 
+                href="/features" 
+                className="text-white hover:text-green-400 transition-colors font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Features
               </Link>
               <Link 
                 href="/pricing" 
