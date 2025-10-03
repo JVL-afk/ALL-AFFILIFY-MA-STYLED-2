@@ -1,4 +1,3 @@
-// Updated with AFFILIFY orange theme
 'use client'
 
 import { useState } from 'react'
@@ -110,7 +109,7 @@ export default function EnterpriseCreateWebsite() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Create New Website</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Create New Website</h1>
             <p className="text-gray-700">Enterprise Plan - Unlimited professional website creation</p>
           </div>
           <div className="flex items-center space-x-4">
@@ -128,7 +127,7 @@ export default function EnterpriseCreateWebsite() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Website Details Form */}
           <div className="lg:col-span-2">
-            <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+            <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Enterprise Website Configuration</CardTitle>
                 <CardDescription className="text-gray-700">
@@ -144,7 +143,7 @@ export default function EnterpriseCreateWebsite() {
                       placeholder="e.g., TechReviews Authority Hub"
                       value={formData.websiteName}
                       onChange={(e) => handleInputChange('websiteName', e.target.value)}
-                      className="bg-white bg-opacity-10 border-white border-opacity-20 text-white placeholder-gray-400"
+                      className="bg-white bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
                     />
                   </div>
 
@@ -155,7 +154,7 @@ export default function EnterpriseCreateWebsite() {
                       placeholder="e.g., yourbrand.com"
                       value={formData.customDomain}
                       onChange={(e) => handleInputChange('customDomain', e.target.value)}
-                      className="bg-white bg-opacity-10 border-white border-opacity-20 text-white placeholder-gray-400"
+                      className="bg-white bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
                     />
                   </div>
                 </div>
@@ -164,7 +163,7 @@ export default function EnterpriseCreateWebsite() {
                   <div className="space-y-2">
                     <Label htmlFor="niche" className="text-gray-900">Primary Niche</Label>
                     <Select value={formData.niche} onValueChange={(value) => handleInputChange('niche', value)}>
-                      <SelectTrigger className="bg-white bg-opacity-10 border-white border-opacity-20 text-gray-900">
+                      <SelectTrigger className="bg-white bg-opacity-20 border-white border-opacity-30 text-gray-900">
                         <SelectValue placeholder="Select primary niche" />
                       </SelectTrigger>
                       <SelectContent>
@@ -192,7 +191,7 @@ export default function EnterpriseCreateWebsite() {
                       placeholder="e.g., Tech enthusiasts, professionals"
                       value={formData.targetAudience}
                       onChange={(e) => handleInputChange('targetAudience', e.target.value)}
-                      className="bg-white bg-opacity-10 border-white border-opacity-20 text-white placeholder-gray-400"
+                      className="bg-white bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
                     />
                   </div>
                 </div>
@@ -204,7 +203,7 @@ export default function EnterpriseCreateWebsite() {
                     placeholder="Describe your website's purpose, content strategy, target audience, and business goals..."
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
-                    className="bg-white bg-opacity-10 border-white border-opacity-20 text-white placeholder-gray-400 min-h-[120px]"
+                    className="bg-white bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400 min-h-[120px]"
                   />
                 </div>
 
@@ -215,7 +214,7 @@ export default function EnterpriseCreateWebsite() {
                     placeholder="e.g., Product sales, email signups, affiliate clicks"
                     value={formData.conversionGoals}
                     onChange={(e) => handleInputChange('conversionGoals', e.target.value)}
-                    className="bg-white bg-opacity-10 border-white border-opacity-20 text-white placeholder-gray-400"
+                    className="bg-white bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
                   />
                 </div>
 
@@ -229,7 +228,7 @@ export default function EnterpriseCreateWebsite() {
                         className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                           formData.template === template.id
                             ? 'border-purple-500 bg-purple-600/20'
-                            : 'border-white border-opacity-20 bg-white bg-opacity-5 hover:border-white/40'
+                            : 'border-white border-opacity-30 bg-white bg-opacity-5 hover:border-white/40'
                         }`}
                         onClick={() => handleInputChange('template', template.id)}
                       >
@@ -237,7 +236,7 @@ export default function EnterpriseCreateWebsite() {
                           <Palette className="w-8 h-8 text-gray-400" />
                         </div>
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-white font-medium">{template.name}</h4>
+                          <h4 className="text-gray-900 font-medium">{template.name}</h4>
                           <Badge variant="secondary" className="text-xs bg-gradient-to-r from-purple-600 to-blue-600 text-gray-900">
                             {template.category}
                           </Badge>
@@ -265,7 +264,7 @@ export default function EnterpriseCreateWebsite() {
                           <div className="flex items-center space-x-3">
                             <BarChart3 className="w-5 h-5 text-blue-400" />
                             <div>
-                              <h4 className="text-white font-medium">Advanced Analytics</h4>
+                              <h4 className="text-gray-900 font-medium">Advanced Analytics</h4>
                               <p className="text-gray-400 text-sm">Enterprise-level insights</p>
                             </div>
                           </div>
@@ -285,7 +284,7 @@ export default function EnterpriseCreateWebsite() {
                           <div className="flex items-center space-x-3">
                             <TestTube className="w-5 h-5 text-green-400" />
                             <div>
-                              <h4 className="text-white font-medium">A/B Testing Suite</h4>
+                              <h4 className="text-gray-900 font-medium">A/B Testing Suite</h4>
                               <p className="text-gray-400 text-sm">Advanced optimization</p>
                             </div>
                           </div>
@@ -305,7 +304,7 @@ export default function EnterpriseCreateWebsite() {
                           <div className="flex items-center space-x-3">
                             <Users className="w-5 h-5 text-purple-400" />
                             <div>
-                              <h4 className="text-white font-medium">Team Collaboration</h4>
+                              <h4 className="text-gray-900 font-medium">Team Collaboration</h4>
                               <p className="text-gray-400 text-sm">Multi-user access</p>
                             </div>
                           </div>
@@ -325,7 +324,7 @@ export default function EnterpriseCreateWebsite() {
                           <div className="flex items-center space-x-3">
                             <Shield className="w-5 h-5 text-yellow-400" />
                             <div>
-                              <h4 className="text-white font-medium">White-label Mode</h4>
+                              <h4 className="text-gray-900 font-medium">White-label Mode</h4>
                               <p className="text-gray-400 text-sm">Remove AFFILIFY branding</p>
                             </div>
                           </div>
@@ -345,7 +344,7 @@ export default function EnterpriseCreateWebsite() {
                           <div className="flex items-center space-x-3">
                             <Zap className="w-5 h-5 text-orange-400" />
                             <div>
-                              <h4 className="text-white font-medium">API Access</h4>
+                              <h4 className="text-gray-900 font-medium">API Access</h4>
                               <p className="text-gray-400 text-sm">Custom integrations</p>
                             </div>
                           </div>
@@ -364,12 +363,12 @@ export default function EnterpriseCreateWebsite() {
                         <div className="flex items-center space-x-3">
                           <Briefcase className="w-5 h-5 text-cyan-400" />
                           <div className="flex-1">
-                            <h4 className="text-white font-medium">Custom Branding</h4>
+                            <h4 className="text-gray-900 font-medium">Custom Branding</h4>
                             <Input
                               placeholder="Your brand name"
                               value={formData.customBranding}
                               onChange={(e) => handleInputChange('customBranding', e.target.value)}
-                              className="bg-white bg-opacity-10 border-white border-opacity-20 text-white placeholder-gray-400 mt-2"
+                              className="bg-white bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400 mt-2"
                             />
                           </div>
                         </div>
@@ -393,14 +392,14 @@ export default function EnterpriseCreateWebsite() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Enterprise Status */}
-            <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+            <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Enterprise Status</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-700">Websites Created</span>
-                  <span className="text-white font-medium">{currentWebsites}</span>
+                  <span className="text-gray-900 font-medium">{currentWebsites}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-700">Limit</span>
@@ -431,7 +430,7 @@ export default function EnterpriseCreateWebsite() {
             </Card>
 
             {/* Enterprise Image Library */}
-            <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+            <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Enterprise Media Library</CardTitle>
                 <CardDescription className="text-gray-700">
@@ -461,7 +460,7 @@ export default function EnterpriseCreateWebsite() {
             </Card>
 
             {/* Team Management */}
-            <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+            <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Team Management</CardTitle>
                 <CardDescription className="text-gray-700">
@@ -472,14 +471,14 @@ export default function EnterpriseCreateWebsite() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-700">Team Members</span>
-                    <span className="text-white font-medium">8 active</span>
+                    <span className="text-gray-900 font-medium">8 active</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-700">Active Projects</span>
-                    <span className="text-white font-medium">12</span>
+                    <span className="text-gray-900 font-medium">12</span>
                   </div>
                 </div>
-                <Button asChild variant="outline" className="w-full border-white border-opacity-20 text-white hover:bg-white bg-opacity-10">
+                <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-white bg-opacity-20">
                   <Link href="/dashboard/team-collaboration">
                     <Users className="w-4 h-4 mr-2" />
                     Manage Team
@@ -489,7 +488,7 @@ export default function EnterpriseCreateWebsite() {
             </Card>
 
             {/* API & Integrations */}
-            <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+            <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">API & Integrations</CardTitle>
                 <CardDescription className="text-gray-700">
@@ -497,13 +496,13 @@ export default function EnterpriseCreateWebsite() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button asChild variant="outline" className="w-full border-white border-opacity-20 text-white hover:bg-white bg-opacity-10">
+                <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-white bg-opacity-20">
                   <Link href="/dashboard/api-management">
                     <Zap className="w-4 h-4 mr-2" />
                     API Management
                   </Link>
                 </Button>
-                <Button asChild variant="outline" className="w-full border-white border-opacity-20 text-white hover:bg-white bg-opacity-10">
+                <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-white bg-opacity-20">
                   <Link href="/dashboard/custom-integrations">
                     <Settings className="w-4 h-4 mr-2" />
                     Custom Integrations

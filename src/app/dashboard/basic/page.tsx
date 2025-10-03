@@ -1,4 +1,3 @@
-// Updated with AFFILIFY orange theme
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -28,12 +27,12 @@ export default function BasicDashboard() {
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Basic Dashboard</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Basic Dashboard</h1>
             <p className="text-gray-700">Manage your affiliate marketing websites</p>
           </div>
           <div className="flex items-center space-x-4">
@@ -51,7 +50,7 @@ export default function BasicDashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+          <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">Websites</CardTitle>
               <Globe className="h-4 w-4 text-purple-400" />
@@ -64,7 +63,7 @@ export default function BasicDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+          <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">Total Views</CardTitle>
               <Eye className="h-4 w-4 text-blue-400" />
@@ -77,7 +76,7 @@ export default function BasicDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+          <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">Total Clicks</CardTitle>
               <MousePointer className="h-4 w-4 text-green-400" />
@@ -90,7 +89,7 @@ export default function BasicDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+          <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">Conversion Rate</CardTitle>
               <TrendingUp className="h-4 w-4 text-orange-400" />
@@ -106,7 +105,7 @@ export default function BasicDashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+          <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
             <CardHeader>
               <CardTitle className="text-gray-900">Quick Actions</CardTitle>
               <CardDescription className="text-gray-700">
@@ -120,13 +119,13 @@ export default function BasicDashboard() {
                   Create New Website
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full border-white border-opacity-20 text-white hover:bg-white bg-opacity-10">
+              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-white bg-opacity-20">
                 <Link href="/dashboard/my-websites">
                   <Globe className="w-4 h-4 mr-2" />
                   Manage Websites
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full border-white border-opacity-20 text-white hover:bg-white bg-opacity-10">
+              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-white bg-opacity-20">
                 <Link href="/dashboard/analyze-website">
                   <BarChart3 className="w-4 h-4 mr-2" />
                   Basic Analytics
@@ -135,7 +134,7 @@ export default function BasicDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+          <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
             <CardHeader>
               <CardTitle className="text-gray-900">Upgrade Benefits</CardTitle>
               <CardDescription className="text-gray-700">
@@ -169,7 +168,7 @@ export default function BasicDashboard() {
         </div>
 
         {/* Recent Activity */}
-        <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+        <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
           <CardHeader>
             <CardTitle className="text-gray-900">Recent Activity</CardTitle>
             <CardDescription className="text-gray-700">
@@ -182,7 +181,7 @@ export default function BasicDashboard() {
                 <div className="flex items-center space-x-3">
                   <Globe className="w-5 h-5 text-purple-400" />
                   <div>
-                    <p className="text-white font-medium">Basketball Hoop Website</p>
+                    <p className="text-gray-900 font-medium">Basketball Hoop Website</p>
                     <p className="text-gray-400 text-sm">Created 2 days ago</p>
                   </div>
                 </div>

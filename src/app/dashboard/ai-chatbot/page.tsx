@@ -1,4 +1,3 @@
-// Updated with AFFILIFY orange theme
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -375,7 +374,7 @@ Could you be more specific about what you'd like help with? I'm here to provide 
                     <div
                       className={`max-w-[80%] rounded-lg p-4 ${
                         message.type === 'user'
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-blue-600 text-gray-900'
                           : 'bg-gray-100 text-gray-900'
                       }`}
                     >

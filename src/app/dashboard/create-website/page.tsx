@@ -1,4 +1,3 @@
-// Updated with AFFILIFY orange theme
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -179,18 +178,18 @@ export default function CreateWebsitePage() {
     <div className="p-6 max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Create Professional Affiliate Website</h1>
-        <p className="text-white/80">Enter any affiliate link and get a conversion-optimized website in seconds</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Professional Affiliate Website</h1>
+        <p className="text-gray-900/80">Enter any affiliate link and get a conversion-optimized website in seconds</p>
         
         {/* Plan Status */}
         <div className="mt-4 flex items-center gap-4">
-          <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white border-opacity-20">
-            <span className="text-white/80">Current Plan: </span>
-            <span className="text-white font-semibold">{planLimits[user.plan].name}</span>
+          <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white border-opacity-30">
+            <span className="text-gray-900/80">Current Plan: </span>
+            <span className="text-gray-900 font-semibold">{planLimits[user.plan].name}</span>
           </div>
-          <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white border-opacity-20">
-            <span className="text-white/80">Websites: </span>
-            <span className="text-white font-semibold">
+          <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white border-opacity-30">
+            <span className="text-gray-900/80">Websites: </span>
+            <span className="text-gray-900 font-semibold">
               {user.websiteCount} / {planLimits[user.plan].websites === 999 ? '∞' : planLimits[user.plan].websites}
             </span>
           </div>
@@ -216,13 +215,13 @@ export default function CreateWebsitePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Create Website Form */}
         <div className="lg:col-span-2">
-          <Card className="bg-white bg-opacity-10 backdrop-blur-sm border-white border-opacity-20">
+          <Card className="bg-white bg-opacity-20 backdrop-blur-sm border-white border-opacity-30">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
+              <CardTitle className="text-gray-900 flex items-center gap-2">
                 <Wand2 className="w-5 h-5" />
                 AI Website Generator
               </CardTitle>
-              <CardDescription className="text-white/70">
+              <CardDescription className="text-gray-900/70">
                 Paste any affiliate link and our AI will create a professional website
               </CardDescription>
             </CardHeader>
@@ -240,10 +239,10 @@ export default function CreateWebsitePage() {
                     setProductUrl(e.target.value)
                     setError('')
                   }}
-                  className="bg-white bg-opacity-10 border-white border-opacity-20 text-white placeholder:text-white/50"
+                  className="bg-white bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder:text-gray-900/50"
                   disabled={loading}
                 />
-                <p className="text-sm text-white/60">
+                <p className="text-sm text-gray-900/60">
                   Works with Amazon, ClickBank, ShareASale, and any product URL
                 </p>
               </div>
@@ -254,7 +253,7 @@ export default function CreateWebsitePage() {
                   <Button
                     onClick={handleSubmit}
                     disabled={loading || !productUrl.trim()}
-                    className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold py-3 text-lg"
+                    className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-gray-900 font-semibold py-3 text-lg"
                   >
                     {loading ? (
                       <>
@@ -332,7 +331,7 @@ export default function CreateWebsitePage() {
                         href={generatedWebsite.url} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-green-100 hover:text-white underline inline-flex items-center"
+                        className="text-green-100 hover:text-gray-900 underline inline-flex items-center"
                       >
                         {generatedWebsite.url}
                         <ExternalLink className="w-4 h-4 ml-1" />
@@ -367,32 +366,32 @@ export default function CreateWebsitePage() {
         {/* Sidebar - Features & Pricing */}
         <div className="space-y-6">
           {/* Features */}
-          <Card className="bg-white bg-opacity-10 backdrop-blur-sm border-white border-opacity-20">
+          <Card className="bg-white bg-opacity-20 backdrop-blur-sm border-white border-opacity-30">
             <CardHeader>
               <CardTitle className="text-gray-900">What You Get</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex items-center text-white/80">
+              <div className="flex items-center text-gray-900/80">
                 <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
                 AI-powered content generation
               </div>
-              <div className="flex items-center text-white/80">
+              <div className="flex items-center text-gray-900/80">
                 <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
                 Mobile-responsive design
               </div>
-              <div className="flex items-center text-white/80">
+              <div className="flex items-center text-gray-900/80">
                 <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
                 SEO-optimized structure
               </div>
-              <div className="flex items-center text-white/80">
+              <div className="flex items-center text-gray-900/80">
                 <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
                 Conversion-focused layout
               </div>
-              <div className="flex items-center text-white/80">
+              <div className="flex items-center text-gray-900/80">
                 <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
                 Professional styling
               </div>
-              <div className="flex items-center text-white/80">
+              <div className="flex items-center text-gray-900/80">
                 <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
                 Click tracking & analytics
               </div>
@@ -400,33 +399,33 @@ export default function CreateWebsitePage() {
           </Card>
 
           {/* Pricing */}
-          <Card className="bg-white bg-opacity-10 backdrop-blur-sm border-white border-opacity-20">
+          <Card className="bg-white bg-opacity-20 backdrop-blur-sm border-white border-opacity-30">
             <CardHeader>
               <CardTitle className="text-gray-900">Pricing Plans</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className={`p-3 rounded-lg border ${user.plan === 'basic' ? 'border-orange-400 bg-orange-500/20' : 'border-white border-opacity-20'}`}>
+              <div className={`p-3 rounded-lg border ${user.plan === 'basic' ? 'border-orange-400 bg-orange-500/20' : 'border-white border-opacity-30'}`}>
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-medium text-gray-900">Basic</span>
                   <span className="text-green-400 font-bold">FREE</span>
                 </div>
-                <div className="text-sm text-white/70">3 websites</div>
+                <div className="text-sm text-gray-900/70">3 websites</div>
               </div>
 
-              <div className={`p-3 rounded-lg border ${user.plan === 'pro' ? 'border-purple-400 bg-purple-500/20' : 'border-white border-opacity-20'}`}>
+              <div className={`p-3 rounded-lg border ${user.plan === 'pro' ? 'border-purple-400 bg-purple-500/20' : 'border-white border-opacity-30'}`}>
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-medium text-gray-900">Pro</span>
-                  <span className="text-white font-bold">$29</span>
+                  <span className="text-gray-900 font-bold">$29</span>
                 </div>
-                <div className="text-sm text-white/70">10 websites + advanced features</div>
+                <div className="text-sm text-gray-900/70">10 websites + advanced features</div>
               </div>
 
-              <div className={`p-3 rounded-lg border ${user.plan === 'enterprise' ? 'border-blue-400 bg-blue-500/20' : 'border-white border-opacity-20'}`}>
+              <div className={`p-3 rounded-lg border ${user.plan === 'enterprise' ? 'border-blue-400 bg-blue-500/20' : 'border-white border-opacity-30'}`}>
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-medium text-gray-900">Enterprise</span>
-                  <span className="text-white font-bold">$99</span>
+                  <span className="text-gray-900 font-bold">$99</span>
                 </div>
-                <div className="text-sm text-white/70">Unlimited websites + all features</div>
+                <div className="text-sm text-gray-900/70">Unlimited websites + all features</div>
               </div>
             </CardContent>
           </Card>

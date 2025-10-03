@@ -1,4 +1,3 @@
-// Updated with AFFILIFY orange theme
 'use client'
 
 import { useState, useEffect } from 'react'

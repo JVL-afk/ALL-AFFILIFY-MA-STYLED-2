@@ -1,4 +1,3 @@
-// Updated with AFFILIFY orange theme
 'use client'
 
 import { useState } from 'react'
@@ -101,7 +100,7 @@ export default function ProCreateWebsite() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Create New Website</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Create New Website</h1>
             <p className="text-gray-700">Pro Plan - Advanced affiliate website creation</p>
           </div>
           <div className="flex items-center space-x-4">
@@ -138,7 +137,7 @@ export default function ProCreateWebsite() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Website Details Form */}
           <div className="lg:col-span-2">
-            <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+            <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Website Details</CardTitle>
                 <CardDescription className="text-gray-700">
@@ -154,7 +153,7 @@ export default function ProCreateWebsite() {
                       placeholder="e.g., Ultimate Gaming Gear Reviews"
                       value={formData.websiteName}
                       onChange={(e) => handleInputChange('websiteName', e.target.value)}
-                      className="bg-white bg-opacity-10 border-white border-opacity-20 text-white placeholder-gray-400"
+                      className="bg-white bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
                       disabled={!canCreateWebsite}
                     />
                   </div>
@@ -166,7 +165,7 @@ export default function ProCreateWebsite() {
                       placeholder="e.g., yourdomain.com"
                       value={formData.customDomain}
                       onChange={(e) => handleInputChange('customDomain', e.target.value)}
-                      className="bg-white bg-opacity-10 border-white border-opacity-20 text-white placeholder-gray-400"
+                      className="bg-white bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
                       disabled={!canCreateWebsite}
                     />
                   </div>
@@ -175,7 +174,7 @@ export default function ProCreateWebsite() {
                 <div className="space-y-2">
                   <Label htmlFor="niche" className="text-gray-900">Niche/Category</Label>
                   <Select value={formData.niche} onValueChange={(value) => handleInputChange('niche', value)} disabled={!canCreateWebsite}>
-                    <SelectTrigger className="bg-white bg-opacity-10 border-white border-opacity-20 text-gray-900">
+                    <SelectTrigger className="bg-white bg-opacity-20 border-white border-opacity-30 text-gray-900">
                       <SelectValue placeholder="Select your niche" />
                     </SelectTrigger>
                     <SelectContent>
@@ -201,7 +200,7 @@ export default function ProCreateWebsite() {
                     placeholder="Describe your website's focus, target audience, and the products you'll promote..."
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
-                    className="bg-white bg-opacity-10 border-white border-opacity-20 text-white placeholder-gray-400 min-h-[120px]"
+                    className="bg-white bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400 min-h-[120px]"
                     disabled={!canCreateWebsite}
                   />
                 </div>
@@ -216,7 +215,7 @@ export default function ProCreateWebsite() {
                         className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                           formData.template === template.id
                             ? 'border-purple-500 bg-purple-600/20'
-                            : 'border-white border-opacity-20 bg-white bg-opacity-5 hover:border-white/40'
+                            : 'border-white border-opacity-30 bg-white bg-opacity-5 hover:border-white/40'
                         } ${!canCreateWebsite ? 'opacity-50 cursor-not-allowed' : ''}`}
                         onClick={() => canCreateWebsite && handleInputChange('template', template.id)}
                       >
@@ -224,7 +223,7 @@ export default function ProCreateWebsite() {
                           <Palette className="w-8 h-8 text-gray-400" />
                         </div>
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-white font-medium">{template.name}</h4>
+                          <h4 className="text-gray-900 font-medium">{template.name}</h4>
                           <Badge variant="secondary" className="text-xs bg-purple-600 text-gray-900">
                             {template.category}
                           </Badge>
@@ -252,7 +251,7 @@ export default function ProCreateWebsite() {
                           <div className="flex items-center space-x-3">
                             <BarChart3 className="w-5 h-5 text-blue-400" />
                             <div>
-                              <h4 className="text-white font-medium">Advanced Analytics</h4>
+                              <h4 className="text-gray-900 font-medium">Advanced Analytics</h4>
                               <p className="text-gray-400 text-sm">Detailed visitor insights</p>
                             </div>
                           </div>
@@ -273,7 +272,7 @@ export default function ProCreateWebsite() {
                           <div className="flex items-center space-x-3">
                             <TestTube className="w-5 h-5 text-green-400" />
                             <div>
-                              <h4 className="text-white font-medium">A/B Testing Ready</h4>
+                              <h4 className="text-gray-900 font-medium">A/B Testing Ready</h4>
                               <p className="text-gray-400 text-sm">Optimize conversions</p>
                             </div>
                           </div>
@@ -326,14 +325,14 @@ export default function ProCreateWebsite() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Plan Limits */}
-            <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+            <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Pro Plan Status</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-700">Websites</span>
-                  <span className="text-white font-medium">{currentWebsites}/{maxWebsites}</span>
+                  <span className="text-gray-900 font-medium">{currentWebsites}/{maxWebsites}</span>
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2">
                   <div 
@@ -363,7 +362,7 @@ export default function ProCreateWebsite() {
             </Card>
 
             {/* Unsplash Integration */}
-            <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+            <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Pro Image Library</CardTitle>
                 <CardDescription className="text-gray-700">
@@ -392,7 +391,7 @@ export default function ProCreateWebsite() {
             </Card>
 
             {/* Enterprise Benefits */}
-            <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+            <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Upgrade to Enterprise</CardTitle>
                 <CardDescription className="text-gray-700">

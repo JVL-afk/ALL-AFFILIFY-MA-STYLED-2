@@ -1,4 +1,3 @@
-// Updated with AFFILIFY orange theme
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -292,7 +291,7 @@ export default function ReviewsPage() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <h1 className="text-2xl font-bold text-gray-900">Reviews Management</h1>
-            <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
+            <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-gray-900 px-2 py-1 rounded-full text-xs font-medium flex items-center">
               <Crown className="w-3 h-3 mr-1" />
               Enterprise
             </div>

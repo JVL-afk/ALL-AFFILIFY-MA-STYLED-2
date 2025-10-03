@@ -1,4 +1,3 @@
-// Updated with AFFILIFY orange theme
 'use client'
 
 import { useState } from 'react'
@@ -102,7 +101,7 @@ export default function BasicCreateWebsite() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Website Details Form */}
           <div className="lg:col-span-2">
-            <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+            <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Website Details</CardTitle>
                 <CardDescription className="text-gray-700">
@@ -117,7 +116,7 @@ export default function BasicCreateWebsite() {
                     placeholder="e.g., Best Basketball Hoops"
                     value={formData.websiteName}
                     onChange={(e) => handleInputChange('websiteName', e.target.value)}
-                    className="bg-white bg-opacity-10 border-white border-opacity-20 text-white placeholder-gray-400"
+                    className="bg-white bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
                     disabled={!canCreateWebsite}
                   />
                 </div>
@@ -129,7 +128,7 @@ export default function BasicCreateWebsite() {
                     placeholder="e.g., Sports Equipment, Home & Garden"
                     value={formData.niche}
                     onChange={(e) => handleInputChange('niche', e.target.value)}
-                    className="bg-white bg-opacity-10 border-white border-opacity-20 text-white placeholder-gray-400"
+                    className="bg-white bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
                     disabled={!canCreateWebsite}
                   />
                 </div>
@@ -141,7 +140,7 @@ export default function BasicCreateWebsite() {
                     placeholder="Describe what products you'll be promoting..."
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
-                    className="bg-white bg-opacity-10 border-white border-opacity-20 text-white placeholder-gray-400 min-h-[100px]"
+                    className="bg-white bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400 min-h-[100px]"
                     disabled={!canCreateWebsite}
                   />
                 </div>
@@ -156,14 +155,14 @@ export default function BasicCreateWebsite() {
                         className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                           formData.template === template.id
                             ? 'border-purple-500 bg-purple-600/20'
-                            : 'border-white border-opacity-20 bg-white bg-opacity-5 hover:border-white/40'
+                            : 'border-white border-opacity-30 bg-white bg-opacity-5 hover:border-white/40'
                         } ${!canCreateWebsite ? 'opacity-50 cursor-not-allowed' : ''}`}
                         onClick={() => canCreateWebsite && handleInputChange('template', template.id)}
                       >
                         <div className="aspect-video bg-gray-700 rounded mb-3 flex items-center justify-center">
                           <Palette className="w-8 h-8 text-gray-400" />
                         </div>
-                        <h4 className="text-white font-medium mb-1">{template.name}</h4>
+                        <h4 className="text-gray-900 font-medium mb-1">{template.name}</h4>
                         <p className="text-gray-400 text-sm mb-3">{template.description}</p>
                         <div className="flex flex-wrap gap-1">
                           {template.features.map((feature) => (
@@ -213,14 +212,14 @@ export default function BasicCreateWebsite() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Plan Limits */}
-            <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+            <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Basic Plan Limits</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-700">Websites</span>
-                  <span className="text-white font-medium">{currentWebsites}/{maxWebsites}</span>
+                  <span className="text-gray-900 font-medium">{currentWebsites}/{maxWebsites}</span>
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2">
                   <div 
@@ -246,7 +245,7 @@ export default function BasicCreateWebsite() {
             </Card>
 
             {/* Upgrade Benefits */}
-            <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+            <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Upgrade to Pro</CardTitle>
                 <CardDescription className="text-gray-700">
@@ -281,7 +280,7 @@ export default function BasicCreateWebsite() {
             </Card>
 
             {/* Help */}
-            <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
+            <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Need Help?</CardTitle>
               </CardHeader>
@@ -289,7 +288,7 @@ export default function BasicCreateWebsite() {
                 <p className="text-gray-700 text-sm mb-4">
                   Check our documentation for website creation tips and best practices.
                 </p>
-                <Button asChild variant="outline" className="w-full border-white border-opacity-20 text-white hover:bg-white bg-opacity-10">
+                <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-white bg-opacity-20">
                   <Link href="/docs">
                     View Documentation
                   </Link>
