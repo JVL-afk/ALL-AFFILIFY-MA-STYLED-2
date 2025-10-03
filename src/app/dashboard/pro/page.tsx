@@ -31,16 +31,16 @@ export default function ProDashboard() {
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Pro Dashboard</h1>
-            <p className="text-gray-300">Advanced affiliate marketing management</p>
+            <p className="text-gray-700">Advanced affiliate marketing management</p>
           </div>
           <div className="flex items-center space-x-4">
-            <Badge variant="secondary" className="bg-purple-600 text-white">
+            <Badge variant="secondary" className="bg-purple-600 text-gray-900">
               <Crown className="w-3 h-3 mr-1" />
               Pro Plan
             </Badge>
@@ -57,11 +57,11 @@ export default function ProDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Websites</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900">Websites</CardTitle>
               <Globe className="h-4 w-4 text-purple-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.websites}/{stats.maxWebsites}</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.websites}/{stats.maxWebsites}</div>
               <p className="text-xs text-gray-400">
                 {stats.maxWebsites - stats.websites} remaining
               </p>
@@ -70,11 +70,11 @@ export default function ProDashboard() {
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Total Views</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900">Total Views</CardTitle>
               <Eye className="h-4 w-4 text-blue-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.totalViews?.toLocaleString() || "0"}</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.totalViews?.toLocaleString() || "0"}</div>
               <p className="text-xs text-gray-400">
                 +18% from last month
               </p>
@@ -83,11 +83,11 @@ export default function ProDashboard() {
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Total Clicks</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900">Total Clicks</CardTitle>
               <MousePointer className="h-4 w-4 text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.totalClicks}</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.totalClicks}</div>
               <p className="text-xs text-gray-400">
                 +15% from last month
               </p>
@@ -96,11 +96,11 @@ export default function ProDashboard() {
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Conversion Rate</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900">Conversion Rate</CardTitle>
               <TrendingUp className="h-4 w-4 text-orange-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.conversionRate}%</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.conversionRate}%</div>
               <p className="text-xs text-gray-400">
                 +1.2% from last month
               </p>
@@ -109,11 +109,11 @@ export default function ProDashboard() {
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Revenue</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900">Revenue</CardTitle>
               <TrendingUp className="h-4 w-4 text-yellow-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">${stats.revenue}</div>
+              <div className="text-2xl font-bold text-gray-900">${stats.revenue}</div>
               <p className="text-xs text-gray-400">
                 +22% from last month
               </p>
@@ -125,8 +125,8 @@ export default function ProDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader>
-              <CardTitle className="text-white">Quick Actions</CardTitle>
-              <CardDescription className="text-gray-300">
+              <CardTitle className="text-gray-900">Quick Actions</CardTitle>
+              <CardDescription className="text-gray-700">
                 Pro-level website management
               </CardDescription>
             </CardHeader>
@@ -154,8 +154,8 @@ export default function ProDashboard() {
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader>
-              <CardTitle className="text-white">Pro Features</CardTitle>
-              <CardDescription className="text-gray-300">
+              <CardTitle className="text-gray-900">Pro Features</CardTitle>
+              <CardDescription className="text-gray-700">
                 Advanced tools at your disposal
               </CardDescription>
             </CardHeader>
@@ -183,25 +183,25 @@ export default function ProDashboard() {
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader>
-              <CardTitle className="text-white">Enterprise Benefits</CardTitle>
-              <CardDescription className="text-gray-300">
+              <CardTitle className="text-gray-900">Enterprise Benefits</CardTitle>
+              <CardDescription className="text-gray-700">
                 Unlock unlimited potential
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex items-center text-gray-300">
+              <div className="flex items-center text-gray-700">
                 <Globe className="w-4 h-4 mr-2 text-blue-400" />
                 <span>Unlimited websites</span>
               </div>
-              <div className="flex items-center text-gray-300">
+              <div className="flex items-center text-gray-700">
                 <Users className="w-4 h-4 mr-2 text-green-400" />
                 <span>Team collaboration</span>
               </div>
-              <div className="flex items-center text-gray-300">
+              <div className="flex items-center text-gray-700">
                 <Zap className="w-4 h-4 mr-2 text-yellow-400" />
                 <span>API access</span>
               </div>
-              <div className="flex items-center text-gray-300">
+              <div className="flex items-center text-gray-700">
                 <Settings className="w-4 h-4 mr-2 text-purple-400" />
                 <span>White-label options</span>
               </div>
@@ -218,8 +218,8 @@ export default function ProDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader>
-              <CardTitle className="text-white">Recent Activity</CardTitle>
-              <CardDescription className="text-gray-300">
+              <CardTitle className="text-gray-900">Recent Activity</CardTitle>
+              <CardDescription className="text-gray-700">
                 Your latest affiliate marketing activities
               </CardDescription>
             </CardHeader>
@@ -233,7 +233,7 @@ export default function ProDashboard() {
                       <p className="text-gray-400 text-sm">Created 1 day ago</p>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-green-600 text-white">Active</Badge>
+                  <Badge variant="secondary" className="bg-green-600 text-gray-900">Active</Badge>
                 </div>
                 
                 <div className="flex items-center justify-between p-3 bg-white bg-opacity-5 rounded-lg">
@@ -244,7 +244,7 @@ export default function ProDashboard() {
                       <p className="text-gray-400 text-sm">Started 3 days ago</p>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-orange-600 text-white">Running</Badge>
+                  <Badge variant="secondary" className="bg-orange-600 text-gray-900">Running</Badge>
                 </div>
 
                 <div className="flex items-center justify-between p-3 bg-white bg-opacity-5 rounded-lg">
@@ -255,7 +255,7 @@ export default function ProDashboard() {
                       <p className="text-gray-400 text-sm">Generated 1 week ago</p>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-blue-600 text-white">Completed</Badge>
+                  <Badge variant="secondary" className="bg-blue-600 text-gray-900">Completed</Badge>
                 </div>
               </div>
             </CardContent>
@@ -263,8 +263,8 @@ export default function ProDashboard() {
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader>
-              <CardTitle className="text-white">Performance Insights</CardTitle>
-              <CardDescription className="text-gray-300">
+              <CardTitle className="text-gray-900">Performance Insights</CardTitle>
+              <CardDescription className="text-gray-700">
                 AI-powered recommendations
               </CardDescription>
             </CardHeader>
@@ -272,17 +272,17 @@ export default function ProDashboard() {
               <div className="space-y-4">
                 <div className="p-4 bg-green-600/20 border border-green-600/30 rounded-lg">
                   <h4 className="text-green-400 font-medium mb-2">🎯 Optimization Tip</h4>
-                  <p className="text-gray-300 text-sm">Your "Gaming Laptop" page has 15% higher conversion. Consider creating similar content.</p>
+                  <p className="text-gray-700 text-sm">Your "Gaming Laptop" page has 15% higher conversion. Consider creating similar content.</p>
                 </div>
                 
                 <div className="p-4 bg-blue-600/20 border border-blue-600/30 rounded-lg">
                   <h4 className="text-blue-400 font-medium mb-2">📊 Traffic Insight</h4>
-                  <p className="text-gray-300 text-sm">Mobile traffic increased 28% this month. Optimize for mobile experience.</p>
+                  <p className="text-gray-700 text-sm">Mobile traffic increased 28% this month. Optimize for mobile experience.</p>
                 </div>
 
                 <div className="p-4 bg-purple-600/20 border border-purple-600/30 rounded-lg">
                   <h4 className="text-purple-400 font-medium mb-2">🚀 Growth Opportunity</h4>
-                  <p className="text-gray-300 text-sm">You're using 4/10 websites. Create 2 more to maximize your Pro plan benefits.</p>
+                  <p className="text-gray-700 text-sm">You're using 4/10 websites. Create 2 more to maximize your Pro plan benefits.</p>
                 </div>
               </div>
             </CardContent>

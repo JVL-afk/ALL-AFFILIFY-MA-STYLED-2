@@ -60,16 +60,16 @@ export default function BasicCreateWebsite() {
   const canCreateWebsite = currentWebsites < maxWebsites
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Create New Website</h1>
-            <p className="text-gray-300">Basic Plan - Simple affiliate website creation</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Create New Website</h1>
+            <p className="text-gray-700">Basic Plan - Simple affiliate website creation</p>
           </div>
           <div className="flex items-center space-x-4">
-            <Badge variant="secondary" className="bg-gray-700 text-white">
+            <Badge variant="secondary" className="bg-gray-700 text-gray-900">
               Basic Plan: {currentWebsites}/{maxWebsites} websites
             </Badge>
             <Button asChild className="bg-purple-600 hover:bg-purple-700">
@@ -88,7 +88,7 @@ export default function BasicCreateWebsite() {
                 <AlertCircle className="w-6 h-6 text-red-400" />
                 <div>
                   <h3 className="text-red-400 font-medium">Website Limit Reached</h3>
-                  <p className="text-gray-300">You've reached your Basic plan limit of {maxWebsites} websites. Upgrade to Pro for 10 websites!</p>
+                  <p className="text-gray-700">You've reached your Basic plan limit of {maxWebsites} websites. Upgrade to Pro for 10 websites!</p>
                 </div>
                 <Button asChild className="bg-purple-600 hover:bg-purple-700 ml-auto">
                   <Link href="/pricing">Upgrade Now</Link>
@@ -103,14 +103,14 @@ export default function BasicCreateWebsite() {
           <div className="lg:col-span-2">
             <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
               <CardHeader>
-                <CardTitle className="text-white">Website Details</CardTitle>
-                <CardDescription className="text-gray-300">
+                <CardTitle className="text-gray-900">Website Details</CardTitle>
+                <CardDescription className="text-gray-700">
                   Tell us about your affiliate website
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="websiteName" className="text-white">Website Name</Label>
+                  <Label htmlFor="websiteName" className="text-gray-900">Website Name</Label>
                   <Input
                     id="websiteName"
                     placeholder="e.g., Best Basketball Hoops"
@@ -122,7 +122,7 @@ export default function BasicCreateWebsite() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="niche" className="text-white">Niche/Category</Label>
+                  <Label htmlFor="niche" className="text-gray-900">Niche/Category</Label>
                   <Input
                     id="niche"
                     placeholder="e.g., Sports Equipment, Home & Garden"
@@ -134,7 +134,7 @@ export default function BasicCreateWebsite() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-white">Description</Label>
+                  <Label htmlFor="description" className="text-gray-900">Description</Label>
                   <Textarea
                     id="description"
                     placeholder="Describe what products you'll be promoting..."
@@ -147,7 +147,7 @@ export default function BasicCreateWebsite() {
 
                 {/* Basic Template Selection */}
                 <div className="space-y-4">
-                  <Label className="text-white">Choose Template (Basic Plan)</Label>
+                  <Label className="text-gray-900">Choose Template (Basic Plan)</Label>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {basicTemplates.map((template) => (
                       <div
@@ -166,7 +166,7 @@ export default function BasicCreateWebsite() {
                         <p className="text-gray-400 text-sm mb-3">{template.description}</p>
                         <div className="flex flex-wrap gap-1">
                           {template.features.map((feature) => (
-                            <Badge key={feature} variant="secondary" className="text-xs bg-gray-700 text-gray-300">
+                            <Badge key={feature} variant="secondary" className="text-xs bg-gray-700 text-gray-700">
                               {feature}
                             </Badge>
                           ))}
@@ -183,7 +183,7 @@ export default function BasicCreateWebsite() {
                       <Crown className="w-5 h-5 text-purple-400 mt-0.5" />
                       <div>
                         <h4 className="text-purple-400 font-medium mb-1">Unlock More Templates</h4>
-                        <p className="text-gray-300 text-sm mb-3">
+                        <p className="text-gray-700 text-sm mb-3">
                           Upgrade to Pro for Premium & Conversion Pro templates, plus advanced features like custom domains and analytics.
                         </p>
                         <Button asChild size="sm" className="bg-purple-600 hover:bg-purple-700">
@@ -214,11 +214,11 @@ export default function BasicCreateWebsite() {
             {/* Plan Limits */}
             <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
               <CardHeader>
-                <CardTitle className="text-white">Basic Plan Limits</CardTitle>
+                <CardTitle className="text-gray-900">Basic Plan Limits</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-300">Websites</span>
+                  <span className="text-gray-700">Websites</span>
                   <span className="text-white font-medium">{currentWebsites}/{maxWebsites}</span>
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2">
@@ -228,15 +228,15 @@ export default function BasicCreateWebsite() {
                   ></div>
                 </div>
                 <div className="space-y-2 text-sm">
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Globe className="w-4 h-4 mr-2" />
                     Basic templates only
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Type className="w-4 h-4 mr-2" />
                     AI content generation
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <ImageIcon className="w-4 h-4 mr-2" />
                     Basic image library
                   </div>
@@ -247,26 +247,26 @@ export default function BasicCreateWebsite() {
             {/* Upgrade Benefits */}
             <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
               <CardHeader>
-                <CardTitle className="text-white">Upgrade to Pro</CardTitle>
-                <CardDescription className="text-gray-300">
+                <CardTitle className="text-gray-900">Upgrade to Pro</CardTitle>
+                <CardDescription className="text-gray-700">
                   Get more websites and features
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Crown className="w-4 h-4 mr-2 text-yellow-400" />
                     <span>10 websites (vs 3)</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Palette className="w-4 h-4 mr-2 text-purple-400" />
                     <span>Premium templates</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Globe className="w-4 h-4 mr-2 text-blue-400" />
                     <span>Custom domains</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Sparkles className="w-4 h-4 mr-2 text-green-400" />
                     <span>Advanced analytics</span>
                   </div>
@@ -282,10 +282,10 @@ export default function BasicCreateWebsite() {
             {/* Help */}
             <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
               <CardHeader>
-                <CardTitle className="text-white">Need Help?</CardTitle>
+                <CardTitle className="text-gray-900">Need Help?</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-300 text-sm mb-4">
+                <p className="text-gray-700 text-sm mb-4">
                   Check our documentation for website creation tips and best practices.
                 </p>
                 <Button asChild variant="outline" className="w-full border-white border-opacity-20 text-white hover:bg-white bg-opacity-10">

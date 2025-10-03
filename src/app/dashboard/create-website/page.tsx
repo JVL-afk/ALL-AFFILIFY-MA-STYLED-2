@@ -228,7 +228,7 @@ export default function CreateWebsitePage() {
             <CardContent className="space-y-6">
               {/* URL Input */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-white">
+                <label className="block text-sm font-medium text-gray-900">
                   Affiliate Link *
                 </label>
                 <Input
@@ -284,7 +284,7 @@ export default function CreateWebsitePage() {
                       <Button
                         onClick={() => handleUpgrade('pro')}
                         disabled={upgradeLoading}
-                        className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
+                        className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-gray-900"
                       >
                         {upgradeLoading ? (
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -297,7 +297,7 @@ export default function CreateWebsitePage() {
                       <Button
                         onClick={() => handleUpgrade('enterprise')}
                         disabled={upgradeLoading}
-                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-gray-900"
                       >
                         {upgradeLoading ? (
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -350,7 +350,7 @@ export default function CreateWebsitePage() {
                       
                       <Button
                         onClick={() => router.push('/dashboard/my-websites')}
-                        className="bg-green-600 hover:bg-green-700 text-white"
+                        className="bg-green-600 hover:bg-green-700 text-gray-900"
                       >
                         <ArrowRight className="w-4 h-4 mr-2" />
                         Manage Websites
@@ -368,7 +368,7 @@ export default function CreateWebsitePage() {
           {/* Features */}
           <Card className="bg-white bg-opacity-10 backdrop-blur-sm border-white border-opacity-20">
             <CardHeader>
-              <CardTitle className="text-white">What You Get</CardTitle>
+              <CardTitle className="text-gray-900">What You Get</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center text-white/80">
@@ -401,12 +401,12 @@ export default function CreateWebsitePage() {
           {/* Pricing */}
           <Card className="bg-white bg-opacity-10 backdrop-blur-sm border-white border-opacity-20">
             <CardHeader>
-              <CardTitle className="text-white">Pricing Plans</CardTitle>
+              <CardTitle className="text-gray-900">Pricing Plans</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className={`p-3 rounded-lg border ${user.plan === 'basic' ? 'border-orange-400 bg-orange-500/20' : 'border-white border-opacity-20'}`}>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium text-white">Basic</span>
+                  <span className="font-medium text-gray-900">Basic</span>
                   <span className="text-green-400 font-bold">FREE</span>
                 </div>
                 <div className="text-sm text-white/70">3 websites</div>
@@ -414,7 +414,7 @@ export default function CreateWebsitePage() {
 
               <div className={`p-3 rounded-lg border ${user.plan === 'pro' ? 'border-purple-400 bg-purple-500/20' : 'border-white border-opacity-20'}`}>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium text-white">Pro</span>
+                  <span className="font-medium text-gray-900">Pro</span>
                   <span className="text-white font-bold">$29</span>
                 </div>
                 <div className="text-sm text-white/70">10 websites + advanced features</div>
@@ -422,7 +422,7 @@ export default function CreateWebsitePage() {
 
               <div className={`p-3 rounded-lg border ${user.plan === 'enterprise' ? 'border-blue-400 bg-blue-500/20' : 'border-white border-opacity-20'}`}>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium text-white">Enterprise</span>
+                  <span className="font-medium text-gray-900">Enterprise</span>
                   <span className="text-white font-bold">$99</span>
                 </div>
                 <div className="text-sm text-white/70">Unlimited websites + all features</div>

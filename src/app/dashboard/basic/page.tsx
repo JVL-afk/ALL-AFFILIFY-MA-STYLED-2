@@ -27,16 +27,16 @@ export default function BasicDashboard() {
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Basic Dashboard</h1>
-            <p className="text-gray-300">Manage your affiliate marketing websites</p>
+            <p className="text-gray-700">Manage your affiliate marketing websites</p>
           </div>
           <div className="flex items-center space-x-4">
-            <Badge variant="secondary" className="bg-gray-700 text-white">
+            <Badge variant="secondary" className="bg-gray-700 text-gray-900">
               Basic Plan
             </Badge>
             <Button asChild className="bg-purple-600 hover:bg-purple-700">
@@ -52,11 +52,11 @@ export default function BasicDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Websites</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900">Websites</CardTitle>
               <Globe className="h-4 w-4 text-purple-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.websites}/{stats.maxWebsites}</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.websites}/{stats.maxWebsites}</div>
               <p className="text-xs text-gray-400">
                 {stats.maxWebsites - stats.websites} remaining
               </p>
@@ -65,11 +65,11 @@ export default function BasicDashboard() {
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Total Views</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900">Total Views</CardTitle>
               <Eye className="h-4 w-4 text-blue-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.totalViews?.toLocaleString() || "0"}</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.totalViews?.toLocaleString() || "0"}</div>
               <p className="text-xs text-gray-400">
                 +12% from last month
               </p>
@@ -78,11 +78,11 @@ export default function BasicDashboard() {
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Total Clicks</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900">Total Clicks</CardTitle>
               <MousePointer className="h-4 w-4 text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.totalClicks}</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.totalClicks}</div>
               <p className="text-xs text-gray-400">
                 +8% from last month
               </p>
@@ -91,11 +91,11 @@ export default function BasicDashboard() {
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Conversion Rate</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900">Conversion Rate</CardTitle>
               <TrendingUp className="h-4 w-4 text-orange-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.conversionRate}%</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.conversionRate}%</div>
               <p className="text-xs text-gray-400">
                 +2.1% from last month
               </p>
@@ -107,8 +107,8 @@ export default function BasicDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader>
-              <CardTitle className="text-white">Quick Actions</CardTitle>
-              <CardDescription className="text-gray-300">
+              <CardTitle className="text-gray-900">Quick Actions</CardTitle>
+              <CardDescription className="text-gray-700">
                 Get started with your affiliate marketing
               </CardDescription>
             </CardHeader>
@@ -136,25 +136,25 @@ export default function BasicDashboard() {
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader>
-              <CardTitle className="text-white">Upgrade Benefits</CardTitle>
-              <CardDescription className="text-gray-300">
+              <CardTitle className="text-gray-900">Upgrade Benefits</CardTitle>
+              <CardDescription className="text-gray-700">
                 Unlock more features with Pro plan
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex items-center text-gray-300">
+              <div className="flex items-center text-gray-700">
                 <Crown className="w-4 h-4 mr-2 text-yellow-400" />
                 <span>10 websites (vs 3 current)</span>
               </div>
-              <div className="flex items-center text-gray-300">
+              <div className="flex items-center text-gray-700">
                 <BarChart3 className="w-4 h-4 mr-2 text-blue-400" />
                 <span>Advanced analytics</span>
               </div>
-              <div className="flex items-center text-gray-300">
+              <div className="flex items-center text-gray-700">
                 <Globe className="w-4 h-4 mr-2 text-green-400" />
                 <span>Custom domains</span>
               </div>
-              <div className="flex items-center text-gray-300">
+              <div className="flex items-center text-gray-700">
                 <Settings className="w-4 h-4 mr-2 text-purple-400" />
                 <span>Priority support</span>
               </div>
@@ -170,8 +170,8 @@ export default function BasicDashboard() {
         {/* Recent Activity */}
         <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
           <CardHeader>
-            <CardTitle className="text-white">Recent Activity</CardTitle>
-            <CardDescription className="text-gray-300">
+            <CardTitle className="text-gray-900">Recent Activity</CardTitle>
+            <CardDescription className="text-gray-700">
               Your latest affiliate marketing activities
             </CardDescription>
           </CardHeader>
@@ -185,7 +185,7 @@ export default function BasicDashboard() {
                     <p className="text-gray-400 text-sm">Created 2 days ago</p>
                   </div>
                 </div>
-                <Badge variant="secondary" className="bg-green-600 text-white">Active</Badge>
+                <Badge variant="secondary" className="bg-green-600 text-gray-900">Active</Badge>
               </div>
               
               <div className="text-center py-8">

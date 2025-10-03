@@ -104,20 +104,20 @@ export default function EnterpriseCreateWebsite() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Create New Website</h1>
-            <p className="text-gray-300">Enterprise Plan - Unlimited professional website creation</p>
+            <p className="text-gray-700">Enterprise Plan - Unlimited professional website creation</p>
           </div>
           <div className="flex items-center space-x-4">
-            <Badge variant="secondary" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+            <Badge variant="secondary" className="bg-gradient-to-r from-purple-600 to-blue-600 text-gray-900">
               <Crown className="w-3 h-3 mr-1" />
               Enterprise: {currentWebsites} websites
             </Badge>
-            <Badge variant="secondary" className="bg-green-600 text-white">
+            <Badge variant="secondary" className="bg-green-600 text-gray-900">
               <Infinity className="w-3 h-3 mr-1" />
               Unlimited
             </Badge>
@@ -129,15 +129,15 @@ export default function EnterpriseCreateWebsite() {
           <div className="lg:col-span-2">
             <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
               <CardHeader>
-                <CardTitle className="text-white">Enterprise Website Configuration</CardTitle>
-                <CardDescription className="text-gray-300">
+                <CardTitle className="text-gray-900">Enterprise Website Configuration</CardTitle>
+                <CardDescription className="text-gray-700">
                   Create your enterprise-grade affiliate website with advanced features
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="websiteName" className="text-white">Website Name</Label>
+                    <Label htmlFor="websiteName" className="text-gray-900">Website Name</Label>
                     <Input
                       id="websiteName"
                       placeholder="e.g., TechReviews Authority Hub"
@@ -148,7 +148,7 @@ export default function EnterpriseCreateWebsite() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="customDomain" className="text-white">Custom Domain</Label>
+                    <Label htmlFor="customDomain" className="text-gray-900">Custom Domain</Label>
                     <Input
                       id="customDomain"
                       placeholder="e.g., yourbrand.com"
@@ -161,9 +161,9 @@ export default function EnterpriseCreateWebsite() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="niche" className="text-white">Primary Niche</Label>
+                    <Label htmlFor="niche" className="text-gray-900">Primary Niche</Label>
                     <Select value={formData.niche} onValueChange={(value) => handleInputChange('niche', value)}>
-                      <SelectTrigger className="bg-white bg-opacity-10 border-white border-opacity-20 text-white">
+                      <SelectTrigger className="bg-white bg-opacity-10 border-white border-opacity-20 text-gray-900">
                         <SelectValue placeholder="Select primary niche" />
                       </SelectTrigger>
                       <SelectContent>
@@ -185,7 +185,7 @@ export default function EnterpriseCreateWebsite() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="targetAudience" className="text-white">Target Audience</Label>
+                    <Label htmlFor="targetAudience" className="text-gray-900">Target Audience</Label>
                     <Input
                       id="targetAudience"
                       placeholder="e.g., Tech enthusiasts, professionals"
@@ -197,7 +197,7 @@ export default function EnterpriseCreateWebsite() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-white">Website Description & Strategy</Label>
+                  <Label htmlFor="description" className="text-gray-900">Website Description & Strategy</Label>
                   <Textarea
                     id="description"
                     placeholder="Describe your website's purpose, content strategy, target audience, and business goals..."
@@ -208,7 +208,7 @@ export default function EnterpriseCreateWebsite() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="conversionGoals" className="text-white">Conversion Goals</Label>
+                  <Label htmlFor="conversionGoals" className="text-gray-900">Conversion Goals</Label>
                   <Input
                     id="conversionGoals"
                     placeholder="e.g., Product sales, email signups, affiliate clicks"
@@ -220,7 +220,7 @@ export default function EnterpriseCreateWebsite() {
 
                 {/* Enterprise Template Selection */}
                 <div className="space-y-4">
-                  <Label className="text-white">Choose Enterprise Template</Label>
+                  <Label className="text-gray-900">Choose Enterprise Template</Label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {enterpriseTemplates.map((template) => (
                       <div
@@ -237,14 +237,14 @@ export default function EnterpriseCreateWebsite() {
                         </div>
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="text-white font-medium">{template.name}</h4>
-                          <Badge variant="secondary" className="text-xs bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+                          <Badge variant="secondary" className="text-xs bg-gradient-to-r from-purple-600 to-blue-600 text-gray-900">
                             {template.category}
                           </Badge>
                         </div>
                         <p className="text-gray-400 text-sm mb-3">{template.description}</p>
                         <div className="flex flex-wrap gap-1">
                           {template.features.map((feature) => (
-                            <Badge key={feature} variant="secondary" className="text-xs bg-gray-700 text-gray-300">
+                            <Badge key={feature} variant="secondary" className="text-xs bg-gray-700 text-gray-700">
                               {feature}
                             </Badge>
                           ))}
@@ -256,7 +256,7 @@ export default function EnterpriseCreateWebsite() {
 
                 {/* Enterprise Features Configuration */}
                 <div className="space-y-4">
-                  <Label className="text-white">Enterprise Features Configuration</Label>
+                  <Label className="text-gray-900">Enterprise Features Configuration</Label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Card className="bg-white bg-opacity-5 border-white/10">
                       <CardContent className="p-4">
@@ -394,34 +394,34 @@ export default function EnterpriseCreateWebsite() {
             {/* Enterprise Status */}
             <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
               <CardHeader>
-                <CardTitle className="text-white">Enterprise Status</CardTitle>
+                <CardTitle className="text-gray-900">Enterprise Status</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-300">Websites Created</span>
+                  <span className="text-gray-700">Websites Created</span>
                   <span className="text-white font-medium">{currentWebsites}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-300">Limit</span>
-                  <Badge variant="secondary" className="bg-green-600 text-white">
+                  <span className="text-gray-700">Limit</span>
+                  <Badge variant="secondary" className="bg-green-600 text-gray-900">
                     <Infinity className="w-3 h-3 mr-1" />
                     Unlimited
                   </Badge>
                 </div>
                 <div className="space-y-2 text-sm">
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Crown className="w-4 h-4 mr-2 text-yellow-400" />
                     All Enterprise templates
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Users className="w-4 h-4 mr-2 text-purple-400" />
                     Team collaboration
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Shield className="w-4 h-4 mr-2 text-blue-400" />
                     White-label options
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Zap className="w-4 h-4 mr-2 text-orange-400" />
                     Full API access
                   </div>
@@ -432,26 +432,26 @@ export default function EnterpriseCreateWebsite() {
             {/* Enterprise Image Library */}
             <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
               <CardHeader>
-                <CardTitle className="text-white">Enterprise Media Library</CardTitle>
-                <CardDescription className="text-gray-300">
+                <CardTitle className="text-gray-900">Enterprise Media Library</CardTitle>
+                <CardDescription className="text-gray-700">
                   Premium content and assets
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <ImageIcon className="w-4 h-4 mr-2 text-purple-400" />
                     <span>Unlimited Unsplash access</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Sparkles className="w-4 h-4 mr-2 text-blue-400" />
                     <span>AI-powered content generation</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Database className="w-4 h-4 mr-2 text-green-400" />
                     <span>Custom asset management</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Code className="w-4 h-4 mr-2 text-orange-400" />
                     <span>Custom component library</span>
                   </div>
@@ -462,19 +462,19 @@ export default function EnterpriseCreateWebsite() {
             {/* Team Management */}
             <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
               <CardHeader>
-                <CardTitle className="text-white">Team Management</CardTitle>
-                <CardDescription className="text-gray-300">
+                <CardTitle className="text-gray-900">Team Management</CardTitle>
+                <CardDescription className="text-gray-700">
                   Collaborate with your team
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-300">Team Members</span>
+                    <span className="text-gray-700">Team Members</span>
                     <span className="text-white font-medium">8 active</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-300">Active Projects</span>
+                    <span className="text-gray-700">Active Projects</span>
                     <span className="text-white font-medium">12</span>
                   </div>
                 </div>
@@ -490,8 +490,8 @@ export default function EnterpriseCreateWebsite() {
             {/* API & Integrations */}
             <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
               <CardHeader>
-                <CardTitle className="text-white">API & Integrations</CardTitle>
-                <CardDescription className="text-gray-300">
+                <CardTitle className="text-gray-900">API & Integrations</CardTitle>
+                <CardDescription className="text-gray-700">
                   Connect with external services
                 </CardDescription>
               </CardHeader>

@@ -95,16 +95,16 @@ export default function ProCreateWebsite() {
   const canCreateWebsite = currentWebsites < maxWebsites
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Create New Website</h1>
-            <p className="text-gray-300">Pro Plan - Advanced affiliate website creation</p>
+            <p className="text-gray-700">Pro Plan - Advanced affiliate website creation</p>
           </div>
           <div className="flex items-center space-x-4">
-            <Badge variant="secondary" className="bg-purple-600 text-white">
+            <Badge variant="secondary" className="bg-purple-600 text-gray-900">
               <Crown className="w-3 h-3 mr-1" />
               Pro Plan: {currentWebsites}/{maxWebsites} websites
             </Badge>
@@ -124,7 +124,7 @@ export default function ProCreateWebsite() {
                 <AlertCircle className="w-6 h-6 text-red-400" />
                 <div>
                   <h3 className="text-red-400 font-medium">Website Limit Reached</h3>
-                  <p className="text-gray-300">You've reached your Pro plan limit of {maxWebsites} websites. Upgrade to Enterprise for unlimited websites!</p>
+                  <p className="text-gray-700">You've reached your Pro plan limit of {maxWebsites} websites. Upgrade to Enterprise for unlimited websites!</p>
                 </div>
                 <Button asChild className="bg-blue-600 hover:bg-blue-700 ml-auto">
                   <Link href="/pricing">Upgrade Now</Link>
@@ -139,15 +139,15 @@ export default function ProCreateWebsite() {
           <div className="lg:col-span-2">
             <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
               <CardHeader>
-                <CardTitle className="text-white">Website Details</CardTitle>
-                <CardDescription className="text-gray-300">
+                <CardTitle className="text-gray-900">Website Details</CardTitle>
+                <CardDescription className="text-gray-700">
                   Create your professional affiliate website
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="websiteName" className="text-white">Website Name</Label>
+                    <Label htmlFor="websiteName" className="text-gray-900">Website Name</Label>
                     <Input
                       id="websiteName"
                       placeholder="e.g., Ultimate Gaming Gear Reviews"
@@ -159,7 +159,7 @@ export default function ProCreateWebsite() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="customDomain" className="text-white">Custom Domain (Optional)</Label>
+                    <Label htmlFor="customDomain" className="text-gray-900">Custom Domain (Optional)</Label>
                     <Input
                       id="customDomain"
                       placeholder="e.g., yourdomain.com"
@@ -172,9 +172,9 @@ export default function ProCreateWebsite() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="niche" className="text-white">Niche/Category</Label>
+                  <Label htmlFor="niche" className="text-gray-900">Niche/Category</Label>
                   <Select value={formData.niche} onValueChange={(value) => handleInputChange('niche', value)} disabled={!canCreateWebsite}>
-                    <SelectTrigger className="bg-white bg-opacity-10 border-white border-opacity-20 text-white">
+                    <SelectTrigger className="bg-white bg-opacity-10 border-white border-opacity-20 text-gray-900">
                       <SelectValue placeholder="Select your niche" />
                     </SelectTrigger>
                     <SelectContent>
@@ -194,7 +194,7 @@ export default function ProCreateWebsite() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-white">Description</Label>
+                  <Label htmlFor="description" className="text-gray-900">Description</Label>
                   <Textarea
                     id="description"
                     placeholder="Describe your website's focus, target audience, and the products you'll promote..."
@@ -207,7 +207,7 @@ export default function ProCreateWebsite() {
 
                 {/* Pro Template Selection */}
                 <div className="space-y-4">
-                  <Label className="text-white">Choose Premium Template</Label>
+                  <Label className="text-gray-900">Choose Premium Template</Label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {proTemplates.map((template) => (
                       <div
@@ -224,14 +224,14 @@ export default function ProCreateWebsite() {
                         </div>
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="text-white font-medium">{template.name}</h4>
-                          <Badge variant="secondary" className="text-xs bg-purple-600 text-white">
+                          <Badge variant="secondary" className="text-xs bg-purple-600 text-gray-900">
                             {template.category}
                           </Badge>
                         </div>
                         <p className="text-gray-400 text-sm mb-3">{template.description}</p>
                         <div className="flex flex-wrap gap-1">
                           {template.features.map((feature) => (
-                            <Badge key={feature} variant="secondary" className="text-xs bg-gray-700 text-gray-300">
+                            <Badge key={feature} variant="secondary" className="text-xs bg-gray-700 text-gray-700">
                               {feature}
                             </Badge>
                           ))}
@@ -243,7 +243,7 @@ export default function ProCreateWebsite() {
 
                 {/* Pro Features */}
                 <div className="space-y-4">
-                  <Label className="text-white">Pro Features</Label>
+                  <Label className="text-gray-900">Pro Features</Label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Card className="bg-white bg-opacity-5 border-white/10">
                       <CardContent className="p-4">
@@ -296,7 +296,7 @@ export default function ProCreateWebsite() {
                       <Zap className="w-5 h-5 text-blue-400 mt-0.5" />
                       <div>
                         <h4 className="text-blue-400 font-medium mb-1">Unlock Enterprise Features</h4>
-                        <p className="text-gray-300 text-sm mb-3">
+                        <p className="text-gray-700 text-sm mb-3">
                           Get unlimited websites, team collaboration, white-label options, and API access with Enterprise plan.
                         </p>
                         <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700">
@@ -327,11 +327,11 @@ export default function ProCreateWebsite() {
             {/* Plan Limits */}
             <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
               <CardHeader>
-                <CardTitle className="text-white">Pro Plan Status</CardTitle>
+                <CardTitle className="text-gray-900">Pro Plan Status</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-300">Websites</span>
+                  <span className="text-gray-700">Websites</span>
                   <span className="text-white font-medium">{currentWebsites}/{maxWebsites}</span>
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2">
@@ -341,19 +341,19 @@ export default function ProCreateWebsite() {
                   ></div>
                 </div>
                 <div className="space-y-2 text-sm">
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Crown className="w-4 h-4 mr-2 text-purple-400" />
                     Premium & Conversion templates
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Globe className="w-4 h-4 mr-2 text-blue-400" />
                     Custom domains
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <BarChart3 className="w-4 h-4 mr-2 text-green-400" />
                     Advanced analytics
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <TestTube className="w-4 h-4 mr-2 text-orange-400" />
                     A/B testing
                   </div>
@@ -364,22 +364,22 @@ export default function ProCreateWebsite() {
             {/* Unsplash Integration */}
             <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
               <CardHeader>
-                <CardTitle className="text-white">Pro Image Library</CardTitle>
-                <CardDescription className="text-gray-300">
+                <CardTitle className="text-gray-900">Pro Image Library</CardTitle>
+                <CardDescription className="text-gray-700">
                   Access to premium stock photos
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <ImageIcon className="w-4 h-4 mr-2 text-purple-400" />
                     <span>Unsplash integration</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Sparkles className="w-4 h-4 mr-2 text-blue-400" />
                     <span>AI-powered image selection</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Settings className="w-4 h-4 mr-2 text-green-400" />
                     <span>Automatic optimization</span>
                   </div>
@@ -393,26 +393,26 @@ export default function ProCreateWebsite() {
             {/* Enterprise Benefits */}
             <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
               <CardHeader>
-                <CardTitle className="text-white">Upgrade to Enterprise</CardTitle>
-                <CardDescription className="text-gray-300">
+                <CardTitle className="text-gray-900">Upgrade to Enterprise</CardTitle>
+                <CardDescription className="text-gray-700">
                   Unlimited websites and team features
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Globe className="w-4 h-4 mr-2 text-blue-400" />
                     <span>Unlimited websites</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Crown className="w-4 h-4 mr-2 text-yellow-400" />
                     <span>Team collaboration</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Zap className="w-4 h-4 mr-2 text-purple-400" />
                     <span>API access</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center text-gray-700">
                     <Settings className="w-4 h-4 mr-2 text-green-400" />
                     <span>White-label options</span>
                   </div>

@@ -231,7 +231,7 @@ export default function ReviewsPage() {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-4 h-4 ${i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+        className={`w-4 h-4 ${i < rating ? 'text-yellow-400 fill-current' : 'text-gray-700'}`}
       />
     ))
   }
@@ -242,7 +242,7 @@ export default function ReviewsPage() {
       <div className="p-6">
         <div className="max-w-2xl mx-auto text-center py-12">
           <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Crown className="w-8 h-8 text-white" />
+            <Crown className="w-8 h-8 text-gray-900" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Enterprise Feature</h1>
           <p className="text-gray-600 mb-6">

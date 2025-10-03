@@ -36,16 +36,16 @@ export default function EnterpriseDashboard() {
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Enterprise Dashboard</h1>
-            <p className="text-gray-300">Complete affiliate marketing command center</p>
+            <p className="text-gray-700">Complete affiliate marketing command center</p>
           </div>
           <div className="flex items-center space-x-4">
-            <Badge variant="secondary" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+            <Badge variant="secondary" className="bg-gradient-to-r from-purple-600 to-blue-600 text-gray-900">
               <Crown className="w-3 h-3 mr-1" />
               Enterprise Plan
             </Badge>
@@ -62,77 +62,77 @@ export default function EnterpriseDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-6 mb-8">
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Websites</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900">Websites</CardTitle>
               <Infinity className="h-4 w-4 text-purple-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.websites}</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.websites}</div>
               <p className="text-xs text-gray-400">Unlimited</p>
             </CardContent>
           </Card>
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Total Views</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900">Total Views</CardTitle>
               <Eye className="h-4 w-4 text-blue-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.totalViews?.toLocaleString() || "0"}</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.totalViews?.toLocaleString() || "0"}</div>
               <p className="text-xs text-gray-400">+24% from last month</p>
             </CardContent>
           </Card>
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Total Clicks</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900">Total Clicks</CardTitle>
               <MousePointer className="h-4 w-4 text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.totalClicks?.toLocaleString() || "0"}</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.totalClicks?.toLocaleString() || "0"}</div>
               <p className="text-xs text-gray-400">+19% from last month</p>
             </CardContent>
           </Card>
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Conversion</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900">Conversion</CardTitle>
               <TrendingUp className="h-4 w-4 text-orange-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.conversionRate}%</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.conversionRate}%</div>
               <p className="text-xs text-gray-400">+0.8% from last month</p>
             </CardContent>
           </Card>
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Revenue</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900">Revenue</CardTitle>
               <TrendingUp className="h-4 w-4 text-yellow-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">${stats.revenue?.toLocaleString() || "0"}</div>
+              <div className="text-2xl font-bold text-gray-900">${stats.revenue?.toLocaleString() || "0"}</div>
               <p className="text-xs text-gray-400">+31% from last month</p>
             </CardContent>
           </Card>
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Team</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900">Team</CardTitle>
               <Users className="h-4 w-4 text-cyan-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.teamMembers}</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.teamMembers}</div>
               <p className="text-xs text-gray-400">Active members</p>
             </CardContent>
           </Card>
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">A/B Tests</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900">A/B Tests</CardTitle>
               <TestTube className="h-4 w-4 text-pink-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.activeTests}</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.activeTests}</div>
               <p className="text-xs text-gray-400">Running tests</p>
             </CardContent>
           </Card>
@@ -142,8 +142,8 @@ export default function EnterpriseDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader>
-              <CardTitle className="text-white">Website Management</CardTitle>
-              <CardDescription className="text-gray-300">
+              <CardTitle className="text-gray-900">Website Management</CardTitle>
+              <CardDescription className="text-gray-700">
                 Enterprise-level creation & management
               </CardDescription>
             </CardHeader>
@@ -165,8 +165,8 @@ export default function EnterpriseDashboard() {
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader>
-              <CardTitle className="text-white">Analytics & Testing</CardTitle>
-              <CardDescription className="text-gray-300">
+              <CardTitle className="text-gray-900">Analytics & Testing</CardTitle>
+              <CardDescription className="text-gray-700">
                 Advanced insights & optimization
               </CardDescription>
             </CardHeader>
@@ -188,8 +188,8 @@ export default function EnterpriseDashboard() {
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader>
-              <CardTitle className="text-white">Team & Collaboration</CardTitle>
-              <CardDescription className="text-gray-300">
+              <CardTitle className="text-gray-900">Team & Collaboration</CardTitle>
+              <CardDescription className="text-gray-700">
                 Manage your team & workflows
               </CardDescription>
             </CardHeader>
@@ -211,8 +211,8 @@ export default function EnterpriseDashboard() {
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader>
-              <CardTitle className="text-white">Enterprise Features</CardTitle>
-              <CardDescription className="text-gray-300">
+              <CardTitle className="text-gray-900">Enterprise Features</CardTitle>
+              <CardDescription className="text-gray-700">
                 White-label & custom solutions
               </CardDescription>
             </CardHeader>
@@ -237,8 +237,8 @@ export default function EnterpriseDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader>
-              <CardTitle className="text-white">Top Performing Websites</CardTitle>
-              <CardDescription className="text-gray-300">
+              <CardTitle className="text-gray-900">Top Performing Websites</CardTitle>
+              <CardDescription className="text-gray-700">
                 Your highest converting sites
               </CardDescription>
             </CardHeader>
@@ -252,7 +252,7 @@ export default function EnterpriseDashboard() {
                       <p className="text-gray-400 text-sm">12.4% conversion</p>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-green-600 text-white">$8,247</Badge>
+                  <Badge variant="secondary" className="bg-green-600 text-gray-900">$8,247</Badge>
                 </div>
                 
                 <div className="flex items-center justify-between p-3 bg-white bg-opacity-5 rounded-lg">
@@ -263,7 +263,7 @@ export default function EnterpriseDashboard() {
                       <p className="text-gray-400 text-sm">9.8% conversion</p>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-blue-600 text-white">$6,892</Badge>
+                  <Badge variant="secondary" className="bg-blue-600 text-gray-900">$6,892</Badge>
                 </div>
 
                 <div className="flex items-center justify-between p-3 bg-white bg-opacity-5 rounded-lg">
@@ -274,7 +274,7 @@ export default function EnterpriseDashboard() {
                       <p className="text-gray-400 text-sm">8.1% conversion</p>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-purple-600 text-white">$5,234</Badge>
+                  <Badge variant="secondary" className="bg-purple-600 text-gray-900">$5,234</Badge>
                 </div>
               </div>
             </CardContent>
@@ -282,8 +282,8 @@ export default function EnterpriseDashboard() {
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader>
-              <CardTitle className="text-white">Team Activity</CardTitle>
-              <CardDescription className="text-gray-300">
+              <CardTitle className="text-gray-900">Team Activity</CardTitle>
+              <CardDescription className="text-gray-700">
                 Recent team member actions
               </CardDescription>
             </CardHeader>
@@ -327,8 +327,8 @@ export default function EnterpriseDashboard() {
 
           <Card className="bg-white bg-opacity-10 border-white border-opacity-20">
             <CardHeader>
-              <CardTitle className="text-white">AI Insights & Recommendations</CardTitle>
-              <CardDescription className="text-gray-300">
+              <CardTitle className="text-gray-900">AI Insights & Recommendations</CardTitle>
+              <CardDescription className="text-gray-700">
                 Enterprise-level optimization suggestions
               </CardDescription>
             </CardHeader>
@@ -336,17 +336,17 @@ export default function EnterpriseDashboard() {
               <div className="space-y-4">
                 <div className="p-4 bg-green-600/20 border border-green-600/30 rounded-lg">
                   <h4 className="text-green-400 font-medium mb-2">🎯 Revenue Opportunity</h4>
-                  <p className="text-gray-300 text-sm">Scale your "Tech Reviews" template to 5 more niches for potential $15k+ monthly increase.</p>
+                  <p className="text-gray-700 text-sm">Scale your "Tech Reviews" template to 5 more niches for potential $15k+ monthly increase.</p>
                 </div>
                 
                 <div className="p-4 bg-blue-600/20 border border-blue-600/30 rounded-lg">
                   <h4 className="text-blue-400 font-medium mb-2">📊 Team Efficiency</h4>
-                  <p className="text-gray-300 text-sm">Your team's productivity increased 34% this month. Consider expanding to 12 members.</p>
+                  <p className="text-gray-700 text-sm">Your team's productivity increased 34% this month. Consider expanding to 12 members.</p>
                 </div>
 
                 <div className="p-4 bg-purple-600/20 border border-purple-600/30 rounded-lg">
                   <h4 className="text-purple-400 font-medium mb-2">🚀 Market Trend</h4>
-                  <p className="text-gray-300 text-sm">AI tools niche showing 67% growth. Perfect timing to create content in this space.</p>
+                  <p className="text-gray-700 text-sm">AI tools niche showing 67% growth. Perfect timing to create content in this space.</p>
                 </div>
               </div>
             </CardContent>

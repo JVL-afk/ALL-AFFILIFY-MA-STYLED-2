@@ -234,7 +234,7 @@ export default function ABTestingPage() {
       <div className="p-6">
         <div className="max-w-2xl mx-auto text-center py-12">
           <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <TestTube className="w-8 h-8 text-white" />
+            <TestTube className="w-8 h-8 text-gray-900" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Enterprise Feature</h1>
           <p className="text-gray-600 mb-6">
