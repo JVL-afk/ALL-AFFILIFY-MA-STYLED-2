@@ -31,7 +31,7 @@ export default function ProDashboard() {
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900">
+    <div className="min-h-screen bg-orange-500">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -55,7 +55,7 @@ export default function ProDashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-          <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
+          <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">Websites</CardTitle>
               <Globe className="h-4 w-4 text-purple-400" />
@@ -68,7 +68,7 @@ export default function ProDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
+          <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">Total Views</CardTitle>
               <Eye className="h-4 w-4 text-blue-400" />
@@ -81,7 +81,7 @@ export default function ProDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
+          <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">Total Clicks</CardTitle>
               <MousePointer className="h-4 w-4 text-green-400" />
@@ -94,7 +94,7 @@ export default function ProDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
+          <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">Conversion Rate</CardTitle>
               <TrendingUp className="h-4 w-4 text-orange-400" />
@@ -107,7 +107,7 @@ export default function ProDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
+          <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">Revenue</CardTitle>
               <TrendingUp className="h-4 w-4 text-yellow-400" />
@@ -123,7 +123,7 @@ export default function ProDashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
+          <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
             <CardHeader>
               <CardTitle className="text-gray-900">Quick Actions</CardTitle>
               <CardDescription className="text-gray-700">
@@ -137,13 +137,13 @@ export default function ProDashboard() {
                   Create New Website
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-white bg-opacity-20">
+              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-orange-500 bg-opacity-20">
                 <Link href="/dashboard/my-websites">
                   <Globe className="w-4 h-4 mr-2" />
                   Manage Websites
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-white bg-opacity-20">
+              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-orange-500 bg-opacity-20">
                 <Link href="/dashboard/advanced-analytics">
                   <BarChart3 className="w-4 h-4 mr-2" />
                   Advanced Analytics
@@ -152,7 +152,7 @@ export default function ProDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
+          <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
             <CardHeader>
               <CardTitle className="text-gray-900">Pro Features</CardTitle>
               <CardDescription className="text-gray-700">
@@ -160,19 +160,19 @@ export default function ProDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-white bg-opacity-20">
+              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-orange-500 bg-opacity-20">
                 <Link href="/dashboard/ab-testing">
                   <TestTube className="w-4 h-4 mr-2" />
                   A/B Testing
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-white bg-opacity-20">
+              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-orange-500 bg-opacity-20">
                 <Link href="/dashboard/analyze-website">
                   <BarChart3 className="w-4 h-4 mr-2" />
                   Website Analysis
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-white bg-opacity-20">
+              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-orange-500 bg-opacity-20">
                 <Link href="/dashboard/reviews">
                   <MessageSquare className="w-4 h-4 mr-2" />
                   Reviews Management
@@ -181,7 +181,7 @@ export default function ProDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
+          <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
             <CardHeader>
               <CardTitle className="text-gray-900">Enterprise Benefits</CardTitle>
               <CardDescription className="text-gray-700">
@@ -216,7 +216,7 @@ export default function ProDashboard() {
 
         {/* Recent Activity & Performance */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
+          <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
             <CardHeader>
               <CardTitle className="text-gray-900">Recent Activity</CardTitle>
               <CardDescription className="text-gray-700">
@@ -225,7 +225,7 @@ export default function ProDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-white bg-opacity-5 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-orange-500 bg-opacity-5 rounded-lg">
                   <div className="flex items-center space-x-3">
                     <Globe className="w-5 h-5 text-purple-400" />
                     <div>
@@ -236,7 +236,7 @@ export default function ProDashboard() {
                   <Badge variant="secondary" className="bg-green-600 text-gray-900">Active</Badge>
                 </div>
                 
-                <div className="flex items-center justify-between p-3 bg-white bg-opacity-5 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-orange-500 bg-opacity-5 rounded-lg">
                   <div className="flex items-center space-x-3">
                     <TestTube className="w-5 h-5 text-blue-400" />
                     <div>
@@ -247,7 +247,7 @@ export default function ProDashboard() {
                   <Badge variant="secondary" className="bg-orange-600 text-gray-900">Running</Badge>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-white bg-opacity-5 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-orange-500 bg-opacity-5 rounded-lg">
                   <div className="flex items-center space-x-3">
                     <BarChart3 className="w-5 h-5 text-green-400" />
                     <div>
@@ -261,7 +261,7 @@ export default function ProDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white bg-opacity-20 border-white border-opacity-30">
+          <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
             <CardHeader>
               <CardTitle className="text-gray-900">Performance Insights</CardTitle>
               <CardDescription className="text-gray-700">

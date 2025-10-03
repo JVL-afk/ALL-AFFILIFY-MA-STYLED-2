@@ -188,9 +188,9 @@ export default function ABTestingPage() {
       case 'completed':
         return 'bg-blue-100 text-blue-800'
       case 'draft':
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-orange-500 text-gray-800'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-orange-500 text-gray-800'
     }
   }
 
@@ -470,7 +470,7 @@ export default function ABTestingPage() {
                         ? 'border-green-500 bg-green-50'
                         : variant.isControl
                         ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 bg-gray-50'
+                        : 'border-gray-200 bg-orange-500'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -536,7 +536,7 @@ export default function ABTestingPage() {
                         Significant
                       </span>
                     ) : (
-                      <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">
+                      <span className="text-xs bg-orange-500 text-gray-800 px-2 py-1 rounded-full">
                         Need more data
                       </span>
                     )}
@@ -567,7 +567,7 @@ export default function ABTestingPage() {
       {/* Create Test Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-orange-500 rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold">Create A/B Test</h2>
               <Button

@@ -125,8 +125,8 @@ export default function EmailMarketingPage() {
       case 'active': return 'text-green-600 bg-green-100';
       case 'sent': return 'text-blue-600 bg-blue-100';
       case 'scheduled': return 'text-orange-600 bg-orange-100';
-      case 'draft': return 'text-gray-600 bg-gray-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'draft': return 'text-gray-600 bg-orange-500';
+      default: return 'text-gray-600 bg-orange-500';
     }
   };
 

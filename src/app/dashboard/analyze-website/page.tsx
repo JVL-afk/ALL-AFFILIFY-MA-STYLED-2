@@ -122,7 +122,7 @@ export default function AnalyzeWebsitePage() {
       case 'low':
         return 'bg-green-100 text-green-800'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-orange-500 text-gray-800'
     }
   }
 
@@ -135,7 +135,7 @@ export default function AnalyzeWebsitePage() {
       case 'low':
         return 'bg-blue-100 text-blue-800'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-orange-500 text-gray-800'
     }
   }
 
@@ -275,7 +275,7 @@ export default function AnalyzeWebsitePage() {
             <CardContent>
               <div className="space-y-4">
                 {result.insights.map((insight, index) => (
-                  <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div key={index} className="flex items-start space-x-3 p-3 bg-orange-500 rounded-lg">
                     <div className="flex-shrink-0 mt-1">
                       {insight.type === 'success' && <CheckCircle className="w-5 h-5 text-green-600" />}
                       {insight.type === 'opportunity' && <TrendingUp className="w-5 h-5 text-blue-600" />}
@@ -313,7 +313,7 @@ export default function AnalyzeWebsitePage() {
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(rec.priority)}`}>
                           {rec.priority} priority
                         </span>
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500 text-gray-800">
                           {rec.effort} effort
                         </span>
                       </div>
@@ -335,7 +335,7 @@ export default function AnalyzeWebsitePage() {
               <CardContent>
                 <div className="space-y-4">
                   {result.competitors.map((competitor, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div key={index} className="flex items-center justify-between p-3 bg-orange-500 rounded-lg">
                       <div>
                         <h4 className="font-medium">{competitor.url}</h4>
                         <p className="text-sm text-gray-600">
