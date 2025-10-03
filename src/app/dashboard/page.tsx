@@ -84,7 +84,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-orange-500 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 flex items-center justify-center">
         <div className="text-gray-900 text-xl">Loading...</div>
       </div>
     );
