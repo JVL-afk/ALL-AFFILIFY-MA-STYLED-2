@@ -187,8 +187,8 @@ export default function TeamCollaborationPage() {
     switch (status) {
       case 'active': return 'text-green-600 bg-green-100';
       case 'pending': return 'text-orange-600 bg-orange-100';
-      case 'inactive': return 'text-gray-600 bg-orange-500';
-      default: return 'text-gray-600 bg-orange-500';
+      case 'inactive': return 'text-gray-600 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900';
+      default: return 'text-gray-600 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900';
     }
   };
 
@@ -197,7 +197,7 @@ export default function TeamCollaborationPage() {
       case 'active': return 'text-blue-600 bg-blue-100';
       case 'completed': return 'text-green-600 bg-green-100';
       case 'on-hold': return 'text-orange-600 bg-orange-100';
-      default: return 'text-gray-600 bg-orange-500';
+      default: return 'text-gray-600 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900';
     }
   };
 
@@ -493,7 +493,7 @@ export default function TeamCollaborationPage() {
                 role: 'Viewer',
                 icon: <Eye className="h-5 w-5 text-gray-600" />,
                 permissions: ['View websites and campaigns', 'View basic analytics', 'Comment on projects', 'Export reports'],
-                color: 'border-gray-200 bg-orange-500',
+                color: 'border-gray-200 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900',
               },
             ].map((roleInfo) => (
               <Card key={roleInfo.role} className={roleInfo.color}>

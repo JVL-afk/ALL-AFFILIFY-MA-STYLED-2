@@ -104,7 +104,7 @@ export default function EnterpriseCreateWebsite() {
   }
 
   return (
-    <div className="min-h-screen bg-orange-500">
+    <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -127,7 +127,7 @@ export default function EnterpriseCreateWebsite() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Website Details Form */}
           <div className="lg:col-span-2">
-            <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Enterprise Website Configuration</CardTitle>
                 <CardDescription className="text-gray-700">
@@ -143,7 +143,7 @@ export default function EnterpriseCreateWebsite() {
                       placeholder="e.g., TechReviews Authority Hub"
                       value={formData.websiteName}
                       onChange={(e) => handleInputChange('websiteName', e.target.value)}
-                      className="bg-orange-500 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
+                      className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
                     />
                   </div>
 
@@ -154,7 +154,7 @@ export default function EnterpriseCreateWebsite() {
                       placeholder="e.g., yourbrand.com"
                       value={formData.customDomain}
                       onChange={(e) => handleInputChange('customDomain', e.target.value)}
-                      className="bg-orange-500 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
+                      className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
                     />
                   </div>
                 </div>
@@ -163,7 +163,7 @@ export default function EnterpriseCreateWebsite() {
                   <div className="space-y-2">
                     <Label htmlFor="niche" className="text-gray-900">Primary Niche</Label>
                     <Select value={formData.niche} onValueChange={(value) => handleInputChange('niche', value)}>
-                      <SelectTrigger className="bg-orange-500 bg-opacity-20 border-white border-opacity-30 text-gray-900">
+                      <SelectTrigger className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900">
                         <SelectValue placeholder="Select primary niche" />
                       </SelectTrigger>
                       <SelectContent>
@@ -191,7 +191,7 @@ export default function EnterpriseCreateWebsite() {
                       placeholder="e.g., Tech enthusiasts, professionals"
                       value={formData.targetAudience}
                       onChange={(e) => handleInputChange('targetAudience', e.target.value)}
-                      className="bg-orange-500 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
+                      className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
                     />
                   </div>
                 </div>
@@ -203,7 +203,7 @@ export default function EnterpriseCreateWebsite() {
                     placeholder="Describe your website's purpose, content strategy, target audience, and business goals..."
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
-                    className="bg-orange-500 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400 min-h-[120px]"
+                    className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400 min-h-[120px]"
                   />
                 </div>
 
@@ -214,7 +214,7 @@ export default function EnterpriseCreateWebsite() {
                     placeholder="e.g., Product sales, email signups, affiliate clicks"
                     value={formData.conversionGoals}
                     onChange={(e) => handleInputChange('conversionGoals', e.target.value)}
-                    className="bg-orange-500 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
+                    className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
                   />
                 </div>
 
@@ -228,7 +228,7 @@ export default function EnterpriseCreateWebsite() {
                         className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                           formData.template === template.id
                             ? 'border-purple-500 bg-purple-600/20'
-                            : 'border-white border-opacity-30 bg-orange-500 bg-opacity-5 hover:border-white/40'
+                            : 'border-white border-opacity-30 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 hover:border-white/40'
                         }`}
                         onClick={() => handleInputChange('template', template.id)}
                       >
@@ -258,7 +258,7 @@ export default function EnterpriseCreateWebsite() {
                 <div className="space-y-4">
                   <Label className="text-gray-900">Enterprise Features Configuration</Label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card className="bg-orange-500 bg-opacity-5 border-white/10">
+                    <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 border-white/10">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
@@ -278,7 +278,7 @@ export default function EnterpriseCreateWebsite() {
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-orange-500 bg-opacity-5 border-white/10">
+                    <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 border-white/10">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
@@ -298,7 +298,7 @@ export default function EnterpriseCreateWebsite() {
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-orange-500 bg-opacity-5 border-white/10">
+                    <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 border-white/10">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
@@ -318,7 +318,7 @@ export default function EnterpriseCreateWebsite() {
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-orange-500 bg-opacity-5 border-white/10">
+                    <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 border-white/10">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
@@ -338,7 +338,7 @@ export default function EnterpriseCreateWebsite() {
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-orange-500 bg-opacity-5 border-white/10">
+                    <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 border-white/10">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
@@ -358,7 +358,7 @@ export default function EnterpriseCreateWebsite() {
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-orange-500 bg-opacity-5 border-white/10">
+                    <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 border-white/10">
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-3">
                           <Briefcase className="w-5 h-5 text-cyan-400" />
@@ -368,7 +368,7 @@ export default function EnterpriseCreateWebsite() {
                               placeholder="Your brand name"
                               value={formData.customBranding}
                               onChange={(e) => handleInputChange('customBranding', e.target.value)}
-                              className="bg-orange-500 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400 mt-2"
+                              className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400 mt-2"
                             />
                           </div>
                         </div>
@@ -392,7 +392,7 @@ export default function EnterpriseCreateWebsite() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Enterprise Status */}
-            <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Enterprise Status</CardTitle>
               </CardHeader>
@@ -430,7 +430,7 @@ export default function EnterpriseCreateWebsite() {
             </Card>
 
             {/* Enterprise Image Library */}
-            <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Enterprise Media Library</CardTitle>
                 <CardDescription className="text-gray-700">
@@ -460,7 +460,7 @@ export default function EnterpriseCreateWebsite() {
             </Card>
 
             {/* Team Management */}
-            <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Team Management</CardTitle>
                 <CardDescription className="text-gray-700">
@@ -478,7 +478,7 @@ export default function EnterpriseCreateWebsite() {
                     <span className="text-gray-900 font-medium">12</span>
                   </div>
                 </div>
-                <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-orange-500 bg-opacity-20">
+                <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20">
                   <Link href="/dashboard/team-collaboration">
                     <Users className="w-4 h-4 mr-2" />
                     Manage Team
@@ -488,7 +488,7 @@ export default function EnterpriseCreateWebsite() {
             </Card>
 
             {/* API & Integrations */}
-            <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">API & Integrations</CardTitle>
                 <CardDescription className="text-gray-700">
@@ -496,13 +496,13 @@ export default function EnterpriseCreateWebsite() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-orange-500 bg-opacity-20">
+                <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20">
                   <Link href="/dashboard/api-management">
                     <Zap className="w-4 h-4 mr-2" />
                     API Management
                   </Link>
                 </Button>
-                <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-orange-500 bg-opacity-20">
+                <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20">
                   <Link href="/dashboard/custom-integrations">
                     <Settings className="w-4 h-4 mr-2" />
                     Custom Integrations

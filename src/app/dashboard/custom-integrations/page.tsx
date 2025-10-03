@@ -149,10 +149,10 @@ export default function CustomIntegrationsPage() {
       case 'connected':
       case 'active': return 'text-green-600 bg-green-100';
       case 'disconnected':
-      case 'inactive': return 'text-gray-600 bg-orange-500';
+      case 'inactive': return 'text-gray-600 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900';
       case 'error': return 'text-red-600 bg-red-100';
       case 'pending': return 'text-orange-600 bg-orange-100';
-      default: return 'text-gray-600 bg-orange-500';
+      default: return 'text-gray-600 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900';
     }
   };
 
@@ -357,7 +357,7 @@ export default function CustomIntegrationsPage() {
                     
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2">
-                        <code className="bg-orange-500 px-2 py-1 rounded text-sm">{webhook.url}</code>
+                        <code className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 px-2 py-1 rounded text-sm">{webhook.url}</code>
                         <Button variant="outline" size="sm">
                           <ExternalLink className="h-3 w-3" />
                         </Button>

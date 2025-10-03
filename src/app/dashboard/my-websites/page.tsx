@@ -140,9 +140,9 @@ export default function MyWebsitesPage() {
       case 'draft':
         return 'bg-yellow-100 text-yellow-800'
       case 'archived':
-        return 'bg-orange-500 text-gray-800'
+        return 'bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 text-gray-800'
       default:
-        return 'bg-orange-500 text-gray-800'
+        return 'bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 text-gray-800'
     }
   }
 
@@ -362,7 +362,7 @@ export default function MyWebsitesPage() {
                 </div>
                 
                 {website.url && (
-                  <div className="mb-4 p-2 bg-orange-500 rounded-md">
+                  <div className="mb-4 p-2 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 rounded-md">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-gray-600 truncate flex-1">{website.url}</span>
                       <div className="flex space-x-1 ml-2">

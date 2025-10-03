@@ -60,7 +60,7 @@ export default function BasicCreateWebsite() {
   const canCreateWebsite = currentWebsites < maxWebsites
 
   return (
-    <div className="min-h-screen bg-orange-500">
+    <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -101,7 +101,7 @@ export default function BasicCreateWebsite() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Website Details Form */}
           <div className="lg:col-span-2">
-            <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Website Details</CardTitle>
                 <CardDescription className="text-gray-700">
@@ -116,7 +116,7 @@ export default function BasicCreateWebsite() {
                     placeholder="e.g., Best Basketball Hoops"
                     value={formData.websiteName}
                     onChange={(e) => handleInputChange('websiteName', e.target.value)}
-                    className="bg-orange-500 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
+                    className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
                     disabled={!canCreateWebsite}
                   />
                 </div>
@@ -128,7 +128,7 @@ export default function BasicCreateWebsite() {
                     placeholder="e.g., Sports Equipment, Home & Garden"
                     value={formData.niche}
                     onChange={(e) => handleInputChange('niche', e.target.value)}
-                    className="bg-orange-500 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
+                    className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
                     disabled={!canCreateWebsite}
                   />
                 </div>
@@ -140,7 +140,7 @@ export default function BasicCreateWebsite() {
                     placeholder="Describe what products you'll be promoting..."
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
-                    className="bg-orange-500 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400 min-h-[100px]"
+                    className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400 min-h-[100px]"
                     disabled={!canCreateWebsite}
                   />
                 </div>
@@ -155,7 +155,7 @@ export default function BasicCreateWebsite() {
                         className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                           formData.template === template.id
                             ? 'border-purple-500 bg-purple-600/20'
-                            : 'border-white border-opacity-30 bg-orange-500 bg-opacity-5 hover:border-white/40'
+                            : 'border-white border-opacity-30 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 hover:border-white/40'
                         } ${!canCreateWebsite ? 'opacity-50 cursor-not-allowed' : ''}`}
                         onClick={() => canCreateWebsite && handleInputChange('template', template.id)}
                       >
@@ -212,7 +212,7 @@ export default function BasicCreateWebsite() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Plan Limits */}
-            <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Basic Plan Limits</CardTitle>
               </CardHeader>
@@ -245,7 +245,7 @@ export default function BasicCreateWebsite() {
             </Card>
 
             {/* Upgrade Benefits */}
-            <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Upgrade to Pro</CardTitle>
                 <CardDescription className="text-gray-700">
@@ -280,7 +280,7 @@ export default function BasicCreateWebsite() {
             </Card>
 
             {/* Help */}
-            <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Need Help?</CardTitle>
               </CardHeader>
@@ -288,7 +288,7 @@ export default function BasicCreateWebsite() {
                 <p className="text-gray-700 text-sm mb-4">
                   Check our documentation for website creation tips and best practices.
                 </p>
-                <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-orange-500 bg-opacity-20">
+                <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20">
                   <Link href="/docs">
                     View Documentation
                   </Link>

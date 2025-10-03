@@ -296,7 +296,7 @@ Could you be more specific about what you'd like help with? I'm here to provide 
                     className={`p-3 rounded-lg cursor-pointer transition-colors ${
                       currentSessionId === session.id 
                         ? 'bg-blue-100 border-blue-300' 
-                        : 'bg-orange-500 hover:bg-orange-500'
+                        : 'bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900'
                     }`}
                     onClick={() => setCurrentSessionId(session.id)}
                   >
@@ -375,7 +375,7 @@ Could you be more specific about what you'd like help with? I'm here to provide 
                       className={`max-w-[80%] rounded-lg p-4 ${
                         message.type === 'user'
                           ? 'bg-blue-600 text-gray-900'
-                          : 'bg-orange-500 text-gray-900'
+                          : 'bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 text-gray-900'
                       }`}
                     >
                       <div className="flex items-start space-x-2">
@@ -428,7 +428,7 @@ Could you be more specific about what you'd like help with? I'm here to provide 
                 
                 {isLoading && (
                   <div className="flex justify-start">
-                    <div className="bg-orange-500 rounded-lg p-4 max-w-[80%]">
+                    <div className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 rounded-lg p-4 max-w-[80%]">
                       <div className="flex items-center space-x-2">
                         <Bot className="h-5 w-5" />
                         <div className="flex space-x-1">

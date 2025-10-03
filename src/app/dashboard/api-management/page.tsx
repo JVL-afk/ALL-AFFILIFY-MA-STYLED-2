@@ -182,10 +182,10 @@ export default function ApiManagementPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'text-green-600 bg-green-100';
-      case 'inactive': return 'text-gray-600 bg-orange-500';
+      case 'inactive': return 'text-gray-600 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900';
       case 'expired': return 'text-red-600 bg-red-100';
       case 'deprecated': return 'text-orange-600 bg-orange-100';
-      default: return 'text-gray-600 bg-orange-500';
+      default: return 'text-gray-600 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900';
     }
   };
 
@@ -195,7 +195,7 @@ export default function ApiManagementPage() {
       case 'POST': return 'text-green-600 bg-green-100';
       case 'PUT': return 'text-orange-600 bg-orange-100';
       case 'DELETE': return 'text-red-600 bg-red-100';
-      default: return 'text-gray-600 bg-orange-500';
+      default: return 'text-gray-600 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900';
     }
   };
 
@@ -305,7 +305,7 @@ export default function ApiManagementPage() {
                     </div>
                     
                     <div className="flex items-center space-x-2 mb-3">
-                      <code className="bg-orange-500 px-3 py-1 rounded text-sm font-mono">
+                      <code className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 px-3 py-1 rounded text-sm font-mono">
                         {visibleKeys.has(apiKey.id) ? apiKey.key : maskApiKey(apiKey.key)}
                       </code>
                       <Button
@@ -382,7 +382,7 @@ export default function ApiManagementPage() {
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">API Endpoints</h2>
             <div className="text-sm text-gray-600">
-              Base URL: <code className="bg-orange-500 px-2 py-1 rounded">https://api.affilify.eu/v1</code>
+              Base URL: <code className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 px-2 py-1 rounded">https://api.affilify.eu/v1</code>
             </div>
           </div>
           
@@ -519,14 +519,14 @@ export default function ApiManagementPage() {
                 <p className="text-gray-600 mb-2">
                   All API requests must include your API key in the Authorization header:
                 </p>
-                <code className="block bg-orange-500 p-3 rounded text-sm">
+                <code className="block bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 p-3 rounded text-sm">
                   Authorization: Bearer your_api_key_here
                 </code>
               </div>
               
               <div>
                 <h3 className="font-semibold mb-2">Base URL</h3>
-                <code className="block bg-orange-500 p-3 rounded text-sm">
+                <code className="block bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 p-3 rounded text-sm">
                   https://api.affilify.eu/v1
                 </code>
               </div>
@@ -536,7 +536,7 @@ export default function ApiManagementPage() {
                 <p className="text-gray-600 mb-2">
                   All responses are returned in JSON format:
                 </p>
-                <code className="block bg-orange-500 p-3 rounded text-sm whitespace-pre">
+                <code className="block bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 p-3 rounded text-sm whitespace-pre">
 {`{
   "success": true,
   "data": { ... },
@@ -555,7 +555,7 @@ export default function ApiManagementPage() {
             <CardContent className="space-y-4">
               <div>
                 <h3 className="font-semibold mb-2">Create a Website (JavaScript)</h3>
-                <code className="block bg-orange-500 p-3 rounded text-sm whitespace-pre">
+                <code className="block bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 p-3 rounded text-sm whitespace-pre">
 {`const response = await fetch('https://api.affilify.eu/v1/websites', {
   method: 'POST',
   headers: {
@@ -575,7 +575,7 @@ const data = await response.json();`}
               
               <div>
                 <h3 className="font-semibold mb-2">Get Analytics (Python)</h3>
-                <code className="block bg-orange-500 p-3 rounded text-sm whitespace-pre">
+                <code className="block bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 p-3 rounded text-sm whitespace-pre">
 {`import requests
 
 headers = {

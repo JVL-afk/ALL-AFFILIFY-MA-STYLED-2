@@ -27,7 +27,7 @@ export default function BasicDashboard() {
   })
 
   return (
-    <div className="min-h-screen bg-orange-500">
+    <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -50,7 +50,7 @@ export default function BasicDashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+          <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">Websites</CardTitle>
               <Globe className="h-4 w-4 text-purple-400" />
@@ -63,7 +63,7 @@ export default function BasicDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+          <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">Total Views</CardTitle>
               <Eye className="h-4 w-4 text-blue-400" />
@@ -76,7 +76,7 @@ export default function BasicDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+          <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">Total Clicks</CardTitle>
               <MousePointer className="h-4 w-4 text-green-400" />
@@ -89,7 +89,7 @@ export default function BasicDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+          <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">Conversion Rate</CardTitle>
               <TrendingUp className="h-4 w-4 text-orange-400" />
@@ -105,7 +105,7 @@ export default function BasicDashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+          <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
             <CardHeader>
               <CardTitle className="text-gray-900">Quick Actions</CardTitle>
               <CardDescription className="text-gray-700">
@@ -119,13 +119,13 @@ export default function BasicDashboard() {
                   Create New Website
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-orange-500 bg-opacity-20">
+              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20">
                 <Link href="/dashboard/my-websites">
                   <Globe className="w-4 h-4 mr-2" />
                   Manage Websites
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-orange-500 bg-opacity-20">
+              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20">
                 <Link href="/dashboard/analyze-website">
                   <BarChart3 className="w-4 h-4 mr-2" />
                   Basic Analytics
@@ -134,7 +134,7 @@ export default function BasicDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+          <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
             <CardHeader>
               <CardTitle className="text-gray-900">Upgrade Benefits</CardTitle>
               <CardDescription className="text-gray-700">
@@ -168,7 +168,7 @@ export default function BasicDashboard() {
         </div>
 
         {/* Recent Activity */}
-        <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+        <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
           <CardHeader>
             <CardTitle className="text-gray-900">Recent Activity</CardTitle>
             <CardDescription className="text-gray-700">
@@ -177,7 +177,7 @@ export default function BasicDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-orange-500 bg-opacity-5 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <Globe className="w-5 h-5 text-purple-400" />
                   <div>

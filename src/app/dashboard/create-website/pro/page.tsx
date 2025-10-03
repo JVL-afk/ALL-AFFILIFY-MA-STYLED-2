@@ -95,7 +95,7 @@ export default function ProCreateWebsite() {
   const canCreateWebsite = currentWebsites < maxWebsites
 
   return (
-    <div className="min-h-screen bg-orange-500">
+    <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -137,7 +137,7 @@ export default function ProCreateWebsite() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Website Details Form */}
           <div className="lg:col-span-2">
-            <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Website Details</CardTitle>
                 <CardDescription className="text-gray-700">
@@ -153,7 +153,7 @@ export default function ProCreateWebsite() {
                       placeholder="e.g., Ultimate Gaming Gear Reviews"
                       value={formData.websiteName}
                       onChange={(e) => handleInputChange('websiteName', e.target.value)}
-                      className="bg-orange-500 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
+                      className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
                       disabled={!canCreateWebsite}
                     />
                   </div>
@@ -165,7 +165,7 @@ export default function ProCreateWebsite() {
                       placeholder="e.g., yourdomain.com"
                       value={formData.customDomain}
                       onChange={(e) => handleInputChange('customDomain', e.target.value)}
-                      className="bg-orange-500 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
+                      className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
                       disabled={!canCreateWebsite}
                     />
                   </div>
@@ -174,7 +174,7 @@ export default function ProCreateWebsite() {
                 <div className="space-y-2">
                   <Label htmlFor="niche" className="text-gray-900">Niche/Category</Label>
                   <Select value={formData.niche} onValueChange={(value) => handleInputChange('niche', value)} disabled={!canCreateWebsite}>
-                    <SelectTrigger className="bg-orange-500 bg-opacity-20 border-white border-opacity-30 text-gray-900">
+                    <SelectTrigger className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900">
                       <SelectValue placeholder="Select your niche" />
                     </SelectTrigger>
                     <SelectContent>
@@ -200,7 +200,7 @@ export default function ProCreateWebsite() {
                     placeholder="Describe your website's focus, target audience, and the products you'll promote..."
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
-                    className="bg-orange-500 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400 min-h-[120px]"
+                    className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400 min-h-[120px]"
                     disabled={!canCreateWebsite}
                   />
                 </div>
@@ -215,7 +215,7 @@ export default function ProCreateWebsite() {
                         className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                           formData.template === template.id
                             ? 'border-purple-500 bg-purple-600/20'
-                            : 'border-white border-opacity-30 bg-orange-500 bg-opacity-5 hover:border-white/40'
+                            : 'border-white border-opacity-30 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 hover:border-white/40'
                         } ${!canCreateWebsite ? 'opacity-50 cursor-not-allowed' : ''}`}
                         onClick={() => canCreateWebsite && handleInputChange('template', template.id)}
                       >
@@ -245,7 +245,7 @@ export default function ProCreateWebsite() {
                 <div className="space-y-4">
                   <Label className="text-gray-900">Pro Features</Label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card className="bg-orange-500 bg-opacity-5 border-white/10">
+                    <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 border-white/10">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
@@ -266,7 +266,7 @@ export default function ProCreateWebsite() {
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-orange-500 bg-opacity-5 border-white/10">
+                    <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 border-white/10">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
@@ -325,7 +325,7 @@ export default function ProCreateWebsite() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Plan Limits */}
-            <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Pro Plan Status</CardTitle>
               </CardHeader>
@@ -362,7 +362,7 @@ export default function ProCreateWebsite() {
             </Card>
 
             {/* Unsplash Integration */}
-            <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Pro Image Library</CardTitle>
                 <CardDescription className="text-gray-700">
@@ -391,7 +391,7 @@ export default function ProCreateWebsite() {
             </Card>
 
             {/* Enterprise Benefits */}
-            <Card className="bg-orange-500 bg-opacity-20 border-white border-opacity-30">
+            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
               <CardHeader>
                 <CardTitle className="text-gray-900">Upgrade to Enterprise</CardTitle>
                 <CardDescription className="text-gray-700">

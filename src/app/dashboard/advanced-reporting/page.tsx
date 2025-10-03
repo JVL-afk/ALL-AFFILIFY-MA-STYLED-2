@@ -176,8 +176,8 @@ export default function AdvancedReportingPage() {
     switch (status) {
       case 'active': return 'text-green-600 bg-green-100';
       case 'paused': return 'text-orange-600 bg-orange-100';
-      case 'draft': return 'text-gray-600 bg-orange-500';
-      default: return 'text-gray-600 bg-orange-500';
+      case 'draft': return 'text-gray-600 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900';
+      default: return 'text-gray-600 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900';
     }
   };
 
@@ -187,7 +187,7 @@ export default function AdvancedReportingPage() {
       case 'traffic': return 'text-blue-600 bg-blue-100';
       case 'conversion': return 'text-purple-600 bg-purple-100';
       case 'custom': return 'text-orange-600 bg-orange-100';
-      default: return 'text-gray-600 bg-orange-500';
+      default: return 'text-gray-600 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900';
     }
   };
 
@@ -373,7 +373,7 @@ export default function AdvancedReportingPage() {
                     <p className="text-sm font-medium mb-2">Included Metrics:</p>
                     <div className="flex flex-wrap gap-1">
                       {template.metrics.map((metric, index) => (
-                        <span key={index} className="px-2 py-1 bg-orange-500 text-gray-700 text-xs rounded">
+                        <span key={index} className="px-2 py-1 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 text-gray-700 text-xs rounded">
                           {metric}
                         </span>
                       ))}
