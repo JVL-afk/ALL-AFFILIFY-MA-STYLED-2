@@ -104,7 +104,7 @@ export default function EnterpriseCreateWebsite() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600">
+    <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
