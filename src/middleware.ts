@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { enforcePlanRestrictions } from './lib/plan-middleware';
+import { enforcePlanRestrictions } from './lib/plan-middleware-edge';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
