@@ -27,6 +27,7 @@ import {
   TestTube,
   Star
 } from 'lucide-react'
+import { FEATURE_ACCESS_MAP, PlanType } from '@/lib/plan-middleware'
 
 interface User {
   id: string
@@ -82,89 +83,104 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }
 
+  // Define the navigation items with plan requirements
   const navigation = [
     {
       name: 'Dashboard',
       href: '/dashboard',
       icon: LayoutDashboard,
-      current: pathname === '/dashboard'
+      current: pathname === '/dashboard',
+      requiredPlan: 'basic' as PlanType
     },
     {
       name: 'Create Website',
-      href: '/dashboard/create-website',
+      href: user ? `/dashboard/create-website/${user.plan}` : '/dashboard/create-website/basic',
       icon: Plus,
-      current: pathname === '/dashboard/create-website'
+      current: pathname?.includes('/dashboard/create-website'),
+      requiredPlan: 'basic' as PlanType
     },
     {
       name: 'My Websites',
       href: '/dashboard/my-websites',
       icon: Globe,
-      current: pathname === '/dashboard/my-websites'
+      current: pathname === '/dashboard/my-websites',
+      requiredPlan: 'basic' as PlanType
     },
     {
       name: 'Analyze Website',
       href: '/dashboard/analyze-website',
       icon: BarChart3,
-      current: pathname === '/dashboard/analyze-website'
+      current: pathname === '/dashboard/analyze-website',
+      requiredPlan: 'basic' as PlanType
     },
     {
       name: 'A/B Testing',
       href: '/dashboard/ab-testing',
       icon: TestTube,
       current: pathname === '/dashboard/ab-testing',
-      enterprise: true
+      requiredPlan: 'enterprise' as PlanType
     },
     {
       name: 'Reviews',
       href: '/dashboard/reviews',
       icon: Star,
       current: pathname === '/dashboard/reviews',
-      enterprise: true
+      requiredPlan: 'enterprise' as PlanType
     }
   ]
 
-  const enterpriseNavigation = [
+  const proEnterpriseNavigation = [
     {
       name: 'Advanced Analytics',
       href: '/dashboard/advanced-analytics',
       icon: BarChart3,
-      current: pathname === '/dashboard/advanced-analytics'
+      current: pathname === '/dashboard/advanced-analytics',
+      requiredPlan: 'pro' as PlanType
     },
     {
       name: 'AI Chatbot',
       href: '/dashboard/ai-chatbot',
       icon: Bot,
-      current: pathname === '/dashboard/ai-chatbot'
+      current: pathname === '/dashboard/ai-chatbot',
+      requiredPlan: 'pro' as PlanType
     },
     {
       name: 'Email Marketing',
       href: '/dashboard/email-marketing',
       icon: Mail,
-      current: pathname === '/dashboard/email-marketing'
-    },
-    {
-      name: 'Team Collaboration',
-      href: '/dashboard/team-collaboration',
-      icon: Users,
-      current: pathname === '/dashboard/team-collaboration'
-    },
-    {
-      name: 'API Management',
-      href: '/dashboard/api-management',
-      icon: Key,
-      current: pathname === '/dashboard/api-management'
+      current: pathname === '/dashboard/email-marketing',
+      requiredPlan: 'pro' as PlanType
     },
     {
       name: 'Custom Integrations',
       href: '/dashboard/custom-integrations',
       icon: Plug,
-      current: pathname === '/dashboard/custom-integrations'
+      current: pathname === '/dashboard/custom-integrations',
+      requiredPlan: 'pro' as PlanType
+    }
+  ]
+
+  const enterpriseNavigation = [
+    {
+      name: 'Team Collaboration',
+      href: '/dashboard/team-collaboration',
+      icon: Users,
+      current: pathname === '/dashboard/team-collaboration',
+      requiredPlan: 'enterprise' as PlanType
+    },
+    {
+      name: 'API Management',
+      href: '/dashboard/api-management',
+      icon: Key,
+      current: pathname === '/dashboard/api-management',
+      requiredPlan: 'enterprise' as PlanType
     },
     {
       name: 'Advanced Reporting',
       href: '/dashboard/advanced-reporting',
       icon: FileText,
-      current: pathname === '/dashboard/advanced-reporting'
+      current: pathname === '/dashboard/advanced-reporting',
+      requiredPlan: 'enterprise' as PlanType
     }
   ]
 
@@ -172,17 +188,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     {
       name: 'Settings',
       href: '/dashboard/settings',
-      icon: Settings
+      icon: Settings,
+      requiredPlan: 'basic' as PlanType
     },
     {
       name: 'Billing',
       href: '/dashboard/billing',
-      icon: CreditCard
+      icon: CreditCard,
+      requiredPlan: 'basic' as PlanType
     },
     {
       name: 'Help',
       href: '/dashboard/help',
-      icon: HelpCircle
+      icon: HelpCircle,
+      requiredPlan: 'basic' as PlanType
     }
   ]
 
@@ -210,10 +229,27 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }
 
+  // Define plan hierarchy for comparison
+  const planHierarchy = {
+    'basic': 1,
+    'pro': 2,
+    'enterprise': 3
+  }
+
+  // Check if user can access a feature based on their plan
+  const canAccessFeature = (userPlan: PlanType, requiredPlan: PlanType): boolean => {
+    return planHierarchy[userPlan] >= planHierarchy[requiredPlan];
+  }
+
+  // Get the upgrade URL based on current plan
+  const getUpgradeUrl = (currentPlan: PlanType, featurePlan: PlanType): string => {
+    return `/pricing?upgrade=${featurePlan}&from=${currentPlan}`;
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
       </div>
     )
   }
@@ -223,63 +259,116 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900">
       {/* Mobile sidebar */}
       <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-        <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white shadow-xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white/10 backdrop-blur-lg border-r border-white/20">
           <div className="flex h-16 items-center justify-between px-4">
             <Link href="/dashboard" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-orange-600 to-red-600 rounded-lg flex items-center justify-center">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                AFFILIFY
-              </span>
+              <span className="text-xl font-bold text-white">AFFILIFY</span>
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-white/70 hover:text-white"
             >
               <X className="w-6 h-6" />
             </button>
           </div>
           
+          <div className="mb-6 px-4">
+            <div className={`
+              py-1.5 px-3 rounded-full text-sm font-medium text-center
+              ${user.plan === 'basic' ? 'bg-blue-600/20 text-blue-300' : 
+                user.plan === 'pro' ? 'bg-purple-600/20 text-purple-300' : 
+                'bg-orange-600/20 text-orange-300'}
+            `}>
+              {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)} Plan
+            </div>
+          </div>
+          
           <nav className="flex-1 px-4 py-4 space-y-1">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                  item.current
-                    ? 'bg-purple-50 text-purple-700 border-r-2 border-purple-700'
-                    : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                }`}
-                onClick={() => setSidebarOpen(false)}
-              >
-                <item.icon className="mr-3 h-5 w-5" />
-                {item.name}
-                {item.enterprise && user.plan !== 'enterprise' && (
-                  <Crown className="ml-auto h-4 w-4 text-orange-500" />
-                )}
-              </Link>
-            ))}
+            {navigation.map((item) => {
+              const canAccess = canAccessFeature(user.plan as PlanType, item.requiredPlan);
+              return (
+                <Link
+                  key={item.name}
+                  href={canAccess ? item.href : getUpgradeUrl(user.plan as PlanType, item.requiredPlan)}
+                  className={`
+                    flex items-center px-3 py-2 text-sm font-medium rounded-lg
+                    ${item.current
+                      ? 'bg-white/20 text-white'
+                      : 'text-white/70 hover:bg-white/10 hover:text-white'
+                    }
+                    ${!canAccess ? 'opacity-50' : ''}
+                    transition-colors
+                  `}
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <item.icon className="mr-3 h-5 w-5" />
+                  {item.name}
+                  {!canAccess && (
+                    <Crown className="ml-auto h-4 w-4 text-yellow-400" />
+                  )}
+                </Link>
+              );
+            })}
+            
+            {/* Pro & Enterprise Features */}
+            {(user.plan === 'pro' || user.plan === 'enterprise') && (
+              <div className="pt-4 mt-4 border-t border-white/20">
+                <div className="px-3 py-2 text-xs font-semibold text-white/70 uppercase tracking-wider">
+                  Pro Features
+                </div>
+                {proEnterpriseNavigation.map((item) => {
+                  const canAccess = canAccessFeature(user.plan as PlanType, item.requiredPlan);
+                  return (
+                    <Link
+                      key={item.name}
+                      href={canAccess ? item.href : getUpgradeUrl(user.plan as PlanType, item.requiredPlan)}
+                      className={`
+                        flex items-center px-3 py-2 text-sm font-medium rounded-lg
+                        ${item.current
+                          ? 'bg-white/20 text-white'
+                          : 'text-white/70 hover:bg-white/10 hover:text-white'
+                        }
+                        ${!canAccess ? 'opacity-50' : ''}
+                        transition-colors
+                      `}
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      <item.icon className="mr-3 h-5 w-5" />
+                      {item.name}
+                      {!canAccess && (
+                        <Crown className="ml-auto h-4 w-4 text-yellow-400" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
             
             {/* Enterprise Features */}
             {user.plan === 'enterprise' && (
-              <div className="pt-4 mt-4 border-t border-gray-200">
-                <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <div className="pt-4 mt-4 border-t border-white/20">
+                <div className="px-3 py-2 text-xs font-semibold text-white/70 uppercase tracking-wider">
                   Enterprise Features
                 </div>
                 {enterpriseNavigation.map((item) => (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                      item.current
-                        ? 'bg-purple-50 text-purple-700 border-r-2 border-purple-700'
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
+                    className={`
+                      flex items-center px-3 py-2 text-sm font-medium rounded-lg
+                      ${item.current
+                        ? 'bg-white/20 text-white'
+                        : 'text-white/70 hover:bg-white/10 hover:text-white'
+                      }
+                      transition-colors
+                    `}
                     onClick={() => setSidebarOpen(false)}
                   >
                     <item.icon className="mr-3 h-5 w-5" />
@@ -289,12 +378,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
             )}
             
-            <div className="pt-6 mt-6 border-t border-gray-200">
+            <div className="pt-6 mt-6 border-t border-white/20">
               {secondaryNavigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                  className="flex items-center px-3 py-2 text-sm font-medium text-white/70 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
                   onClick={() => setSidebarOpen(false)}
                 >
                   <item.icon className="mr-3 h-5 w-5" />
@@ -304,14 +393,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
           </nav>
           
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-white/20">
             <div className="flex items-center space-x-3 mb-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+              <div className="w-8 h-8 bg-gradient-to-r from-orange-600 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-                <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getPlanColor(user.plan)}`}>
+                <p className="text-sm font-medium text-white truncate">{user.name}</p>
+                <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium
+                  ${user.plan === 'basic' ? 'bg-blue-600/20 text-blue-300' : 
+                    user.plan === 'pro' ? 'bg-purple-600/20 text-purple-300' : 
+                    'bg-orange-600/20 text-orange-300'}
+                `}>
                   {getPlanIcon(user.plan)}
                   <span>{user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}</span>
                 </div>
@@ -321,7 +414,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               onClick={handleLogout}
               variant="outline"
               size="sm"
-              className="w-full"
+              className="w-full bg-white/10 text-white hover:bg-white/20 border-white/20"
             >
               <LogOut className="w-4 h-4 mr-2" />
               Sign out
@@ -332,52 +425,104 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex flex-col flex-grow bg-white border-r border-gray-200 shadow-sm">
+        <div className="flex flex-col flex-grow bg-white/10 backdrop-blur-lg border-r border-white/20">
           <div className="flex h-16 items-center px-4">
             <Link href="/dashboard" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-orange-600 to-red-600 rounded-lg flex items-center justify-center">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                AFFILIFY
-              </span>
+              <span className="text-xl font-bold text-white">AFFILIFY</span>
             </Link>
           </div>
           
+          <div className="mb-6 px-4">
+            <div className={`
+              py-1.5 px-3 rounded-full text-sm font-medium text-center
+              ${user.plan === 'basic' ? 'bg-blue-600/20 text-blue-300' : 
+                user.plan === 'pro' ? 'bg-purple-600/20 text-purple-300' : 
+                'bg-orange-600/20 text-orange-300'}
+            `}>
+              {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)} Plan
+            </div>
+          </div>
+          
           <nav className="flex-1 px-4 py-4 space-y-1">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                  item.current
-                    ? 'bg-purple-50 text-purple-700 border-r-2 border-purple-700'
-                    : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                }`}
-              >
-                <item.icon className="mr-3 h-5 w-5" />
-                {item.name}
-                {item.enterprise && user.plan !== 'enterprise' && (
-                  <Crown className="ml-auto h-4 w-4 text-orange-500" />
-                )}
-              </Link>
-            ))}
+            {navigation.map((item) => {
+              const canAccess = canAccessFeature(user.plan as PlanType, item.requiredPlan);
+              return (
+                <Link
+                  key={item.name}
+                  href={canAccess ? item.href : getUpgradeUrl(user.plan as PlanType, item.requiredPlan)}
+                  className={`
+                    flex items-center px-3 py-2 text-sm font-medium rounded-lg
+                    ${item.current
+                      ? 'bg-white/20 text-white'
+                      : 'text-white/70 hover:bg-white/10 hover:text-white'
+                    }
+                    ${!canAccess ? 'opacity-50' : ''}
+                    transition-colors
+                  `}
+                >
+                  <item.icon className="mr-3 h-5 w-5" />
+                  {item.name}
+                  {!canAccess && (
+                    <Crown className="ml-auto h-4 w-4 text-yellow-400" />
+                  )}
+                </Link>
+              );
+            })}
+            
+            {/* Pro & Enterprise Features */}
+            {(user.plan === 'pro' || user.plan === 'enterprise') && (
+              <div className="pt-4 mt-4 border-t border-white/20">
+                <div className="px-3 py-2 text-xs font-semibold text-white/70 uppercase tracking-wider">
+                  Pro Features
+                </div>
+                {proEnterpriseNavigation.map((item) => {
+                  const canAccess = canAccessFeature(user.plan as PlanType, item.requiredPlan);
+                  return (
+                    <Link
+                      key={item.name}
+                      href={canAccess ? item.href : getUpgradeUrl(user.plan as PlanType, item.requiredPlan)}
+                      className={`
+                        flex items-center px-3 py-2 text-sm font-medium rounded-lg
+                        ${item.current
+                          ? 'bg-white/20 text-white'
+                          : 'text-white/70 hover:bg-white/10 hover:text-white'
+                        }
+                        ${!canAccess ? 'opacity-50' : ''}
+                        transition-colors
+                      `}
+                    >
+                      <item.icon className="mr-3 h-5 w-5" />
+                      {item.name}
+                      {!canAccess && (
+                        <Crown className="ml-auto h-4 w-4 text-yellow-400" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
             
             {/* Enterprise Features */}
             {user.plan === 'enterprise' && (
-              <div className="pt-4 mt-4 border-t border-gray-200">
-                <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <div className="pt-4 mt-4 border-t border-white/20">
+                <div className="px-3 py-2 text-xs font-semibold text-white/70 uppercase tracking-wider">
                   Enterprise Features
                 </div>
                 {enterpriseNavigation.map((item) => (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                      item.current
-                        ? 'bg-purple-50 text-purple-700 border-r-2 border-purple-700'
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
+                    className={`
+                      flex items-center px-3 py-2 text-sm font-medium rounded-lg
+                      ${item.current
+                        ? 'bg-white/20 text-white'
+                        : 'text-white/70 hover:bg-white/10 hover:text-white'
+                      }
+                      transition-colors
+                    `}
                   >
                     <item.icon className="mr-3 h-5 w-5" />
                     {item.name}
@@ -386,12 +531,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
             )}
             
-            <div className="pt-6 mt-6 border-t border-gray-200">
+            <div className="pt-6 mt-6 border-t border-white/20">
               {secondaryNavigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                  className="flex items-center px-3 py-2 text-sm font-medium text-white/70 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
                 >
                   <item.icon className="mr-3 h-5 w-5" />
                   {item.name}
@@ -400,14 +545,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
           </nav>
           
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-white/20">
             <div className="flex items-center space-x-3 mb-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+              <div className="w-8 h-8 bg-gradient-to-r from-orange-600 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-                <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getPlanColor(user.plan)}`}>
+                <p className="text-sm font-medium text-white truncate">{user.name}</p>
+                <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium
+                  ${user.plan === 'basic' ? 'bg-blue-600/20 text-blue-300' : 
+                    user.plan === 'pro' ? 'bg-purple-600/20 text-purple-300' : 
+                    'bg-orange-600/20 text-orange-300'}
+                `}>
                   {getPlanIcon(user.plan)}
                   <span>{user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}</span>
                 </div>
@@ -417,7 +566,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               onClick={handleLogout}
               variant="outline"
               size="sm"
-              className="w-full"
+              className="w-full bg-white/10 text-white hover:bg-white/20 border-white/20"
             >
               <LogOut className="w-4 h-4 mr-2" />
               Sign out
@@ -429,24 +578,27 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top bar */}
-        <div className="sticky top-0 z-40 flex h-16 bg-white border-b border-gray-200 shadow-sm">
+        <div className="sticky top-0 z-40 flex h-16 bg-white/10 backdrop-blur-lg border-b border-white/20">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 lg:hidden"
+            className="px-4 text-white/70 hover:text-white focus:outline-none lg:hidden"
           >
             <Menu className="h-6 w-6" />
           </button>
           
           <div className="flex flex-1 justify-between px-4 lg:px-6">
             <div className="flex flex-1 items-center">
-              <h1 className="text-lg font-semibold text-gray-900">
-                {navigation.find(item => item.current)?.name || 'Dashboard'}
+              <h1 className="text-lg font-semibold text-white">
+                {navigation.find(item => item.current)?.name || 
+                 proEnterpriseNavigation.find(item => item.current)?.name || 
+                 enterpriseNavigation.find(item => item.current)?.name || 
+                 'Dashboard'}
               </h1>
             </div>
             
             <div className="flex items-center space-x-4">
               {/* Usage indicators */}
-              <div className="hidden sm:flex items-center space-x-4 text-sm text-gray-600">
+              <div className="hidden sm:flex items-center space-x-4 text-sm text-white/70">
                 <div className="flex items-center space-x-1">
                   <Globe className="w-4 h-4" />
                   <span>{user.websitesCreated}/{user.websiteLimit === -1 ? '∞' : user.websiteLimit}</span>
@@ -457,9 +609,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </div>
               </div>
               
-              {user.plan === 'basic' && (
-                <Link href="/pricing">
-                  <Button size="sm" variant="gradient">
+              {user.plan !== 'enterprise' && (
+                <Link href={`/pricing?from=${user.plan}`}>
+                  <Button size="sm" className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white border-none">
                     <Crown className="w-4 h-4 mr-1" />
                     Upgrade
                   </Button>
@@ -477,4 +629,3 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     </div>
   )
 }
-
