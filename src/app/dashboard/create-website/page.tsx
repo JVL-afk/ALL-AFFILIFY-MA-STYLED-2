@@ -33,7 +33,7 @@ export default function CreateWebsitePage() {
   const [upgradeLoading, setUpgradeLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [productUrl, setProductUrl] = useState('')
+  const [affiliateLink, setAffiliateLink] = useState('')
   const [generatedWebsite, setGeneratedWebsite] = useState<any>(null)
   const router = useRouter()
 
@@ -109,26 +109,26 @@ export default function CreateWebsitePage() {
 
     try {
       // Validation
-      if (!productUrl.trim()) {
+      if (!affiliateLink.trim()) {
         setError('Please enter an affiliate link')
         setLoading(false)
         return
       }
 
-      if (!validateUrl(productUrl)) {
+      if (!validateUrl(affiliateLink)) {
         setError('Please enter a valid URL (include https://)')
         setLoading(false)
         return
       }
 
-      // Call the REAL API
+      // Call the generate-from-link API
       const response = await fetch('/api/ai/generate-from-link', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          productUrl: productUrl.trim()
+          productUrl: affiliateLink.trim()
         }),
       })
 
@@ -178,8 +178,8 @@ export default function CreateWebsitePage() {
     <div className="p-6 max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Professional Affiliate Website</h1>
-        <p className="text-gray-900/80">Enter any affiliate link and get a conversion-optimized website in seconds</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Create New Website</h1>
+        <p className="text-gray-900/80">Basic plan - Simple affiliate website creation</p>
         
         {/* Plan Status */}
         <div className="mt-4 flex items-center gap-4">
@@ -219,10 +219,10 @@ export default function CreateWebsitePage() {
             <CardHeader>
               <CardTitle className="text-gray-900 flex items-center gap-2">
                 <Wand2 className="w-5 h-5" />
-                AI Website Generator
+                Website Details
               </CardTitle>
               <CardDescription className="text-gray-900/70">
-                Paste any affiliate link and our AI will create a professional website
+                Tell us about your affiliate website
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -234,9 +234,9 @@ export default function CreateWebsitePage() {
                 <Input
                   type="url"
                   placeholder="https://amazon.com/product-link or any affiliate URL"
-                  value={productUrl}
+                  value={affiliateLink}
                   onChange={(e) => {
-                    setProductUrl(e.target.value)
+                    setAffiliateLink(e.target.value)
                     setError('')
                   }}
                   className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder:text-gray-900/50"
@@ -252,7 +252,7 @@ export default function CreateWebsitePage() {
                 {canCreateWebsite() ? (
                   <Button
                     onClick={handleSubmit}
-                    disabled={loading || !productUrl.trim()}
+                    disabled={loading || !affiliateLink.trim()}
                     className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-gray-900 font-semibold py-3 text-lg"
                   >
                     {loading ? (
@@ -368,65 +368,63 @@ export default function CreateWebsitePage() {
           {/* Features */}
           <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 backdrop-blur-sm border-white border-opacity-30">
             <CardHeader>
-              <CardTitle className="text-gray-900">What You Get</CardTitle>
+              <CardTitle className="text-gray-900">Basic Plan Limits</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center text-gray-900/80">
-                <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
-                AI-powered content generation
+                <Globe className="w-4 h-4 mr-2 text-gray-900" />
+                Websites: {user.websiteCount}/{planLimits[user.plan].websites}
               </div>
               <div className="flex items-center text-gray-900/80">
                 <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
-                Mobile-responsive design
+                Basic templates only
               </div>
               <div className="flex items-center text-gray-900/80">
                 <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
-                SEO-optimized structure
+                AI content generation
               </div>
               <div className="flex items-center text-gray-900/80">
                 <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
-                Conversion-focused layout
-              </div>
-              <div className="flex items-center text-gray-900/80">
-                <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
-                Professional styling
-              </div>
-              <div className="flex items-center text-gray-900/80">
-                <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
-                Click tracking & analytics
+                Basic image library
               </div>
             </CardContent>
           </Card>
 
-          {/* Pricing */}
+          {/* Upgrade to Pro */}
           <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 backdrop-blur-sm border-white border-opacity-30">
             <CardHeader>
-              <CardTitle className="text-gray-900">Pricing Plans</CardTitle>
+              <CardTitle className="text-gray-900">Upgrade to Pro</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className={`p-3 rounded-lg border ${user.plan === 'basic' ? 'border-orange-400 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900/20' : 'border-white border-opacity-30'}`}>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium text-gray-900">Basic</span>
-                  <span className="text-green-400 font-bold">FREE</span>
-                </div>
-                <div className="text-sm text-gray-900/70">3 websites</div>
+              <div className="flex items-center text-gray-900/80">
+                <Crown className="w-4 h-4 mr-2 text-yellow-400" />
+                10 websites (vs. 3)
               </div>
-
-              <div className={`p-3 rounded-lg border ${user.plan === 'pro' ? 'border-purple-400 bg-purple-500/20' : 'border-white border-opacity-30'}`}>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium text-gray-900">Pro</span>
-                  <span className="text-gray-900 font-bold">$29</span>
-                </div>
-                <div className="text-sm text-gray-900/70">10 websites + advanced features</div>
+              <div className="flex items-center text-gray-900/80">
+                <Crown className="w-4 h-4 mr-2 text-yellow-400" />
+                Premium templates
               </div>
-
-              <div className={`p-3 rounded-lg border ${user.plan === 'enterprise' ? 'border-blue-400 bg-blue-500/20' : 'border-white border-opacity-30'}`}>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium text-gray-900">Enterprise</span>
-                  <span className="text-gray-900 font-bold">$99</span>
-                </div>
-                <div className="text-sm text-gray-900/70">Unlimited websites + all features</div>
+              <div className="flex items-center text-gray-900/80">
+                <Crown className="w-4 h-4 mr-2 text-yellow-400" />
+                Custom domain support
               </div>
+              <div className="flex items-center text-gray-900/80">
+                <Crown className="w-4 h-4 mr-2 text-yellow-400" />
+                Advanced analytics
+              </div>
+              
+              <Button
+                onClick={() => handleUpgrade('pro')}
+                disabled={upgradeLoading}
+                className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-gray-900"
+              >
+                {upgradeLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <CreditCard className="w-4 h-4 mr-2" />
+                )}
+                Upgrade to Pro - $29/month
+              </Button>
             </CardContent>
           </Card>
         </div>
@@ -434,4 +432,3 @@ export default function CreateWebsitePage() {
     </div>
   )
 }
-
