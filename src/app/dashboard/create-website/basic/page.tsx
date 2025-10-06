@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -6,8 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Globe, 
+import {
+  Globe,
   Crown,
   Sparkles,
   ArrowRight,
@@ -17,40 +18,63 @@ import {
   Image as ImageIcon,
   Loader2,
   CheckCircle,
-  ExternalLink
+  ExternalLink,
+  Zap,
+  Target,
+  Wand2,
+  CreditCard
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
+interface User {
+  id: string
+  name: string
+  email: string
+  plan: 'basic' | 'pro' | 'enterprise'
+  websiteCount: number
+}
+
 export default function BasicCreateWebsite() {
+  const [user, setUser] = useState<User | null>(null)
   const [currentWebsites, setCurrentWebsites] = useState(0)
   const [userPlan, setUserPlan] = useState("basic") // Default to basic, fetch actual plan
+  const maxWebsites = 3
+  const [affiliateLink, setAffiliateLink] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [upgradeLoading, setUpgradeLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const [generatedWebsite, setGeneratedWebsite] = useState<any>(null)
+  const router = useRouter()
 
-  // Fetch user data on component mount
+  // Plan limits
+  const planLimits = {
+    basic: { websites: 3, name: 'Basic (FREE)' },
+    pro: { websites: 10, name: 'Pro ($29)' },
+    enterprise: { websites: 999, name: 'Enterprise ($99)' }
+  }
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await fetch("/api/user/data"); // Assuming an API endpoint for user data
         if (response.ok) {
           const data = await response.json();
+          setUser(data);
           setCurrentWebsites(data.websiteCount || 0); // Assuming websiteCount is part of user data
           setUserPlan(data.plan || "basic"); // Assuming plan is part of user data
         } else {
           console.error("Failed to fetch user data");
+          router.push('/login'); // Redirect to login if user data cannot be fetched
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
+        router.push('/login'); // Redirect to login on error
       }
     };
     fetchUserData();
   }, []);
-  const maxWebsites = 3
-  const [affiliateLink, setAffiliateLink] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
-  const [generatedWebsite, setGeneratedWebsite] = useState<any>(null)
-  const router = useRouter()
 
   const validateUrl = (url: string) => {
     try {
@@ -58,6 +82,35 @@ export default function BasicCreateWebsite() {
       return true
     } catch {
       return false
+    }
+  }
+
+  const handleUpgrade = async (plan: 'pro' | 'enterprise') => {
+    setUpgradeLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/stripe/create-checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ plan }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        // Redirect to Stripe checkout
+        window.location.href = data.checkoutUrl
+      } else {
+        setError(data.message || 'Failed to create checkout session')
+      }
+    } catch (error) {
+      console.error('Upgrade error:', error)
+      setError('An error occurred while processing your upgrade')
+    } finally {
+      setUpgradeLoading(false)
     }
   }
 
@@ -97,6 +150,7 @@ export default function BasicCreateWebsite() {
       if (response.ok) {
         setGeneratedWebsite(data.website)
         setSuccess('Professional affiliate website created successfully!')
+        await fetchUserData(); // Reload user data to update website count
       } else {
         setError(data.message || 'Failed to create website')
       }
@@ -108,7 +162,25 @@ export default function BasicCreateWebsite() {
     }
   }
 
-  const canCreateWebsite = currentWebsites < maxWebsites
+  const canCreateWebsite = () => {
+    if (!user) return false
+    const limit = planLimits[user.plan].websites
+    return user.websiteCount < limit
+  }
+
+  const getRemainingWebsites = () => {
+    if (!user) return 0
+    const limit = planLimits[user.plan].websites
+    return Math.max(0, limit - user.websiteCount)
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900">
@@ -121,7 +193,7 @@ export default function BasicCreateWebsite() {
           </div>
           <div className="flex items-center space-x-4">
             <Badge variant="secondary" className="bg-gray-700 text-gray-900">
-              Basic Plan: {currentWebsites}/{maxWebsites} websites
+              Basic Plan: {user.websiteCount}/{planLimits[user.plan].websites} websites
             </Badge>
             <Button asChild className="bg-purple-600 hover:bg-purple-700">
               <Link href="/pricing">
@@ -161,14 +233,14 @@ export default function BasicCreateWebsite() {
           </Card>
         )}
 
-        {!canCreateWebsite && (
+        {!canCreateWebsite() && (
           <Card className="bg-red-600/20 border-red-600/30 mb-8">
             <CardContent className="p-6">
               <div className="flex items-center space-x-3">
                 <AlertCircle className="w-6 h-6 text-red-400" />
                 <div>
                   <h3 className="text-red-400 font-medium">Website Limit Reached</h3>
-                  <p className="text-gray-700">You've reached your Basic plan limit of {maxWebsites} websites. Upgrade to Pro for 10 websites!</p>
+                  <p className="text-gray-700">You've reached your Basic plan limit of {planLimits[user.plan].websites} websites. Upgrade to Pro for more websites!</p>
                 </div>
                 <Button asChild className="bg-purple-600 hover:bg-purple-700 ml-auto">
                   <Link href="/pricing">Upgrade Now</Link>
@@ -200,7 +272,7 @@ export default function BasicCreateWebsite() {
                       setError('')
                     }}
                     className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
-                    disabled={!canCreateWebsite || loading}
+                    disabled={!canCreateWebsite() || loading}
                   />
                   <p className="text-sm text-gray-700">
                     Works with Amazon, ClickBank, ShareASale, and any product URL
@@ -210,7 +282,7 @@ export default function BasicCreateWebsite() {
                 {/* Create Button */}
                 <Button 
                   className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:opacity-50"
-                  disabled={!canCreateWebsite || !affiliateLink || loading}
+                  disabled={!canCreateWebsite() || !affiliateLink || loading}
                   onClick={handleSubmit}
                 >
                   {loading ? (
@@ -288,12 +360,12 @@ export default function BasicCreateWebsite() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-700">Websites</span>
-                  <span className="text-gray-900 font-medium">{currentWebsites}/{maxWebsites}</span>
+                  <span className="text-gray-900 font-medium">{user.websiteCount}/{planLimits[user.plan].websites}</span>
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2">
                   <div 
                     className="bg-purple-600 h-2 rounded-full transition-all"
-                    style={{ width: `${(currentWebsites / maxWebsites) * 100}%` }}
+                    style={{ width: `${(user.websiteCount / planLimits[user.plan].websites) * 100}%` }}
                   ></div>
                 </div>
                 <div className="space-y-2 text-sm">
@@ -370,3 +442,4 @@ export default function BasicCreateWebsite() {
     </div>
   )
 }
+
