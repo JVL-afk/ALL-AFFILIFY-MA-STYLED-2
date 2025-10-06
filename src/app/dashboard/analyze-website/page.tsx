@@ -229,8 +229,8 @@ export default function AnalyzeWebsitePage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center">
                   <div className={`w-16 h-16 rounded-full ${getScoreBg(result.metrics.performance)} flex items-center justify-center mx-auto mb-2`}>
-                    <span className={`text-lg font-bold ${getScoreColor(result.metrics.performance)}`}>
-                      {result.metrics.performance}
+                    <span className={`text-lg font-bold ${getScoreColor(result.metrics?.performance || 0)}`}>
+                      {result.metrics?.performance || 0}
                     </span>
                   </div>
                   <p className="text-sm font-medium">Performance</p>
@@ -238,8 +238,8 @@ export default function AnalyzeWebsitePage() {
                 
                 <div className="text-center">
                   <div className={`w-16 h-16 rounded-full ${getScoreBg(result.metrics.seo)} flex items-center justify-center mx-auto mb-2`}>
-                    <span className={`text-lg font-bold ${getScoreColor(result.metrics.seo)}`}>
-                      {result.metrics.seo}
+                    <span className={`text-lg font-bold ${getScoreColor(result.metrics?.seo || 0)}`}>
+                      {result.metrics?.seo || 0}
                     </span>
                   </div>
                   <p className="text-sm font-medium">SEO</p>
@@ -247,8 +247,8 @@ export default function AnalyzeWebsitePage() {
                 
                 <div className="text-center">
                   <div className={`w-16 h-16 rounded-full ${getScoreBg(result.metrics.accessibility)} flex items-center justify-center mx-auto mb-2`}>
-                    <span className={`text-lg font-bold ${getScoreColor(result.metrics.accessibility)}`}>
-                      {result.metrics.accessibility}
+                    <span className={`text-lg font-bold ${getScoreColor(result.metrics?.accessibility || 0)}`}>
+                      {result.metrics?.accessibility || 0}
                     </span>
                   </div>
                   <p className="text-sm font-medium">Accessibility</p>
@@ -256,8 +256,8 @@ export default function AnalyzeWebsitePage() {
                 
                 <div className="text-center">
                   <div className={`w-16 h-16 rounded-full ${getScoreBg(result.metrics.bestPractices)} flex items-center justify-center mx-auto mb-2`}>
-                    <span className={`text-lg font-bold ${getScoreColor(result.metrics.bestPractices)}`}>
-                      {result.metrics.bestPractices}
+                    <span className={`text-lg font-bold ${getScoreColor(result.metrics?.bestPractices || 0)}`}>
+                      {result.metrics?.bestPractices || 0}
                     </span>
                   </div>
                   <p className="text-sm font-medium">Best Practices</p>

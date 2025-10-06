@@ -1,11 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { 
   Globe, 
@@ -15,46 +14,98 @@ import {
   AlertCircle,
   Palette,
   Type,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Loader2,
+  CheckCircle,
+  ExternalLink
 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function BasicCreateWebsite() {
-  const [currentWebsites] = useState(1)
+  const [currentWebsites, setCurrentWebsites] = useState(0)
+  const [userPlan, setUserPlan] = useState("basic") // Default to basic, fetch actual plan
+
+  // Fetch user data on component mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch("/api/user/data"); // Assuming an API endpoint for user data
+        if (response.ok) {
+          const data = await response.json();
+          setCurrentWebsites(data.websiteCount || 0); // Assuming websiteCount is part of user data
+          setUserPlan(data.plan || "basic"); // Assuming plan is part of user data
+        } else {
+          console.error("Failed to fetch user data");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchUserData();
+  }, []);
   const maxWebsites = 3
-  const [formData, setFormData] = useState({
-    websiteName: '',
-    niche: '',
-    description: '',
-    template: 'modern'
-  })
+  const [affiliateLink, setAffiliateLink] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const [generatedWebsite, setGeneratedWebsite] = useState<any>(null)
+  const router = useRouter()
 
-  const basicTemplates = [
-    {
-      id: 'modern',
-      name: 'Modern',
-      description: 'Clean and contemporary design',
-      preview: '/templates/modern-preview.jpg',
-      features: ['Responsive', 'Fast Loading', 'SEO Optimized']
-    },
-    {
-      id: 'classic',
-      name: 'Classic',
-      description: 'Traditional and professional layout',
-      preview: '/templates/classic-preview.jpg',
-      features: ['Professional', 'Clean Layout', 'Easy Navigation']
-    },
-    {
-      id: 'bold',
-      name: 'Bold',
-      description: 'Eye-catching and vibrant design',
-      preview: '/templates/bold-preview.jpg',
-      features: ['High Impact', 'Colorful', 'Engaging']
+  const validateUrl = (url: string) => {
+    try {
+      new URL(url)
+      return true
+    } catch {
+      return false
     }
-  ]
+  }
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+  const handleSubmit = async () => {
+    setLoading(true)
+    setError('')
+    setSuccess('')
+    setGeneratedWebsite(null)
+
+    try {
+      // Validation
+      if (!affiliateLink.trim()) {
+        setError('Please enter an affiliate link')
+        setLoading(false)
+        return
+      }
+
+      if (!validateUrl(affiliateLink)) {
+        setError('Please enter a valid URL (include https://)')
+        setLoading(false)
+        return
+      }
+
+      // Call the generate-from-link API
+      const response = await fetch('/api/ai/generate-from-link', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          productUrl: affiliateLink.trim()
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setGeneratedWebsite(data.website)
+        setSuccess('Professional affiliate website created successfully!')
+      } else {
+        setError(data.message || 'Failed to create website')
+      }
+    } catch (error) {
+      console.error('Website creation error:', error)
+      setError('An unexpected error occurred. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const canCreateWebsite = currentWebsites < maxWebsites
@@ -81,6 +132,35 @@ export default function BasicCreateWebsite() {
           </div>
         </div>
 
+        {/* Error/Success Messages */}
+        {error && (
+          <Card className="bg-red-600/20 border-red-600/30 mb-8">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-3">
+                <AlertCircle className="w-6 h-6 text-red-400" />
+                <div>
+                  <h3 className="text-red-400 font-medium">Error</h3>
+                  <p className="text-gray-700">{error}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {success && (
+          <Card className="bg-green-600/20 border-green-600/30 mb-8">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-3">
+                <CheckCircle className="w-6 h-6 text-green-400" />
+                <div>
+                  <h3 className="text-green-400 font-medium">Success</h3>
+                  <p className="text-gray-700">{success}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {!canCreateWebsite && (
           <Card className="bg-red-600/20 border-red-600/30 mb-8">
             <CardContent className="p-6">
@@ -105,106 +185,95 @@ export default function BasicCreateWebsite() {
               <CardHeader>
                 <CardTitle className="text-gray-900">Website Details</CardTitle>
                 <CardDescription className="text-gray-700">
-                  Tell us about your affiliate website
+                  Paste your affiliate link and our AI will create a professional website
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="websiteName" className="text-gray-900">Website Name</Label>
+                  <Label htmlFor="affiliateLink" className="text-gray-900">Affiliate Link</Label>
                   <Input
-                    id="websiteName"
-                    placeholder="e.g., Best Basketball Hoops"
-                    value={formData.websiteName}
-                    onChange={(e) => handleInputChange('websiteName', e.target.value)}
+                    id="affiliateLink"
+                    placeholder="https://amazon.com/product-link or any affiliate URL"
+                    value={affiliateLink}
+                    onChange={(e) => {
+                      setAffiliateLink(e.target.value)
+                      setError('')
+                    }}
                     className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
-                    disabled={!canCreateWebsite}
+                    disabled={!canCreateWebsite || loading}
                   />
+                  <p className="text-sm text-gray-700">
+                    Works with Amazon, ClickBank, ShareASale, and any product URL
+                  </p>
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="niche" className="text-gray-900">Niche/Category</Label>
-                  <Input
-                    id="niche"
-                    placeholder="e.g., Sports Equipment, Home & Garden"
-                    value={formData.niche}
-                    onChange={(e) => handleInputChange('niche', e.target.value)}
-                    className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400"
-                    disabled={!canCreateWebsite}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description" className="text-gray-900">Description</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="Describe what products you'll be promoting..."
-                    value={formData.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
-                    className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder-gray-400 min-h-[100px]"
-                    disabled={!canCreateWebsite}
-                  />
-                </div>
-
-                {/* Basic Template Selection */}
-                <div className="space-y-4">
-                  <Label className="text-gray-900">Choose Template (Basic Plan)</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {basicTemplates.map((template) => (
-                      <div
-                        key={template.id}
-                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                          formData.template === template.id
-                            ? 'border-purple-500 bg-purple-600/20'
-                            : 'border-white border-opacity-30 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 hover:border-white/40'
-                        } ${!canCreateWebsite ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        onClick={() => canCreateWebsite && handleInputChange('template', template.id)}
-                      >
-                        <div className="aspect-video bg-gray-700 rounded mb-3 flex items-center justify-center">
-                          <Palette className="w-8 h-8 text-gray-400" />
-                        </div>
-                        <h4 className="text-gray-900 font-medium mb-1">{template.name}</h4>
-                        <p className="text-gray-400 text-sm mb-3">{template.description}</p>
-                        <div className="flex flex-wrap gap-1">
-                          {template.features.map((feature) => (
-                            <Badge key={feature} variant="secondary" className="text-xs bg-gray-700 text-gray-700">
-                              {feature}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Upgrade Notice */}
-                <Card className="bg-purple-600/20 border-purple-600/30">
-                  <CardContent className="p-4">
-                    <div className="flex items-start space-x-3">
-                      <Crown className="w-5 h-5 text-purple-400 mt-0.5" />
-                      <div>
-                        <h4 className="text-purple-400 font-medium mb-1">Unlock More Templates</h4>
-                        <p className="text-gray-700 text-sm mb-3">
-                          Upgrade to Pro for Premium & Conversion Pro templates, plus advanced features like custom domains and analytics.
-                        </p>
-                        <Button asChild size="sm" className="bg-purple-600 hover:bg-purple-700">
-                          <Link href="/pricing">
-                            View Pro Features
-                            <ArrowRight className="w-4 h-4 ml-1" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
 
                 {/* Create Button */}
                 <Button 
                   className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:opacity-50"
-                  disabled={!canCreateWebsite || !formData.websiteName || !formData.niche}
+                  disabled={!canCreateWebsite || !affiliateLink || loading}
+                  onClick={handleSubmit}
                 >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  {canCreateWebsite ? 'Create Website with AI' : 'Upgrade to Create More Websites'}
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Creating Website...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Create Website with AI
+                    </>
+                  )}
                 </Button>
+
+                {/* Generated Website Result */}
+                {generatedWebsite && (
+                  <div className="mt-6 p-6 bg-green-500/20 border border-green-500/30 rounded-lg backdrop-blur-sm">
+                    <h3 className="text-lg font-semibold text-green-100 mb-4 flex items-center">
+                      <CheckCircle className="w-5 h-5 mr-2" />
+                      Website Created Successfully!
+                    </h3>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <span className="text-green-200 font-medium">Title: </span>
+                        <span className="text-green-100">{generatedWebsite.title}</span>
+                      </div>
+                      
+                      <div>
+                        <span className="text-green-200 font-medium">URL: </span>
+                        <a 
+                          href={generatedWebsite.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-green-100 hover:text-gray-900 underline inline-flex items-center"
+                        >
+                          {generatedWebsite.url}
+                          <ExternalLink className="w-4 h-4 ml-1" />
+                        </a>
+                      </div>
+                      
+                      <div className="flex gap-3 mt-4">
+                        <Button
+                          onClick={() => window.open(generatedWebsite.previewUrl, '_blank')}
+                          variant="outline"
+                          className="border-green-400 text-green-100 hover:bg-green-500/20"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          Preview Website
+                        </Button>
+                        
+                        <Button
+                          onClick={() => router.push('/dashboard/my-websites')}
+                          className="bg-green-600 hover:bg-green-700 text-gray-900"
+                        >
+                          <ArrowRight className="w-4 h-4 mr-2" />
+                          Manage Websites
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -301,4 +370,3 @@ export default function BasicCreateWebsite() {
     </div>
   )
 }
-
