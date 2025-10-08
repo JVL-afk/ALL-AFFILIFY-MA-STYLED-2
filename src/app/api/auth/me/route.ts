@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyToken, getUserById } from '@/lib/auth'
+import { verifyToken, getUserById } from '../../../../lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
         name: user.name,
         email: user.email,
         plan: user.plan,
+        websiteCount: user.websitesCreated, // Map to websiteCount for frontend
         websitesCreated: user.websitesCreated,
         websiteLimit: user.websiteLimit,
         analysesUsed: user.analysesUsed,

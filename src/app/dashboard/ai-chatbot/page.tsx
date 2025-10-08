@@ -1,467 +1,479 @@
-'use client';
+'use client'
 
-import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Bot, User, Send, Settings, Download, Trash2, Copy, ThumbsUp, ThumbsDown, Zap } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { 
+  MessageCircle, 
+  Send, 
+  Plus, 
+  Trash2, 
+  ThumbsUp, 
+  ThumbsDown,
+  Copy,
+  Loader2,
+  Bot,
+  User,
+  Sparkles,
+  Zap
+} from 'lucide-react'
 
 interface Message {
-  id: string;
-  type: 'user' | 'bot';
-  content: string;
-  timestamp: Date;
-  rating?: 'up' | 'down';
+  id: string
+  type: 'user' | 'bot'
+  content: string
+  timestamp: Date
+  rating?: 'up' | 'down'
 }
 
 interface ChatSession {
-  id: string;
-  title: string;
-  messages: Message[];
-  createdAt: Date;
+  id: string
+  title: string
+  createdAt: Date
+  updatedAt: Date
+  messageCount?: number
+  lastMessage?: string
 }
 
 export default function AIChatbotPage() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [messages, setMessages] = useState<Message[]>([])
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([])
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
+  const [inputMessage, setInputMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [loadingSessions, setLoadingSessions] = useState(true)
+  const [error, setError] = useState('')
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Initialize with welcome message
-    const welcomeMessage: Message = {
-      id: '1',
-      type: 'bot',
-      content: 'Hello! I\'m your AI assistant for AFFILIFY. I can help you with:\n\n• Website optimization strategies\n• Affiliate marketing best practices\n• Content creation ideas\n• Performance analysis\n• Technical support\n\nHow can I assist you today?',
-      timestamp: new Date(),
-    };
-    setMessages([welcomeMessage]);
-    
-    // Load chat sessions
-    loadChatSessions();
-  }, []);
+    loadChatSessions()
+  }, [])
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (currentSessionId) {
+      loadMessages(currentSessionId)
+    }
+  }, [currentSessionId])
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
-  const loadChatSessions = () => {
-    // Mock chat sessions
-    const mockSessions: ChatSession[] = [
-      {
-        id: '1',
-        title: 'Website Optimization Tips',
-        messages: [],
-        createdAt: new Date(Date.now() - 86400000), // 1 day ago
-      },
-      {
-        id: '2',
-        title: 'Affiliate Marketing Strategy',
-        messages: [],
-        createdAt: new Date(Date.now() - 172800000), // 2 days ago
-      },
-    ];
-    setChatSessions(mockSessions);
-  };
+  const loadChatSessions = async () => {
+    try {
+      setLoadingSessions(true)
+      const response = await fetch('/api/chatbot/sessions')
+      const data = await response.json()
+
+      if (response.ok) {
+        setChatSessions(data.sessions || [])
+        
+        // If no sessions exist, create a default one
+        if (data.sessions.length === 0) {
+          await createNewSession('Getting Started with AFFILIFY')
+        } else {
+          // Load the most recent session
+          setCurrentSessionId(data.sessions[0].id)
+        }
+      } else {
+        setError('Failed to load chat sessions')
+      }
+    } catch (error) {
+      console.error('Error loading chat sessions:', error)
+      setError('Failed to load chat sessions')
+    } finally {
+      setLoadingSessions(false)
+    }
+  }
+
+  const loadMessages = async (sessionId: string) => {
+    try {
+      const response = await fetch(`/api/chatbot/messages?sessionId=${sessionId}`)
+      const data = await response.json()
+
+      if (response.ok) {
+        setMessages(data.messages || [])
+      } else {
+        setError('Failed to load messages')
+      }
+    } catch (error) {
+      console.error('Error loading messages:', error)
+      setError('Failed to load messages')
+    }
+  }
+
+  const createNewSession = async (title: string = 'New Chat') => {
+    try {
+      const response = await fetch('/api/chatbot/sessions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        const newSession = data.session
+        setChatSessions(prev => [newSession, ...prev])
+        setCurrentSessionId(newSession.id)
+        setMessages([])
+        
+        // Load the welcome message
+        setTimeout(() => loadMessages(newSession.id), 500)
+      } else {
+        setError('Failed to create new session')
+      }
+    } catch (error) {
+      console.error('Error creating session:', error)
+      setError('Failed to create new session')
+    }
+  }
+
+  const deleteSession = async (sessionId: string) => {
+    if (!confirm('Are you sure you want to delete this chat session?')) return
+
+    try {
+      const response = await fetch(`/api/chatbot/sessions?sessionId=${sessionId}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        setChatSessions(prev => prev.filter(s => s.id !== sessionId))
+        
+        if (currentSessionId === sessionId) {
+          const remainingSessions = chatSessions.filter(s => s.id !== sessionId)
+          if (remainingSessions.length > 0) {
+            setCurrentSessionId(remainingSessions[0].id)
+          } else {
+            await createNewSession('New Chat')
+          }
+        }
+      } else {
+        setError('Failed to delete session')
+      }
+    } catch (error) {
+      console.error('Error deleting session:', error)
+      setError('Failed to delete session')
+    }
+  }
 
   const sendMessage = async () => {
-    if (!inputMessage.trim() || isLoading) return;
+    if (!inputMessage.trim() || isLoading || !currentSessionId) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
       content: inputMessage,
       timestamp: new Date(),
-    };
+    }
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
-    setIsLoading(true);
+    setMessages(prev => [...prev, userMessage])
+    setInputMessage('')
+    setIsLoading(true)
+    setError('')
 
     try {
-      // Simulate AI response
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const botResponse = generateAIResponse(inputMessage);
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        type: 'bot',
-        content: botResponse,
-        timestamp: new Date(),
-      };
+      const response = await fetch('/api/chatbot/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: inputMessage,
+          sessionId: currentSessionId,
+        }),
+      })
 
-      setMessages(prev => [...prev, botMessage]);
+      const data = await response.json()
+
+      if (response.ok) {
+        setMessages(prev => [...prev, data.message])
+        
+        // Update session list to reflect new activity
+        loadChatSessions()
+      } else {
+        setError(data.message || 'Failed to get AI response')
+        
+        // Add error message to chat
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          type: 'bot',
+          content: 'I apologize, but I\'m experiencing some technical difficulties. Please try again in a moment.',
+          timestamp: new Date(),
+        }
+        setMessages(prev => [...prev, errorMessage])
+      }
     } catch (error) {
-      console.error('Failed to get AI response:', error);
+      console.error('Failed to send message:', error)
+      setError('Failed to send message')
+      
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
         content: 'I apologize, but I\'m experiencing some technical difficulties. Please try again in a moment.',
         timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      }
+      setMessages(prev => [...prev, errorMessage])
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
-  const generateAIResponse = (userInput: string): string => {
-    const input = userInput.toLowerCase();
-    
-    if (input.includes('optimization') || input.includes('optimize')) {
-      return `Great question about optimization! Here are some key strategies for your affiliate websites:
+  const rateMessage = async (messageId: string, rating: 'up' | 'down') => {
+    try {
+      const response = await fetch('/api/chatbot/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ messageId, rating }),
+      })
 
-🎯 **Conversion Optimization:**
-• Use compelling call-to-action buttons
-• Implement urgency and scarcity tactics
-• A/B test different layouts and copy
-• Optimize page loading speed
-
-📊 **SEO Optimization:**
-• Target long-tail keywords
-• Create high-quality, valuable content
-• Build quality backlinks
-• Optimize meta descriptions and titles
-
-💡 **User Experience:**
-• Ensure mobile responsiveness
-• Simplify navigation
-• Use clear product descriptions
-• Include customer reviews and testimonials
-
-Would you like me to elaborate on any of these strategies?`;
+      if (response.ok) {
+        setMessages(prev => prev.map(msg => 
+          msg.id === messageId ? { ...msg, rating } : msg
+        ))
+      }
+    } catch (error) {
+      console.error('Error rating message:', error)
     }
-    
-    if (input.includes('content') || input.includes('writing')) {
-      return `Content creation is crucial for affiliate success! Here are some proven strategies:
-
-✍️ **Content Types That Convert:**
-• Product comparison articles
-• "Best of" roundup posts
-• Tutorial and how-to guides
-• Problem-solving content
-
-🎯 **Content Optimization Tips:**
-• Focus on buyer intent keywords
-• Include personal experiences and stories
-• Use high-quality images and videos
-• Add clear affiliate disclosures
-
-📈 **Content Strategy:**
-• Create content clusters around main topics
-• Update content regularly
-• Repurpose content across platforms
-• Track performance and optimize
-
-Need help with specific content ideas for your niche?`;
-    }
-    
-    if (input.includes('traffic') || input.includes('visitors')) {
-      return `Driving traffic is essential for affiliate success! Here are effective methods:
-
-🔍 **Organic Traffic:**
-• SEO-optimized blog content
-• YouTube video marketing
-• Pinterest for visual products
-• Social media engagement
-
-💰 **Paid Traffic:**
-• Google Ads (be careful with affiliate policies)
-• Facebook and Instagram ads
-• YouTube advertising
-• Influencer partnerships
-
-📧 **Email Marketing:**
-• Build an email list with lead magnets
-• Send valuable newsletters
-• Promote relevant affiliate products
-• Segment your audience for better targeting
-
-Which traffic source would you like to focus on first?`;
-    }
-    
-    if (input.includes('commission') || input.includes('earnings')) {
-      return `Let's talk about maximizing your affiliate earnings! Here are proven strategies:
-
-💰 **Higher Commission Strategies:**
-• Focus on high-ticket items
-• Promote recurring subscription products
-• Join premium affiliate programs
-• Negotiate higher commission rates
-
-📊 **Conversion Optimization:**
-• Use heat maps to understand user behavior
-• Implement exit-intent popups
-• Create compelling product reviews
-• Build trust with testimonials
-
-🎯 **Scaling Techniques:**
-• Diversify across multiple programs
-• Create evergreen content
-• Build multiple income streams
-• Reinvest profits into growth
-
-What's your current monthly affiliate income goal?`;
-    }
-    
-    // Default response
-    return `I understand you're asking about "${userInput}". As your AI assistant, I'm here to help with all aspects of affiliate marketing!
-
-Here are some areas I can assist with:
-
-🚀 **Strategy & Planning:**
-• Niche selection and research
-• Competitor analysis
-• Goal setting and tracking
-
-🛠️ **Technical Support:**
-• Website setup and optimization
-• Analytics and tracking
-• Tool recommendations
-
-📈 **Growth & Scaling:**
-• Traffic generation strategies
-• Conversion optimization
-• Revenue maximization
-
-Could you be more specific about what you'd like help with? I'm here to provide detailed, actionable advice!`;
-  };
-
-  const rateMessage = (messageId: string, rating: 'up' | 'down') => {
-    setMessages(prev => prev.map(msg => 
-      msg.id === messageId ? { ...msg, rating } : msg
-    ));
-  };
+  }
 
   const copyMessage = (content: string) => {
-    navigator.clipboard.writeText(content);
-    // You could add a toast notification here
-  };
+    navigator.clipboard.writeText(content)
+    // Could add a toast notification here
+  }
 
-  const startNewChat = () => {
-    setMessages([{
-      id: Date.now().toString(),
-      type: 'bot',
-      content: 'Hello! I\'m ready to help you with your affiliate marketing questions. What would you like to discuss?',
-      timestamp: new Date(),
-    }]);
-    setCurrentSessionId(null);
-  };
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      sendMessage()
+    }
+  }
 
-  const clearChat = () => {
-    setMessages([]);
-    setCurrentSessionId(null);
-  };
+  if (loadingSessions) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    )
+  }
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center">
-            <Bot className="h-8 w-8 mr-3 text-blue-600" />
-            AI Chatbot Assistant
-          </h1>
-          <p className="text-gray-600 mt-2">Get instant help with affiliate marketing strategies and optimization</p>
-        </div>
-        <div className="flex space-x-2">
-          <Button variant="outline" onClick={startNewChat}>
-            <Zap className="h-4 w-4 mr-2" />
-            New Chat
-          </Button>
-          <Button variant="outline" onClick={clearChat}>
-            <Trash2 className="h-4 w-4 mr-2" />
-            Clear
-          </Button>
-        </div>
+    <div className="p-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+          <Bot className="w-8 h-8 text-blue-600" />
+          AFFILIFY AI Assistant
+        </h1>
+        <p className="text-gray-600">Get expert affiliate marketing advice powered by advanced AI</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      {/* Error Message */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          {error}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-200px)]">
         {/* Chat Sessions Sidebar */}
         <div className="lg:col-span-1">
-          <Card>
+          <Card className="h-full">
             <CardHeader>
-              <CardTitle className="text-lg">Chat History</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Chat Sessions</CardTitle>
+                <Button
+                  onClick={() => createNewSession()}
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
+            <CardContent className="p-0">
+              <div className="space-y-2 max-h-[calc(100vh-300px)] overflow-y-auto p-4">
                 {chatSessions.map((session) => (
                   <div
                     key={session.id}
-                    className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                      currentSessionId === session.id 
-                        ? 'bg-blue-100 border-blue-300' 
-                        : 'bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900'
+                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                      currentSessionId === session.id
+                        ? 'bg-blue-50 border-blue-200'
+                        : 'hover:bg-gray-50'
                     }`}
                     onClick={() => setCurrentSessionId(session.id)}
                   >
-                    <h4 className="font-medium text-sm">{session.title}</h4>
-                    <p className="text-xs text-gray-500">
-                      {session.createdAt.toLocaleDateString()}
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm truncate">{session.title}</h4>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(session.createdAt).toLocaleDateString()}
+                        </p>
+                        {session.lastMessage && (
+                          <p className="text-xs text-gray-400 mt-1 truncate">
+                            {session.lastMessage}
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          deleteSession(session.id)
+                        }}
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
-
-          {/* Quick Actions */}
-          <Card className="mt-4">
-            <CardHeader>
-              <CardTitle className="text-lg">Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => setInputMessage('How can I optimize my conversion rates?')}
-                >
-                  Conversion Tips
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => setInputMessage('What are the best traffic sources for affiliate marketing?')}
-                >
-                  Traffic Strategies
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => setInputMessage('How do I create compelling content for my affiliate site?')}
-                >
-                  Content Ideas
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => setInputMessage('What are the best affiliate programs to join?')}
-                >
-                  Program Recommendations
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
-        {/* Main Chat Area */}
+        {/* Chat Interface */}
         <div className="lg:col-span-3">
-          <Card className="h-[600px] flex flex-col">
+          <Card className="h-full flex flex-col">
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Bot className="h-5 w-5 mr-2" />
-                AI Assistant
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-purple-600" />
+                AI Chat Assistant
               </CardTitle>
               <CardDescription>
-                Ask me anything about affiliate marketing, website optimization, or content strategy
+                Ask me anything about affiliate marketing, website optimization, or business strategy
               </CardDescription>
             </CardHeader>
             
-            <CardContent className="flex-1 flex flex-col">
-              {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+            {/* Messages */}
+            <CardContent className="flex-1 flex flex-col p-0">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[calc(100vh-400px)]">
                 {messages.map((message) => (
                   <div
                     key={message.id}
-                    className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                    className={`flex gap-3 ${
+                      message.type === 'user' ? 'justify-end' : 'justify-start'
+                    }`}
                   >
+                    {message.type === 'bot' && (
+                      <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Bot className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                    
                     <div
                       className={`max-w-[80%] rounded-lg p-4 ${
                         message.type === 'user'
-                          ? 'bg-blue-600 text-gray-900'
-                          : 'bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 text-gray-900'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-900'
                       }`}
                     >
-                      <div className="flex items-start space-x-2">
-                        {message.type === 'bot' && (
-                          <Bot className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                        )}
-                        {message.type === 'user' && (
-                          <User className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                        )}
-                        <div className="flex-1">
-                          <div className="whitespace-pre-wrap">{message.content}</div>
-                          <div className="flex items-center justify-between mt-2">
-                            <span className="text-xs opacity-70">
-                              {message.timestamp.toLocaleTimeString()}
-                            </span>
-                            {message.type === 'bot' && (
-                              <div className="flex items-center space-x-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => copyMessage(message.content)}
-                                  className="h-6 w-6 p-0"
-                                >
-                                  <Copy className="h-3 w-3" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => rateMessage(message.id, 'up')}
-                                  className={`h-6 w-6 p-0 ${message.rating === 'up' ? 'text-green-600' : ''}`}
-                                >
-                                  <ThumbsUp className="h-3 w-3" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => rateMessage(message.id, 'down')}
-                                  className={`h-6 w-6 p-0 ${message.rating === 'down' ? 'text-red-600' : ''}`}
-                                >
-                                  <ThumbsDown className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            )}
+                      <div className="whitespace-pre-wrap">{message.content}</div>
+                      
+                      {message.type === 'bot' && (
+                        <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200">
+                          <div className="flex items-center gap-2">
+                            <Button
+                              onClick={() => rateMessage(message.id, 'up')}
+                              variant="ghost"
+                              size="sm"
+                              className={`h-6 w-6 p-0 ${
+                                message.rating === 'up' ? 'text-green-600' : 'text-gray-400'
+                              }`}
+                            >
+                              <ThumbsUp className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              onClick={() => rateMessage(message.id, 'down')}
+                              variant="ghost"
+                              size="sm"
+                              className={`h-6 w-6 p-0 ${
+                                message.rating === 'down' ? 'text-red-600' : 'text-gray-400'
+                              }`}
+                            >
+                              <ThumbsDown className="w-3 h-3" />
+                            </Button>
                           </div>
+                          <Button
+                            onClick={() => copyMessage(message.content)}
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                          >
+                            <Copy className="w-3 h-3" />
+                          </Button>
                         </div>
-                      </div>
+                      )}
                     </div>
+                    
+                    {message.type === 'user' && (
+                      <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <User className="w-4 h-4 text-white" />
+                      </div>
+                    )}
                   </div>
                 ))}
                 
                 {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 rounded-lg p-4 max-w-[80%]">
-                      <div className="flex items-center space-x-2">
-                        <Bot className="h-5 w-5" />
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                        </div>
+                  <div className="flex gap-3 justify-start">
+                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                      <Bot className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="bg-gray-100 rounded-lg p-4">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-gray-600">AFFILIFY AI is thinking...</span>
                       </div>
                     </div>
                   </div>
                 )}
+                
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input Area */}
-              <div className="flex space-x-2">
-                <Input
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  placeholder="Ask me about affiliate marketing strategies..."
-                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                  disabled={isLoading}
-                  className="flex-1"
-                />
-                <Button onClick={sendMessage} disabled={isLoading || !inputMessage.trim()}>
-                  <Send className="h-4 w-4" />
-                </Button>
+              {/* Input */}
+              <div className="border-t p-4">
+                <div className="flex gap-2">
+                  <Input
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Ask me about affiliate marketing, SEO, conversions, or anything else..."
+                    disabled={isLoading || !currentSessionId}
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={sendMessage}
+                    disabled={isLoading || !inputMessage.trim() || !currentSessionId}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Press Enter to send, Shift+Enter for new line
+                </p>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
