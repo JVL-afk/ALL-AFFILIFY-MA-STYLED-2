@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { connectToDatabase } from '../../../../lib/database';
+import { connectToDatabase } from '../../../../lib/mongodb';
 import { ObjectId } from 'mongodb';
 import * as cheerio from 'cheerio';
 
@@ -138,66 +138,227 @@ async function generateWebsiteContent(productInfo: any) {
   const featureImages = await getUnsplashImages(`${productInfo.title} benefits features`, 2)
   const testimonialImages = await getUnsplashImages('happy customer testimonial', 1)
   
-  const prompt = `
-THE ULTIMATE AFFILIFY MASTER SYSTEM
+  const prompt = `🚨 CRITICAL MISSION: ULTIMATE $1000+ FIRST WEEK WEBSITE GENERATOR 🚨
 
-PRODUCT INFORMATION:
+You are the world's most elite conversion optimization expert, web designer, and affiliate marketing strategist combined into one unstoppable force. Your mission is LIFE-CHANGING: create a website that WILL generate $1000+ in the first week - GUARANTEED.
+
+THIS IS NOT A REQUEST - THIS IS A MANDATE FOR FINANCIAL SUCCESS.
+
+Your website will directly impact the financial futures of:
+- College students struggling to pay tuition
+- Single parents supporting their families  
+- Entrepreneurs building their dreams
+- Individuals seeking financial independence
+- People whose livelihoods depend on your expertise
+
+EVERY DESIGN DECISION, EVERY WORD, EVERY ELEMENT COULD BE THE DIFFERENCE BETWEEN SOMEONE'S SUCCESS AND FAILURE.
+
+PRODUCT INTELLIGENCE:
 - Title: ${productInfo.title}
 - Description: ${productInfo.description}
 - Price: ${productInfo.price}
 - Original URL: ${productInfo.originalUrl}
 
-PROFESSIONAL IMAGES AVAILABLE:
+STRATEGIC VISUAL ASSETS:
 - Hero Image: ${heroImages[0]?.url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43'}
 - Feature Image 1: ${featureImages[0]?.url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43'}
 - Feature Image 2: ${featureImages[1]?.url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43'}
 - Testimonial Image: ${testimonialImages[0]?.url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43'}
 
-CRITICAL MISSION: Create a professional, high-converting affiliate website that will generate $1000+ in the first week.
+PHASE 1: CONVERSION PSYCHOLOGY MASTERY
 
-RESPOND WITH ONLY VALID HTML CODE - NO JSON, NO EXPLANATIONS, JUST PURE HTML:
+1.1 EMOTIONAL TRIGGER ARCHITECTURE
+- Implement SCARCITY psychology (limited time, limited quantity)
+- Deploy SOCIAL PROOF throughout (testimonials, reviews, user counts)
+- Activate AUTHORITY signals (expert endorsements, certifications, awards)
+- Trigger RECIPROCITY (free bonuses, valuable content, exclusive access)
+- Create COMMITMENT consistency (small yes leading to big yes)
+- Establish LIKING connection (relatable stories, shared values)
 
-Create a complete, professional HTML website with:
+1.2 COGNITIVE BIAS EXPLOITATION
+- Anchoring: Present high-value comparisons to make price seem reasonable
+- Loss Aversion: Emphasize what they'll lose by not acting now
+- Bandwagon Effect: Show how many others have already joined/bought
+- Halo Effect: Associate product with prestigious brands or people
+- Confirmation Bias: Reinforce their existing beliefs and desires
+- Availability Heuristic: Use vivid, memorable examples and stories
 
-1. MODERN RESPONSIVE DESIGN
-- Mobile-first responsive layout
-- Professional color scheme (blues, whites, grays)
-- Modern typography and spacing
-- CSS Grid and Flexbox layouts
+PHASE 2: CONVERSION-OPTIMIZED ARCHITECTURE
 
-2. HIGH-CONVERTING STRUCTURE
-- Compelling hero section with the provided hero image
-- Clear value proposition and benefits
-- Social proof and testimonials with testimonial image
-- Strong call-to-action buttons
-- Trust signals and guarantees
+2.1 HERO SECTION (Above the Fold)
+- Attention-grabbing headline that promises specific benefit
+- Subheadline that amplifies the main promise
+- Hero image that emotionally connects with target audience
+- Primary CTA button with action-oriented text
+- Trust indicators (testimonials, logos, guarantees)
+- Urgency element (countdown timer, limited availability)
 
-3. PROFESSIONAL CONTENT
-- Benefit-focused headlines
-- Emotional triggers and urgency
-- Feature explanations with feature images
+2.2 VALUE PROPOSITION AMPLIFICATION
+- Clear, specific benefits (not features)
+- Quantified results and outcomes
+- Before/after scenarios or transformations
+- Risk reversal and money-back guarantees
+- Exclusive bonuses and added value
+- Social proof integration throughout
+
+2.3 OBJECTION HANDLING FRAMEWORK
+- Address price concerns with value justification
+- Handle skepticism with proof and testimonials
+- Overcome timing objections with urgency
+- Counter competition with unique advantages
+- Resolve trust issues with guarantees and credentials
+- Eliminate confusion with clear, simple messaging
+
+PHASE 3: TECHNICAL EXCELLENCE & PERFORMANCE
+
+3.1 MOBILE-FIRST RESPONSIVE DESIGN
+- Touch-friendly buttons and navigation
+- Fast loading on mobile networks
+- Readable typography on small screens
+- Optimized images for mobile bandwidth
+- Thumb-friendly interaction zones
+- Seamless mobile checkout experience
+
+3.2 CONVERSION RATE OPTIMIZATION
+- Strategic placement of CTA buttons
+- Color psychology for maximum impact
+- White space utilization for focus
+- Visual hierarchy guiding user flow
+- Friction reduction in user journey
+- A/B tested design elements
+
+3.3 TECHNICAL PERFORMANCE
+- Clean, semantic HTML5 structure
+- Embedded CSS for fast loading
+- Optimized images and media
+- SEO-friendly markup and structure
+- Cross-browser compatibility
+- Accessibility compliance
+
+PHASE 4: CONTENT STRATEGY FOR MAXIMUM IMPACT
+
+4.1 HEADLINE PSYCHOLOGY
+- Use power words that trigger emotion
+- Include specific numbers and benefits
+- Create curiosity gaps that demand resolution
+- Address the target audience directly
+- Promise transformation or solution
+- Incorporate urgency and scarcity
+
+4.2 PERSUASIVE COPYWRITING FRAMEWORK
+- AIDA: Attention, Interest, Desire, Action
+- PAS: Problem, Agitation, Solution
+- Before/After/Bridge storytelling
+- Features translated into benefits
+- Emotional appeals backed by logic
+- Clear, compelling call-to-action language
+
+4.3 SOCIAL PROOF INTEGRATION
+- Customer testimonials with photos
+- Review scores and ratings
+- User-generated content
+- Expert endorsements
+- Media mentions and press coverage
+- Usage statistics and social metrics
+
+PHASE 5: $1000+ FIRST WEEK GUARANTEE SYSTEM
+
+5.1 CONVERSION FUNNEL OPTIMIZATION
+- Multiple conversion points throughout page
+- Progressive commitment strategy
+- Exit-intent capture mechanisms
+- Retargeting pixel implementation
+- Email capture for follow-up sequences
+- Upsell and cross-sell opportunities
+
+5.2 TRUST AND CREDIBILITY MAXIMIZATION
+- Professional design and branding
+- Security badges and certifications
+- Money-back guarantee prominently displayed
+- Contact information and support options
+- About section with credibility indicators
+- Professional photography and imagery
+
+5.3 URGENCY AND SCARCITY IMPLEMENTATION
+- Limited-time offers with countdown timers
+- Stock availability indicators
+- Exclusive bonuses for immediate action
+- Price increase warnings
+- Limited quantity messaging
+- Seasonal or event-based urgency
+
+CRITICAL OUTPUT REQUIREMENTS:
+
+You MUST create a complete, professional HTML website that includes:
+
+1. COMPLETE HTML STRUCTURE
+- DOCTYPE declaration and semantic HTML5
+- Responsive meta viewport tag
+- Professional title and meta description
+- Embedded CSS styling (no external files)
+- All images properly integrated
+- Mobile-responsive design
+
+2. CONVERSION-OPTIMIZED SECTIONS
+- Hero section with compelling headline and CTA
+- Benefits section highlighting key advantages
+- Social proof section with testimonials
+- Features section with detailed explanations
+- Guarantee section building trust
+- Final CTA section with urgency
+- Footer with contact and legal information
+
+3. PROFESSIONAL STYLING
+- Modern, clean design aesthetic
+- Consistent color scheme and typography
+- Proper spacing and visual hierarchy
+- Mobile-responsive layout
+- Professional button styling
+- Optimized image placement
+
+4. PSYCHOLOGICAL TRIGGERS
+- Scarcity elements throughout
+- Social proof integration
+- Authority signals and credibility
+- Urgency and time-sensitive offers
 - Risk reversal and guarantees
-- Professional testimonials
+- Emotional connection points
 
-4. TECHNICAL EXCELLENCE
-- Clean, semantic HTML5
-- Embedded CSS for styling
-- Mobile responsive design
-- Fast loading optimization
+5. TECHNICAL EXCELLENCE
+- Fast-loading, optimized code
 - SEO-friendly structure
+- Accessibility compliance
+- Cross-browser compatibility
+- Mobile-first responsive design
+- Clean, maintainable code
 
-5. CONVERSION OPTIMIZATION
-- Multiple call-to-action buttons
-- Scarcity and urgency elements
-- Social proof throughout
-- Easy navigation and flow
-- Professional appearance
+DESIGN SPECIFICATIONS:
 
-The website should look like a professional $10,000+ landing page that converts visitors into customers immediately.
+COLOR PALETTE:
+- Primary: #2563eb (Professional Blue)
+- Secondary: #dc2626 (Urgency Red)
+- Accent: #059669 (Trust Green)
+- Background: #f8fafc (Clean White/Gray)
+- Text: #1e293b (Professional Dark)
 
-USE THE PROVIDED UNSPLASH IMAGES IN THE APPROPRIATE SECTIONS.
+TYPOGRAPHY:
+- Headlines: Bold, impactful fonts
+- Body: Clean, readable sans-serif
+- CTAs: Bold, action-oriented styling
+- Testimonials: Italicized, trustworthy
 
-GENERATE COMPLETE HTML CODE NOW:`;
+LAYOUT PRINCIPLES:
+- F-pattern reading flow
+- Visual hierarchy with size and color
+- White space for focus and clarity
+- Strategic CTA placement
+- Mobile-first responsive design
+
+REMEMBER: This website MUST generate $1000+ in the first week. Every element must be strategically designed for maximum conversion. This is someone's financial future in your hands.
+
+RESPOND WITH ONLY COMPLETE, VALID HTML CODE - NO JSON, NO EXPLANATIONS, JUST PURE HTML THAT WILL CHANGE LIVES AND GENERATE MASSIVE PROFITS!
+
+CREATE THE ULTIMATE CONVERSION MACHINE NOW!`;
 
   try {
     const result = await model.generateContent(prompt);
