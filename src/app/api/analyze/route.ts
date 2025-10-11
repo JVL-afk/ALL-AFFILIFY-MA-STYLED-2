@@ -39,64 +39,100 @@ async function performComprehensiveAnalysis(url: string) {
 
 // PageSpeed Insights API integration
 async function getPageSpeedInsights(url: string) {
-  try {
-    const apiKey = process.env.GOOGLE_PAGESPEED_API_KEY || process.env.GOOGLE_AI_API_KEY
-    
-    if (!apiKey) {
+  const maxRetries = 3
+  let lastError = null
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const apiKey = process.env.GOOGLE_PAGESPEED_API_KEY || process.env.GOOGLE_AI_API_KEY
+      
+      if (!apiKey) {
+        return {
+          mobile: { score: 0, metrics: {} },
+          desktop: { score: 0, metrics: {} },
+          error: 'PageSpeed API key not configured'
+        }
+      }
+
+      console.log(`PageSpeed attempt ${attempt}/${maxRetries} for ${url}`)
+
+      // Add timeout and better error handling
+      const axiosConfig = {
+        timeout: 30000, // 30 second timeout
+        headers: {
+          'User-Agent': 'AFFILIFY-Analysis-Bot/1.0'
+        }
+      }
+
+      // Mobile analysis with retry logic
+      const mobileResponse = await axios.get(
+        `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&key=${apiKey}&strategy=mobile&category=performance`,
+        axiosConfig
+      )
+
+      // Desktop analysis with retry logic
+      const desktopResponse = await axios.get(
+        `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&key=${apiKey}&strategy=desktop&category=performance`,
+        axiosConfig
+      )
+
       return {
-        mobile: { score: 0, metrics: {} },
-        desktop: { score: 0, metrics: {} },
-        error: 'PageSpeed API key not configured'
-      }
-    }
-
-    // Mobile analysis
-    const mobileResponse = await axios.get(
-      `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&key=${apiKey}&strategy=mobile&category=performance&category=accessibility&category=best-practices&category=seo`
-    )
-
-    // Desktop analysis
-    const desktopResponse = await axios.get(
-      `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&key=${apiKey}&strategy=desktop&category=performance&category=accessibility&category=best-practices&category=seo`
-    )
-
-    return {
-      mobile: {
-        score: mobileResponse.data.lighthouseResult?.categories?.performance?.score * 100 || 0,
-        accessibility: mobileResponse.data.lighthouseResult?.categories?.accessibility?.score * 100 || 0,
-        bestPractices: mobileResponse.data.lighthouseResult?.categories?.['best-practices']?.score * 100 || 0,
-        seo: mobileResponse.data.lighthouseResult?.categories?.seo?.score * 100 || 0,
-        metrics: {
-          fcp: mobileResponse.data.lighthouseResult?.audits?.['first-contentful-paint']?.displayValue || 'N/A',
-          lcp: mobileResponse.data.lighthouseResult?.audits?.['largest-contentful-paint']?.displayValue || 'N/A',
-          fid: mobileResponse.data.lighthouseResult?.audits?.['max-potential-fid']?.displayValue || 'N/A',
-          cls: mobileResponse.data.lighthouseResult?.audits?.['cumulative-layout-shift']?.displayValue || 'N/A',
-          speedIndex: mobileResponse.data.lighthouseResult?.audits?.['speed-index']?.displayValue || 'N/A',
-          tti: mobileResponse.data.lighthouseResult?.audits?.['interactive']?.displayValue || 'N/A'
-        }
-      },
-      desktop: {
-        score: desktopResponse.data.lighthouseResult?.categories?.performance?.score * 100 || 0,
-        accessibility: desktopResponse.data.lighthouseResult?.categories?.accessibility?.score * 100 || 0,
-        bestPractices: desktopResponse.data.lighthouseResult?.categories?.['best-practices']?.score * 100 || 0,
-        seo: desktopResponse.data.lighthouseResult?.categories?.seo?.score * 100 || 0,
-        metrics: {
-          fcp: desktopResponse.data.lighthouseResult?.audits?.['first-contentful-paint']?.displayValue || 'N/A',
-          lcp: desktopResponse.data.lighthouseResult?.audits?.['largest-contentful-paint']?.displayValue || 'N/A',
-          fid: desktopResponse.data.lighthouseResult?.audits?.['max-potential-fid']?.displayValue || 'N/A',
-          cls: desktopResponse.data.lighthouseResult?.audits?.['cumulative-layout-shift']?.displayValue || 'N/A',
-          speedIndex: desktopResponse.data.lighthouseResult?.audits?.['speed-index']?.displayValue || 'N/A',
-          tti: desktopResponse.data.lighthouseResult?.audits?.['interactive']?.displayValue || 'N/A'
+        mobile: {
+          score: mobileResponse.data.lighthouseResult?.categories?.performance?.score * 100 || 0,
+          accessibility: mobileResponse.data.lighthouseResult?.categories?.accessibility?.score * 100 || 0,
+          bestPractices: mobileResponse.data.lighthouseResult?.categories?.['best-practices']?.score * 100 || 0,
+          seo: mobileResponse.data.lighthouseResult?.categories?.seo?.score * 100 || 0,
+          metrics: {
+            fcp: mobileResponse.data.lighthouseResult?.audits?.['first-contentful-paint']?.displayValue || 'N/A',
+            lcp: mobileResponse.data.lighthouseResult?.audits?.['largest-contentful-paint']?.displayValue || 'N/A',
+            fid: mobileResponse.data.lighthouseResult?.audits?.['max-potential-fid']?.displayValue || 'N/A',
+            cls: mobileResponse.data.lighthouseResult?.audits?.['cumulative-layout-shift']?.displayValue || 'N/A',
+            speedIndex: mobileResponse.data.lighthouseResult?.audits?.['speed-index']?.displayValue || 'N/A',
+            tti: mobileResponse.data.lighthouseResult?.audits?.['interactive']?.displayValue || 'N/A'
+          }
+        },
+        desktop: {
+          score: desktopResponse.data.lighthouseResult?.categories?.performance?.score * 100 || 0,
+          accessibility: desktopResponse.data.lighthouseResult?.categories?.accessibility?.score * 100 || 0,
+          bestPractices: desktopResponse.data.lighthouseResult?.categories?.['best-practices']?.score * 100 || 0,
+          seo: desktopResponse.data.lighthouseResult?.categories?.seo?.score * 100 || 0,
+          metrics: {
+            fcp: desktopResponse.data.lighthouseResult?.audits?.['first-contentful-paint']?.displayValue || 'N/A',
+            lcp: desktopResponse.data.lighthouseResult?.audits?.['largest-contentful-paint']?.displayValue || 'N/A',
+            fid: desktopResponse.data.lighthouseResult?.audits?.['max-potential-fid']?.displayValue || 'N/A',
+            cls: desktopResponse.data.lighthouseResult?.audits?.['cumulative-layout-shift']?.displayValue || 'N/A',
+            speedIndex: desktopResponse.data.lighthouseResult?.audits?.['speed-index']?.displayValue || 'N/A',
+            tti: desktopResponse.data.lighthouseResult?.audits?.['interactive']?.displayValue || 'N/A'
+          }
         }
       }
+
+    } catch (error) {
+      lastError = error
+      console.error(`PageSpeed attempt ${attempt} failed:`, error.response?.status, error.response?.statusText)
+      
+      // If it's a 403 error, don't retry (authentication issue)
+      if (error.response?.status === 403) {
+        console.error('PageSpeed API authentication failed - check API key and permissions')
+        break
+      }
+      
+      // If it's the last attempt, don't wait
+      if (attempt < maxRetries) {
+        const waitTime = attempt * 2000 // Exponential backoff: 2s, 4s, 6s
+        console.log(`Waiting ${waitTime}ms before retry...`)
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+      }
     }
-  } catch (error) {
-    console.error('PageSpeed analysis error:', error)
-    return {
-      mobile: { score: 0, metrics: {} },
-      desktop: { score: 0, metrics: {} },
-      error: 'Failed to analyze PageSpeed'
-    }
+  }
+
+  // All attempts failed
+  console.error('All PageSpeed attempts failed:', lastError)
+  return {
+    mobile: { score: 0, metrics: {}, error: 'PageSpeed analysis failed' },
+    desktop: { score: 0, metrics: {}, error: 'PageSpeed analysis failed' },
+    error: `Failed to analyze PageSpeed after ${maxRetries} attempts: ${lastError?.response?.status || lastError?.message}`,
+    fallback_used: true
   }
 }
 
@@ -409,11 +445,36 @@ ANALYZE NOW WITH MAXIMUM PRECISION AND DEPTH!
     const response = await result.response
     const analysisText = response.text()
 
-    // Try to parse as JSON, fallback to text if parsing fails
+    // Extract JSON from response (handle cases where AI adds extra text)
     try {
+      // First try direct parsing
       return JSON.parse(analysisText)
     } catch (parseError) {
-      console.error('Failed to parse AI response as JSON:', parseError)
+      console.log('Direct JSON parse failed, trying extraction...')
+      
+      // Try to extract JSON from text (look for { ... })
+      try {
+        const jsonMatch = analysisText.match(/\{[\s\S]*\}/)
+        if (jsonMatch) {
+          return JSON.parse(jsonMatch[0])
+        }
+      } catch (extractError) {
+        console.error('JSON extraction also failed:', extractError)
+      }
+      
+      // Try to extract JSON between ```json and ``` markers
+      try {
+        const codeBlockMatch = analysisText.match(/```json\s*([\s\S]*?)\s*```/)
+        if (codeBlockMatch) {
+          return JSON.parse(codeBlockMatch[1])
+        }
+      } catch (codeBlockError) {
+        console.error('Code block extraction failed:', codeBlockError)
+      }
+      
+      console.error('All JSON parsing attempts failed:', parseError)
+      console.log('Raw AI response:', analysisText.substring(0, 500) + '...')
+      
       return {
         main_score: 50,
         rating_category: "FAIR",
