@@ -626,7 +626,7 @@ export async function POST(request: NextRequest) {
     console.log(`Starting comprehensive analysis for: ${url}`)
 
     // Get PageSpeed data with retry logic
-    const pageSpeedData = await getPageSpeedData(url)
+    const pageSpeedData = await getPageSpeedInsights(url)
     
     // Get page content
     const contentData = await getPageContent(url)
