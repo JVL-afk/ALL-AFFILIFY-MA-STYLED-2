@@ -13,13 +13,31 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '')
 async function performComprehensiveAnalysis(url: string) {
   try {
     // 1. PageSpeed Insights Analysis
-    const pageSpeedData = await getPageSpeedInsights(url)
+    let pageSpeedData
+    try {
+      pageSpeedData = await getPageSpeedInsights(url)
+    } catch (e) {
+      console.error('PageSpeed Insights failed, using fallback data:', e)
+      pageSpeedData = { mobile: { score: 0, metrics: {} }, desktop: { score: 0, metrics: {} }, error: 'PageSpeed analysis failed' }
+    }
     
     // 2. Website Content Analysis with Cheerio
-    const contentData = await analyzeWebsiteContent(url)
+    let contentData
+    try {
+      contentData = await analyzeWebsiteContent(url)
+    } catch (e) {
+      console.error('Website Content Analysis failed, using fallback data:', e)
+      contentData = { title: 'Analysis failed', error: 'Failed to analyze website content' }
+    }
     
     // 3. Technical SEO Analysis
-    const technicalData = await analyzeTechnicalSEO(url)
+    let technicalData
+    try {
+      technicalData = await analyzeTechnicalSEO(url)
+    } catch (e) {
+      console.error('Technical SEO Analysis failed, using fallback data:', e)
+      technicalData = { error: 'Failed to analyze technical SEO' }
+    }
     
     // 4. Gemini AI Analysis with the comprehensive prompt
     const aiAnalysis = await performGeminiAnalysis(url, pageSpeedData, contentData, technicalData)
@@ -142,7 +160,7 @@ async function analyzeWebsiteContent(url: string) {
     const response = await axios.get(url, {
       timeout: 10000,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       }
     })
 
@@ -200,7 +218,7 @@ async function analyzeTechnicalSEO(url: string) {
     const response = await axios.get(url, {
       timeout: 10000,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       }
     })
 
@@ -443,7 +461,15 @@ ANALYZE NOW WITH MAXIMUM PRECISION AND DEPTH!
 
     const result = await model.generateContent(comprehensivePrompt)
     const response = await result.response
-    const analysisText = response.text()
+    let analysisText = response.text()
+    // Aggressive JSON extraction: find content between the first { and the last }
+    const jsonMatch = analysisText.match(/\{[\s\S]*\}/)
+    if (jsonMatch && jsonMatch[0]) {
+      analysisText = jsonMatch[0]
+    } else {
+      // Fallback: remove all code block markers if no specific json block is found
+      analysisText = analysisText.replace(/```json/g, '').replace(/```/g, '')
+    }
 
     // Extract JSON from response (handle cases where AI adds extra text)
     try {
@@ -552,7 +578,7 @@ async function getPageContent(url: string) {
   try {
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       }
     })
     
@@ -597,7 +623,7 @@ async function getTechnicalData(url: string) {
   try {
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       }
     })
     
