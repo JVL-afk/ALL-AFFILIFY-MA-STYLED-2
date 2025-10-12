@@ -528,7 +528,11 @@ async function verifyUser(request: NextRequest): Promise<UserData | null> {
 
     const { db } = await connectToDatabase();
     const user = await db.collection('users').findOne({ 
-      authToken: token 
+      $or: [
+        { authToken: token },
+        { token: token },
+        { sessionToken: token }
+      ]
     });
 
     return user as UserData | null;
