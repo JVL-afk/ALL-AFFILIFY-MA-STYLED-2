@@ -135,6 +135,13 @@ async function getPageSpeedInsights(url: string) {
         break
       }
       
+      // If it's a 429 error, stop retrying and return a specific error message
+      if (error.response?.status === 429) {
+        console.error('PageSpeed API rate limit exceeded (429 Too Many Requests)')
+        lastError = { message: 'PageSpeed API rate limit exceeded (429)', status: 429 }
+        break
+      }
+      
       // If it's the last attempt, don't wait
       if (attempt < maxRetries) {
         const waitTime = attempt * 2000 // Exponential backoff: 2s, 4s, 6s
