@@ -509,7 +509,9 @@ async function analyzeProductURL(url: string) {
 // Verify user authentication
 async function verifyUser(request: NextRequest): Promise<UserData | null> {
   try {
-    let token = request.cookies.get('auth-token')?.value;
+    let token = request.cookies.get('auth-token')?.value || 
+                request.cookies.get('token')?.value || 
+                request.cookies.get('authToken')?.value;
     
     // Also check for Bearer token in Authorization header (standard for frontend fetch)
     if (!token) {
@@ -518,6 +520,8 @@ async function verifyUser(request: NextRequest): Promise<UserData | null> {
         token = authHeader.substring(7);
       }
     }
+    
+    // Final check for token existence
     if (!token) {
       return null;
     }
