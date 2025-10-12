@@ -153,10 +153,12 @@ async function getPageSpeedInsights(url: string) {
 
   // All attempts failed
   console.error('All PageSpeed attempts failed:', lastError)
+  const status = lastError?.response?.status || 'Unknown'
+  const message = lastError?.message || 'Unknown Error'
   return {
-    mobile: { score: 0, metrics: {}, error: 'PageSpeed analysis failed' },
-    desktop: { score: 0, metrics: {}, error: 'PageSpeed analysis failed' },
-    error: `Failed to analyze PageSpeed after ${maxRetries} attempts: ${lastError?.response?.status || lastError?.message}`,
+    mobile: { score: 0, metrics: {}, error: `PageSpeed analysis failed (Status: ${status})` },
+    desktop: { score: 0, metrics: {}, error: `PageSpeed analysis failed (Status: ${status})` },
+    error: `Failed to analyze PageSpeed after ${maxRetries} attempts: Status ${status}, Message: ${message}`,
     fallback_used: true
   }
 }
