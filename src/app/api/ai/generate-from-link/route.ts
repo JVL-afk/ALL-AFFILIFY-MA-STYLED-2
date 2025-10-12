@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { connectToDatabase } from '../../../../lib/mongodb';
 import { ObjectId } from 'mongodb';
 import * as cheerio from 'cheerio';
+import jwt from 'jsonwebtoken';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -527,12 +528,24 @@ async function verifyUser(request: NextRequest): Promise<UserData | null> {
     }
 
     const { db } = await connectToDatabase();
+    // Instead of looking up the token directly, decode the JWT to get the userId
+    const jwtSecret = process.env.JWT_SECRET || 'your_jwt_secret'; // Use a fallback secret for local testing
+    let decoded: any;
+    
+    try {
+      decoded = jwt.verify(token, jwtSecret);
+    } catch (e) {
+      console.log('JWT verification failed:', e);
+      return null;
+    }
+
+    if (!decoded || !decoded.userId) {
+      return null;
+    }
+
+    // Use the extracted userId to find the user
     const user = await db.collection('users').findOne({ 
-      $or: [
-        { authToken: token },
-        { token: token },
-        { sessionToken: token }
-      ]
+      _id: new ObjectId(decoded.userId)
     });
 
     return user as UserData | null;
