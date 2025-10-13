@@ -102,7 +102,7 @@ async function deployToNetlify(websiteHTML: string, siteName: string) {
         'Authorization': `Bearer ${netlifyToken}`,
         'Content-Type': 'application/zip'
       },
-      body: createZipFromHTML(websiteHTML)
+      body: await createZipFromHTML(websiteHTML)
     })
 
     if (!deployResponse.ok) {
@@ -124,10 +124,17 @@ async function deployToNetlify(websiteHTML: string, siteName: string) {
 }
 
 // Create ZIP file from HTML content for Netlify deployment
-function createZipFromHTML(html: string) {
-  // For now, return the HTML as a simple buffer
-  // In production, you'd want to use a proper ZIP library
-  return Buffer.from(html, 'utf8')
+import JSZip from 'jszip';
+
+async function createZipFromHTML(html: string): Promise<Buffer> {
+  const zip = new JSZip();
+  
+  // Add the main index.html file
+  zip.file('index.html', html);
+
+  // Generate the zip file as a Buffer
+  const content = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
+  return content;
 }
 
 // Generate REAL website content using Gemini AI with Unsplash images
