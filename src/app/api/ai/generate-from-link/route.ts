@@ -614,7 +614,9 @@ export async function POST(request: NextRequest) {
     const websiteHTML = await generateWebsiteContent(productInfo);
 
     // Generate unique slug for the website
-    const slug = productInfo.title.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now();
+    const baseSlug = productInfo.title.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 30).replace(/-$/, ''); // Clean, truncate to 30 chars, remove trailing hyphen
+    const uniqueId = Math.random().toString(36).substring(2, 8); // 6-character random hash
+    const slug = `${baseSlug}-${uniqueId}`;
 
     // Deploy to Netlify for live URL
     console.log('Deploying website to Netlify...');
