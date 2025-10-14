@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { connectToDatabase } from '../../../../lib/mongodb';
 import { ObjectId } from 'mongodb';
 import * as cheerio from 'cheerio';
+import JSZip from 'jszip';
 import jwt from 'jsonwebtoken';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
@@ -122,9 +123,6 @@ async function deployToNetlify(websiteHTML: string, siteName: string) {
     return null
   }
 }
-
-// Create ZIP file from HTML content for Netlify deployment
-import JSZip from 'jszip';
 
 async function createZipFromHTML(html: string): Promise<Buffer> {
   const zip = new JSZip();
