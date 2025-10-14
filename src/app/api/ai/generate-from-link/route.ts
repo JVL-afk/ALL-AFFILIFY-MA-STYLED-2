@@ -132,6 +132,13 @@ async function createZipFromHTML(html: string): Promise<Buffer> {
   // Add the main index.html file
   zip.file('index.html', html);
 
+  // Add a _headers file to force Netlify to serve index.html as text/html
+  const headersContent = `
+/*
+  Content-Type: text/html
+`;
+  zip.file('_headers', headersContent);
+
   // Generate the zip file as a Buffer
   const content = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
   return content;
@@ -621,7 +628,7 @@ export async function POST(request: NextRequest) {
     const websiteHTML = await generateWebsiteContent(productInfo);
 
     // Generate unique slug for the website
-    const baseSlug = productInfo.title.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 30).replace(/-$/, ''); // Clean, truncate to 30 chars, remove trailing hyphen
+    const baseSlug = productInfo.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 30).replace(/^-|-$/g, ''); // Clean, truncate to 30 chars, remove trailing hyphen
     const uniqueId = Math.random().toString(36).substring(2, 8); // 6-character random hash
     const slug = `${baseSlug}-${uniqueId}`;
 
