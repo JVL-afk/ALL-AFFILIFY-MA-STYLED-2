@@ -46,16 +46,16 @@ export default function DashboardPage() {
           email: 'demo@affilify.com',
           name: 'Demo User',
           plan: 'Pro',
-          websiteCount: 5,
+          websiteCount: 1,
           createdAt: '2024-01-01',
           lastLoginAt: new Date().toISOString()
         });
         setStats({
-          totalWebsiteGenerations: 12,
-          totalClicks: 2847,
-          totalRevenue: 1250.75,
+          totalWebsiteGenerations: 1,
+          totalClicks: 5683,
+          totalRevenue: 1548.32,
           totalConversions: 89,
-          conversionRate: '3.1%'
+          conversionRate: '73%'
         });
       }
     } catch (error) {
@@ -66,16 +66,16 @@ export default function DashboardPage() {
         email: 'demo@affilify.com',
         name: 'Demo User',
         plan: 'Pro',
-        websiteCount: 5,
+        websiteCount: 1,
         createdAt: '2024-01-01',
         lastLoginAt: new Date().toISOString()
       });
       setStats({
-        totalWebsiteGenerations: 12,
-        totalClicks: 2847,
-        totalRevenue: 1250.75,
+        totalWebsiteGenerations: 1,
+        totalClicks: 5683,
+        totalRevenue: 1548.32,
         totalConversions: 89,
-        conversionRate: '3.1%'
+        conversionRate: '73%'
       });
     } finally {
       setLoading(false);
