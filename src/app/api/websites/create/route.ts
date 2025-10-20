@@ -1,40 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyToken, getUserById, incrementUserWebsites } from '@/lib/auth'
+import { requireAuth } from '@/lib/auth-middleware'
+import { AuthenticatedUser } from '@/lib/types'
 import { generateWebsiteContent } from '@/lib/ai'
 import { saveWebsite } from '@/lib/database'
 import { validateUrl } from '@/lib/utils'
+import { incrementUserWebsites } from '@/lib/auth'
 
-export async function POST(request: NextRequest) {
+export const POST = requireAuth(async (request: NextRequest, user: AuthenticatedUser) => {
   try {
-    // Get token from cookies
-    const token = request.cookies.get('auth-token')?.value
-
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
-    }
-
-    // Verify token
-    const decoded = verifyToken(token)
-    if (!decoded) {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      )
-    }
-
-    // Get user
-    const user = await getUserById(decoded.userId)
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
-    }
-
-    // Check website limit
+    // Best-in-Class: Check website limit
     if (user.websiteLimit !== -1 && user.websitesCreated >= user.websiteLimit) {
       return NextResponse.json(
         { 
@@ -73,8 +47,8 @@ export async function POST(request: NextRequest) {
       features: features || []
     })
 
-    // Save website to database
-    const savedWebsite = await saveWebsite(user.id, websiteData)
+    // Save website to database (CRITICAL FIX: Pass user._id as string, database.ts will convert to ObjectId)
+    const savedWebsite = await saveWebsite(user._id.toString(), websiteData)
     if (!savedWebsite) {
       return NextResponse.json(
         { error: 'Failed to save website' },
@@ -83,13 +57,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Increment user's website count
-    await incrementUserWebsites(user.id)
+    await incrementUserWebsites(user._id.toString())
 
     return NextResponse.json({
       success: true,
       message: 'Website created successfully',
       website: {
-        id: savedWebsite.id,
+        id: savedWebsite._id.toHexString(),
         title: savedWebsite.title,
         description: savedWebsite.description,
         template: savedWebsite.template,
@@ -100,9 +74,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Website creation error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to create website' },
       { status: 500 }
     )
   }
-}
+})
 

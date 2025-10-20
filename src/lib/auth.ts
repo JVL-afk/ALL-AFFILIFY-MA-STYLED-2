@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+
 import { ObjectId } from 'mongodb'
 import { connectToDatabase } from './mongodb'
 
@@ -206,6 +207,38 @@ export async function incrementUserAnalyses(userId: string): Promise<boolean> {
     return false
   }
 }
+// --- Plan Requirement Wrappers ---
+
+
+
+type AuthenticatedHandler = (request: NextRequest, user: AuthenticatedUser) => Promise<NextResponse>
+
+const checkPlan = (requiredPlan: 'premium' | 'enterprise') => (handler: AuthenticatedHandler) => async (request: NextRequest) => {
+  const authResult = await verifyAuth(request)
+  
+  if (!authResult.success) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+  }
+
+  const user = authResult.user as AuthenticatedUser
+  
+  const isPremium = user.plan === 'pro' || user.plan === 'enterprise'
+  const isEnterprise = user.plan === 'enterprise'
+
+  if (requiredPlan === 'premium' && !isPremium) {
+    return NextResponse.json({ error: 'Premium plan required' }, { status: 403 })
+  }
+
+  if (requiredPlan === 'enterprise' && !isEnterprise) {
+    return NextResponse.json({ error: 'Enterprise plan required' }, { status: 403 })
+  }
+
+  return handler(request, user)
+}
+
+export const requirePremium = checkPlan('premium')
+export const requireEnterprise = checkPlan('enterprise')
+
 export async function verifyAuth(request: NextRequest) {
   try {
     const token = request.cookies.get('token')?.value

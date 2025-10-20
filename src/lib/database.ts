@@ -5,7 +5,7 @@ import { GeneratedWebsite } from './ai'
 export interface Website {
   _id: ObjectId
   id: string
-  userId: string
+  userId: ObjectId | string
   title: string
   description: string
   content: any
@@ -25,7 +25,7 @@ export interface Website {
 export interface Analysis {
   _id: ObjectId
   id: string
-  userId: string
+  userId: ObjectId | string
   url: string
   analysisType: string
   score: number
@@ -39,9 +39,11 @@ export async function saveWebsite(userId: string, websiteData: GeneratedWebsite)
   try {
     const { db } = await connectToDatabase()
     
+    // CRITICAL FIX: Store userId as ObjectId for consistency with auth-middleware
+    const userObjectId = new ObjectId(userId)
+    
     const website = {
-      id: websiteData.id,
-      userId,
+      userId: userObjectId,
       title: websiteData.title,
       description: websiteData.description,
       content: websiteData.content,
@@ -65,7 +67,9 @@ export async function saveWebsite(userId: string, websiteData: GeneratedWebsite)
     
     return {
       ...website,
-      _id: result.insertedId
+      _id: result.insertedId,
+      id: result.insertedId.toString(),
+      userId: userObjectId
     }
   } catch (error) {
     console.error('Error saving website:', error)
@@ -77,7 +81,9 @@ export async function getUserWebsites(userId: string, limit?: number): Promise<W
   try {
     const { db } = await connectToDatabase()
     
-    const query = { userId: userId }
+    // CRITICAL FIX: Query with ObjectId for consistency
+    const userObjectId = new ObjectId(userId)
+    const query = { userId: userObjectId }
     const options = {
       sort: { createdAt: -1 },
       ...(limit && { limit })
@@ -101,7 +107,8 @@ export async function getWebsiteById(websiteId: string, userId?: string): Promis
     
     const query: any = { _id: new ObjectId(websiteId) }
     if (userId) {
-      query.userId = userId
+      // CRITICAL FIX: Use ObjectId for userId comparison
+      query.userId = new ObjectId(userId)
     }
     
     const website = await db.collection('websites').findOne(query)
@@ -124,8 +131,11 @@ export async function updateWebsite(websiteId: string, userId: string, updates: 
   try {
     const { db } = await connectToDatabase()
     
+    // CRITICAL FIX: Use ObjectId for userId comparison
+    const userObjectId = new ObjectId(userId)
+    
     const result = await db.collection('websites').updateOne(
-      { _id: new ObjectId(websiteId), userId },
+      { _id: new ObjectId(websiteId), userId: userObjectId },
       { 
         $set: { 
           ...updates, 
@@ -145,9 +155,12 @@ export async function deleteWebsite(websiteId: string, userId: string): Promise<
   try {
     const { db } = await connectToDatabase()
     
+    // CRITICAL FIX: Use ObjectId for userId comparison
+    const userObjectId = new ObjectId(userId)
+    
     const result = await db.collection('websites').deleteOne({
       _id: new ObjectId(websiteId),
-      userId
+      userId: userObjectId
     })
     
     return result.deletedCount > 0
@@ -173,8 +186,11 @@ export async function publishWebsite(websiteId: string, userId: string): Promise
     
     const url = `https://affilify.eu/sites/${slug}-${websiteId.slice(-8)}`
     
+    // CRITICAL FIX: Use ObjectId for userId comparison
+    const userObjectId = new ObjectId(userId)
+    
     const result = await db.collection('websites').updateOne(
-      { _id: new ObjectId(websiteId), userId },
+      { _id: new ObjectId(websiteId), userId: userObjectId },
       { 
         $set: { 
           status: 'published',
@@ -195,9 +211,12 @@ export async function saveAnalysis(userId: string, analysisData: any): Promise<A
   try {
     const { db } = await connectToDatabase()
     
+    // CRITICAL FIX: Store userId as ObjectId for consistency
+    const userObjectId = new ObjectId(userId)
+    
     const analysis = {
       id: analysisData.id || new ObjectId().toString(),
-      userId,
+      userId: userObjectId,
       url: analysisData.url,
       analysisType: analysisData.analysisType,
       score: analysisData.score,
@@ -227,7 +246,9 @@ export async function getUserAnalyses(userId: string, limit?: number): Promise<A
   try {
     const { db } = await connectToDatabase()
     
-    const query = { userId: userId }
+    // CRITICAL FIX: Query with ObjectId for consistency
+    const userObjectId = new ObjectId(userId)
+    const query = { userId: userObjectId }
     const options = {
       sort: { createdAt: -1 },
       ...(limit && { limit })
@@ -251,7 +272,8 @@ export async function getAnalysisById(analysisId: string, userId?: string): Prom
     
     const query: any = { _id: new ObjectId(analysisId) }
     if (userId) {
-      query.userId = userId
+      // CRITICAL FIX: Use ObjectId for userId comparison
+      query.userId = new ObjectId(userId)
     }
     
     const analysis = await db.collection('analyses').findOne(query)
@@ -274,9 +296,12 @@ export async function getDashboardStats(userId: string): Promise<any> {
   try {
     const { db } = await connectToDatabase()
     
+    // CRITICAL FIX: Query with ObjectId for consistency
+    const userObjectId = new ObjectId(userId)
+    
     const [websites, analyses] = await Promise.all([
-      db.collection('websites').find({ userId }).toArray(),
-      db.collection('analyses').find({ userId }).toArray()
+      db.collection('websites').find({ userId: userObjectId }).toArray(),
+      db.collection('analyses').find({ userId: userObjectId }).toArray()
     ])
     
     const totalViews = websites.reduce((sum, site) => sum + (site.views || 0), 0)

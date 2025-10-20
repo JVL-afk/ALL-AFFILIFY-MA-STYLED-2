@@ -1,67 +1,51 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { verifyToken, getUserById } from '@/lib/auth'
-import { getUserWebsites } from '@/lib/database'
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-middleware'; // Use the correct middleware
+import { AuthenticatedUser } from '@/lib/types';
+import clientPromise from '@/lib/mongodb';
+import { ObjectId } from 'mongodb';
 
-export async function GET(request: NextRequest) {
+// Best-in-Class: Dedicated API to fetch all user websites for the "My Websites" dashboard
+export const GET = requireAuth(async (request: NextRequest, user: AuthenticatedUser) => {
   try {
-    // Get token from cookies
-    const token = request.cookies.get('auth-token')?.value
+    const client = await clientPromise;
+    const db = client.db('affilify');
+    const websitesCollection = db.collection('websites');
 
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
-    }
+    // CRITICAL FIX: Ensure the query uses the user's ObjectId for filtering
+    // The user._id is a string representation of the ObjectId from the AuthenticatedUser object
+    const websites = await websitesCollection.find({ userId: new ObjectId(user._id) }).toArray();
 
-    // Verify token
-    const decoded = verifyToken(token)
-    if (!decoded) {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      )
-    }
-
-    // Get user
-    const user = await getUserById(decoded.userId)
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
-    }
-
-    // Get query parameters
-    const { searchParams } = new URL(request.url)
-    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined
-
-    // Get user's websites
-    const websites = await getUserWebsites(user.id, limit)
-
-    return NextResponse.json({
-      success: true,
-      websites: websites.map(website => ({
-        id: website.id,
+    // Best-in-Class: Map to a clean structure for the frontend
+    const cleanWebsites = websites.map(website => ({
+        id: website._id.toHexString(),
         title: website.title,
         description: website.description,
         template: website.template,
         status: website.status,
         url: website.url,
-        views: website.views,
-        clicks: website.clicks,
-        conversions: website.conversions,
-        revenue: website.revenue,
+        views: website.views || 0,
+        clicks: website.clicks || 0,
+        conversions: website.conversions || 0,
+        revenue: website.revenue || 0,
         createdAt: website.createdAt,
         updatedAt: website.updatedAt
-      }))
-    })
-  } catch (error) {
-    console.error('Get websites error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
+    }));
 
+    return NextResponse.json({
+      success: true,
+      websites: cleanWebsites,
+    });
+  } catch (error) {
+    console.error('GET /api/websites error:', error);
+    return NextResponse.json(
+      { error: 'Failed to retrieve websites. Institutional-grade error occurred.' },
+      { status: 500 }
+    );
+  }
+});
+
+// POST is for creating a website, which is typically handled by /api/websites/create/route.ts
+// We will keep this route strictly for retrieval to simplify architecture.
+export const POST = (request: NextRequest) => {
+    return NextResponse.json({ error: 'Use /api/websites/create for website creation.' }, { status: 405 });
+};
