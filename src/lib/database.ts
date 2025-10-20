@@ -77,7 +77,7 @@ export async function getUserWebsites(userId: string, limit?: number): Promise<W
   try {
     const { db } = await connectToDatabase()
     
-    const query = { userId }
+    const query = { userId: userId }
     const options = {
       sort: { createdAt: -1 },
       ...(limit && { limit })
@@ -227,7 +227,7 @@ export async function getUserAnalyses(userId: string, limit?: number): Promise<A
   try {
     const { db } = await connectToDatabase()
     
-    const query = { userId }
+    const query = { userId: userId }
     const options = {
       sort: { createdAt: -1 },
       ...(limit && { limit })
