@@ -151,22 +151,26 @@ export function MyWebsites() {
                   <TableRow key={website.id}>
                     <TableCell className="font-medium">{website.title}</TableCell>
                     <TableCell>
-                      <a href={website.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline truncate max-w-xs block">
-                        {website.url}
-                      </a>
+                      {website.url ? (
+                        <a href={website.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline truncate max-w-xs block">
+                          {website.url}
+                        </a>
+                      ) : (
+                        <span className="text-gray-500">N/A</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                         website.status === 'published' ? 'bg-green-100 text-green-800' :
                         website.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
                         'bg-gray-100 text-gray-800'
-                      }`}>
-                        {website.status.charAt(0).toUpperCase() + website.status.slice(1)}
+                      `}>
+                        {website.status ? website.status.charAt(0).toUpperCase() + website.status.slice(1) : 'Draft'}
                       </span>
                     </TableCell>
                     <TableCell>{new Date(website.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right space-x-2">
-                      <Button variant="outline" size="icon" onClick={() => window.open(website.url, '_blank')}>
+                      <Button variant="outline" size="icon" onClick={() => website.url && window.open(website.url, '_blank')} disabled={!website.url}>
                         <Eye className="h-4 w-4" />
                       </Button>
                       <Button variant="outline" size="icon" onClick={() => console.log('Edit', website.id)}>
