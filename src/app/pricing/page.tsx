@@ -230,7 +230,7 @@ export default function PricingPage() {
               </div>
               
               <div className="pt-0">
-                <Link href={plan.price === 0 ? "/signup" : `/signup?plan=${plan.id}`} className="block mb-6">
+                <Link href={plan.price === 0 ? "/signup" : `/login?plan=${plan.id}`} className="block mb-6">
                   <button className={`w-full font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 ${
                     plan.id === 'basic' ? 'bg-white/20 hover:bg-white/30 text-white border border-white/30' :
                     plan.id === 'pro' ? 'bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white' :

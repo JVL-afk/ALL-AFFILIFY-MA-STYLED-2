@@ -119,7 +119,7 @@ export default function PlanUpgradePrompt({
       </div>
       
       <div className="flex justify-center">
-        <Link href={`/pricing?upgrade=${requiredPlan}&from=${currentPlan}&feature=${encodeURIComponent(featureName)}`}>
+        <Link href={`/login?upgrade=${requiredPlan}&from=${currentPlan}&feature=${encodeURIComponent(featureName)}`}>
           <Button className={`bg-gradient-to-r ${getPlanGradient()} hover:opacity-90 text-white`}>
             <Crown className="w-4 h-4 mr-2" />
             Upgrade to {requiredPlan.charAt(0).toUpperCase() + requiredPlan.slice(1)}
