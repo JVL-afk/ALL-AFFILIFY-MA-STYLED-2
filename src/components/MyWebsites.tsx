@@ -164,7 +164,7 @@ export function MyWebsites() {
                         website.status === 'published' ? 'bg-green-100 text-green-800' :
                         website.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
                         'bg-gray-100 text-gray-800'
-                      `}>
+                      }`}>
                         {website.status ? website.status.charAt(0).toUpperCase() + website.status.slice(1) : 'Draft'}
                       </span>
                     </TableCell>
