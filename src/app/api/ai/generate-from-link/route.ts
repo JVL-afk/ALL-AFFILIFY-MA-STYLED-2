@@ -636,6 +636,10 @@ export async function POST(request: NextRequest) {
 
     // Save website to database
     const { db } = await connectToDatabase();
+    
+    // Determine the live URL
+    const liveUrl = netlifyDeployment?.url || `${process.env.NEXT_PUBLIC_APP_URL || 'https://affilify.eu'}/websites/${slug}`;
+    
     const websiteData = {
       _id: new ObjectId(),
       userId: user._id,
@@ -643,13 +647,21 @@ export async function POST(request: NextRequest) {
       title: productInfo.title,
       description: productInfo.description,
       productUrl,
+      url: liveUrl,
       html: websiteHTML,
       productInfo,
       netlifyDeployment,
+      status: 'draft',
+      template: 'modern',
+      content: {},
+      seo: {},
+      affiliateLinks: [{ url: productUrl, title: productInfo.title }],
       createdAt: new Date(),
       updatedAt: new Date(),
       views: 0,
       clicks: 0,
+      conversions: 0,
+      revenue: 0,
       isActive: true
     };
 
@@ -662,9 +674,6 @@ export async function POST(request: NextRequest) {
     );
 
     console.log('Website created successfully:', slug);
-
-    // Determine the live URL
-    const liveUrl = netlifyDeployment?.url || `${process.env.NEXT_PUBLIC_APP_URL || 'https://affilify.eu'}/websites/${slug}`;
 
     // Return success response
     return NextResponse.json({
