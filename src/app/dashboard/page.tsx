@@ -140,11 +140,11 @@ export default function DashboardPage() {
             <div className="text-gray-700">Websites Created</div>
           </div>
           <div className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 backdrop-blur-xl rounded-2xl p-6 border border-white border-opacity-30 text-center">
-            <div className="text-3xl font-bold text-gray-900 mb-2">{stats?.totalClicks?.toLocaleString() || "5683"}</div>
+            <div className="text-3xl font-bold text-gray-900 mb-2">{stats?.totalClicks?.toLocaleString() || "0"}</div>
             <div className="text-gray-700">Total Clicks</div>
           </div>
           <div className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 backdrop-blur-xl rounded-2xl p-6 border border-white border-opacity-30 text-center">
-            <div className="text-3xl font-bold text-gray-900 mb-2">${(stats?.totalRevenue?.toFixed(2) || "1562.80")}</div>
+            <div className="text-3xl font-bold text-gray-900 mb-2">${(stats?.totalRevenue?.toFixed(2) || "00.00")}</div>
             <div className="text-gray-700">Revenue Generated</div>
           </div>
           <div className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 backdrop-blur-xl rounded-2xl p-6 border border-white border-opacity-30 text-center">
