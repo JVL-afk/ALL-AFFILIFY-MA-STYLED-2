@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 
@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,8 +36,16 @@ export default function LoginPage() {
         // Store user data in localStorage for client-side access
         localStorage.setItem('user', JSON.stringify(data.user))
         
-        // Redirect to dashboard
-        router.push('/dashboard')
+        const planToUpgrade = searchParams.get('plan')
+
+        if (planToUpgrade === 'pro') {
+          router.push('https://buy.stripe.com/aFa5kD1kNaRpe991lP8IU00')
+        } else if (planToUpgrade === 'enterprise') {
+          router.push('https://buy.stripe.com/28EcN56F7cZx1mn7Kd8IU01')
+        } else {
+          // Redirect to dashboard
+          router.push('/dashboard')
+        }
       } else {
         setError(data.error || 'Login failed')
       }

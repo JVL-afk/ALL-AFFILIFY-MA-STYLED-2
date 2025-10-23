@@ -42,44 +42,26 @@ export async function POST(request: NextRequest) {
     // Generate token
     const token = generateToken(user.id)
 
-    // Create response
-    const response = NextResponse.json({
-      success: true,
-      message: 'Login successful',
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        plan: user.plan,
-        websitesCreated: user.websitesCreated,
-        websiteLimit: user.websiteLimit,
-        analysesUsed: user.analysesUsed,
-        analysisLimit: user.analysisLimit
-      }
-    })
-
-    // Set auth cookie
-        // Define Stripe links
+    // Define Stripe links
     const STRIPE_LINKS: Record<string, string> = {
       pro: 'https://buy.stripe.com/aFa5kD1kNaRpe991lP8IU00',
       enterprise: 'https://buy.stripe.com/28EcN56F7cZx1mn7Kd8IU01',
     }
 
-    // Check for upgrade intent
+    // Check for upgrade intent and redirect if necessary
     if (planId && STRIPE_LINKS[planId]) {
-      // Set auth cookie before redirecting to external Stripe link
       const redirectResponse = NextResponse.redirect(STRIPE_LINKS[planId], 302)
       redirectResponse.cookies.set('auth-token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7 // 7 days
+        maxAge: 60 * 60 * 24 * 7, // 7 days
       })
       return redirectResponse
     }
 
-    // Create response
-    const response = NextResponse.json({
+    // If no upgrade, create a standard success response
+    const successResponse = NextResponse.json({
       success: true,
       message: 'Login successful',
       user: {
@@ -90,12 +72,12 @@ export async function POST(request: NextRequest) {
         websitesCreated: user.websitesCreated,
         websiteLimit: user.websiteLimit,
         analysesUsed: user.analysesUsed,
-        analysisLimit: user.analysisLimit
-      }
+        analysisLimit: user.analysisLimit,
+      },
     })
 
-    // Set auth cookie
-    response.cookies.set('auth-token', token, {
+    // Set auth cookie on the success response
+    successResponse.cookies.set('auth-token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
