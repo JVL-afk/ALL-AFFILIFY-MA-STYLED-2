@@ -81,14 +81,14 @@ export default function ABTestingPage() {
   const [success, setSuccess] = useState('')
 
   // Temporarily remove Enterprise plan restriction for testing
-  const [hasEnterpriseAccess, setHasEnterpriseAccess] = useState(true)
+  const [hasEnterpriseAccess, setHasEnterpriseAccess] = useState(false)
 
   useEffect(() => {
-    // checkEnterpriseAccess()
-    // if (hasEnterpriseAccess) {
+checkEnterpriseAccess()
+    if (hasEnterpriseAccess) {
       loadTests()
       loadStats()
-    // }
+    }
   }, [])
 
   const checkEnterpriseAccess = async () => {
@@ -96,8 +96,7 @@ export default function ABTestingPage() {
       const response = await fetch('/api/auth/me')
       if (response.ok) {
         const data = await response.json()
-        // setHasEnterpriseAccess(data.user.plan === 'enterprise')
-        setHasEnterpriseAccess(true) // Temporarily allow access for testing
+        setHasEnterpriseAccess(data.user.plan === 'enterprise')
       }
     } catch (error) {
       console.error('Error checking access:', error)
@@ -252,10 +251,10 @@ export default function ABTestingPage() {
               <li className="flex items-center"><Sparkles className="w-4 h-4 mr-2 text-purple-600" /> Conversion funnel optimization</li>
             </ul>
           </div>
-          <Button size="lg" variant="gradient">
+          <a href="/pricing?upgrade=enterprise&feature=A/B Testing" className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white h-10 py-2 px-4">
             <Crown className="w-4 h-4 mr-2" />
             Upgrade to Enterprise
-          </Button>
+          </a>
         </div>
       </div>
     )
