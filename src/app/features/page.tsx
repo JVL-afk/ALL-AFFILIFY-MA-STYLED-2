@@ -35,8 +35,8 @@ import {
   RefreshCw,
   PieChart,
   FileText,
-  Share2
-} from 'lucide-react'
+  <Share2,
+  Code} from 'lucide-react'
 import Header from '@/components/Header'
 
 export default function FeaturesPage() {
@@ -227,18 +227,35 @@ export default function FeaturesPage() {
             <Link href="/features/custom-integrations">
               <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:bg-white/20 transition-all duration-300 h-full">
                 <div className="w-16 h-16 bg-gradient-to-r from-orange-600 to-red-600 rounded-xl flex items-center justify-center mb-6">
-                  <Settings className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold mb-4 text-white">Custom Integrations</h3>
-                <p className="text-white/70 mb-6">
-                  Integrate with popular affiliate networks, payment processors, and marketing tools to streamline your workflow.
-                </p>
-                <div className="flex items-center text-orange-400">
-                  <span className="mr-2">Learn more</span>
-                  <ArrowRight className="w-4 h-4" />
-                </div>
-              </div>
-            </Link>
+	  <Settings className="w-8 h-8 text-white" />
+	                </div>
+	                <h3 className="text-2xl font-bold mb-4 text-white">Custom Integrations</h3>
+	                <p className="text-white/70 mb-6">
+	                  Integrate with popular affiliate networks, payment processors, and marketing tools to streamline your workflow.
+	                </p>
+	                <div className="flex items-center text-orange-400">
+	                  <span className="mr-2">Learn more</span>
+	                  <ArrowRight className="w-4 h-4" />
+	                </div>
+	              </div>
+	            </Link>
+	            
+	            {/* Code Editor */}
+	            <Link href="/features/code-editor">
+	              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:bg-white/20 transition-all duration-300 h-full">
+	                <div className="w-16 h-16 bg-gradient-to-r from-orange-600 to-red-600 rounded-xl flex items-center justify-center mb-6">
+	                  <Code className="w-8 h-8 text-white" />
+	                </div>
+	                <h3 className="text-2xl font-bold mb-4 text-white">Code Editor</h3>
+	                <p className="text-white/70 mb-6">
+	                  Customize your websites with a powerful, built-in code editor for advanced HTML, CSS, and JavaScript modifications.
+	                </p>
+	                <div className="flex items-center text-orange-400">
+	                  <span className="mr-2">Learn more</span>
+	                  <ArrowRight className="w-4 h-4" />
+	                </div>
+	              </div>
+	            </Link>
             
             {/* Advanced Reporting */}
             <Link href="/features/advanced-reporting">
