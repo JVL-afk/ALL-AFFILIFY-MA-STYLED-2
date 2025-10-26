@@ -36,7 +36,7 @@ import {
   PieChart,
   FileText,
   Share2,
-  Code} from 'lucide-react'
+} from 'lucide-react'
 import Header from '@/components/Header'
 
 export default function FeaturesPage() {
