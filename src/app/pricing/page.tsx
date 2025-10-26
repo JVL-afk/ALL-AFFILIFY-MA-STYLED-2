@@ -14,7 +14,8 @@ import {
   TestTube,
   Palette,
   Shield,
-  Headphones
+  Headphones,
+  Code2
 } from 'lucide-react'
 
 interface PlanFeature {
@@ -100,6 +101,7 @@ export default function PricingPage() {
         { name: 'White-label options', included: true, icon: <Shield className="w-4 h-4" /> },
         { name: 'API access', included: true, icon: <Zap className="w-4 h-4" /> },
         { name: 'Team collaboration', included: true, icon: <Users className="w-4 h-4" /> },
+        { name: '🚀 Full Code Editor (Customize Your Dashboard!)', included: true, icon: <Code2 className="w-4 h-4" /> },
         { name: 'Dedicated support', included: true, icon: <Headphones className="w-4 h-4" /> }
       ]
     }
