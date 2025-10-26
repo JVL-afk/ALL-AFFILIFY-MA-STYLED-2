@@ -12,6 +12,7 @@
     "@google-analytics/data": "^5.2.0",
     "@google/genai": "^1.26.0",
     "@google/generative-ai": "^0.24.1",
+    "@monaco-editor/react": "^4.7.0",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.3",

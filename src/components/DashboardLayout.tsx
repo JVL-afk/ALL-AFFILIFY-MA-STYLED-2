@@ -25,7 +25,8 @@ import {
   Plug,
   FileText,
   TestTube,
-  Star
+  Star,
+  Code
 } from 'lucide-react'
 import { FEATURE_ACCESS_MAP, PlanType } from '@/lib/plan-middleware'
 
@@ -161,6 +162,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   ]
 
   const enterpriseNavigation = [
+    {
+      name: '🚀 Code Editor',
+      href: '/dashboard/code-editor',
+      icon: Code,
+      current: pathname === '/dashboard/code-editor',
+      requiredPlan: 'enterprise' as PlanType
+    },
     {
       name: 'Team Collaboration',
       href: '/dashboard/team-collaboration',
