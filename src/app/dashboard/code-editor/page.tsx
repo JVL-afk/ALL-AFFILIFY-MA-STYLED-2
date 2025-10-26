@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
+import VisualEditor from '@/components/VisualEditor'
+import CodeEditorToolbar from '@/components/CodeEditorToolbar'
 
 // Dynamically import Monaco Editor to avoid SSR issues
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), { ssr: false })
@@ -32,6 +34,8 @@ export default function CodeEditorPage() {
   const [deployments, setDeployments] = useState<Deployment[]>([])
   const [showDeployments, setShowDeployments] = useState(false)
   const [editorMode, setEditorMode] = useState<'code' | 'visual'>('code')
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
+  const editorRef = useRef<any>(null)
 
   // Load files on mount
   useEffect(() => {
@@ -135,6 +139,79 @@ export default function CodeEditorPage() {
     }, 3000)
   }
 
+  const rollbackToDeployment = async (deploymentId: string) => {
+    if (!confirm('Are you sure you want to rollback to this deployment? This will overwrite your current code.')) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/code-editor/rollback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deploymentId })
+      })
+
+      if (response.ok) {
+        alert('Rollback successful! Reloading files...')
+        loadFiles()
+        loadDeployments()
+      } else {
+        const data = await response.json()
+        alert(`Rollback failed: ${data.error}`)
+      }
+    } catch (error) {
+      console.error('Failed to rollback:', error)
+      alert('Rollback failed. Please try again.')
+    }
+  }
+
+  // Advanced editor features
+  const formatCode = () => {
+    if (editorRef.current) {
+      editorRef.current.getAction('editor.action.formatDocument').run()
+    }
+  }
+
+  const searchInFiles = (query: string) => {
+    if (editorRef.current && query) {
+      editorRef.current.trigger('', 'actions.find', { searchString: query })
+    }
+  }
+
+  const replaceInFiles = (find: string, replace: string) => {
+    if (editorRef.current && find) {
+      const model = editorRef.current.getModel()
+      if (model) {
+        const fullText = model.getValue()
+        const newText = fullText.replace(new RegExp(find, 'g'), replace)
+        model.setValue(newText)
+        setCode(newText)
+      }
+    }
+  }
+
+  const getAIAssistance = async () => {
+    if (!currentFile) return
+
+    try {
+      const response = await fetch('/api/code-editor/ai-assist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: code,
+          filePath: currentFile.path
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setAiSuggestions(data.suggestions || [])
+      }
+    } catch (error) {
+      console.error('AI assist failed:', error)
+    }
+  }
+
   return (
     <div className="h-screen flex flex-col bg-gray-900 text-white">
       {/* Header */}
@@ -215,6 +292,14 @@ export default function CodeEditorPage() {
                 </div>
               )}
 
+              {/* Code Editor Toolbar */}
+              <CodeEditorToolbar
+                onFormat={formatCode}
+                onSearch={searchInFiles}
+                onReplace={replaceInFiles}
+                onAIAssist={getAIAssistance}
+              />
+
               {/* Monaco Editor */}
               <div className="flex-1">
                 <MonacoEditor
@@ -223,27 +308,43 @@ export default function CodeEditorPage() {
                   theme="vs-dark"
                   value={code}
                   onChange={(value) => setCode(value || '')}
+                  onMount={(editor) => {
+                    editorRef.current = editor
+                  }}
                   options={{
                     minimap: { enabled: true },
                     fontSize: 14,
                     wordWrap: 'on',
                     automaticLayout: true,
+                    formatOnPaste: true,
+                    formatOnType: true,
                   }}
                 />
               </div>
+
+              {/* AI Suggestions Panel */}
+              {aiSuggestions.length > 0 && (
+                <div className="bg-gray-800 border-t border-gray-700 p-4">
+                  <h3 className="text-sm font-semibold mb-2">🤖 AI Suggestions</h3>
+                  <ul className="space-y-2">
+                    {aiSuggestions.map((suggestion, index) => (
+                      <li key={index} className="text-sm text-gray-300">
+                        • {suggestion}
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    onClick={() => setAiSuggestions([])}
+                    className="mt-2 text-xs text-gray-400 hover:text-white"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              )}
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center bg-gray-800">
-              <div className="text-center">
-                <h2 className="text-2xl font-bold mb-4">🎨 Visual Editor</h2>
-                <p className="text-gray-400 mb-4">Coming soon! The most advanced visual editor on the market.</p>
-                <button
-                  onClick={() => setEditorMode('code')}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded"
-                >
-                  Switch to Code Editor
-                </button>
-              </div>
+            <div className="flex-1">
+              <VisualEditor onCodeChange={(newCode) => setCode(newCode)} />
             </div>
           )}
         </div>
@@ -293,6 +394,14 @@ export default function CodeEditorPage() {
                       <div className="mt-2 p-2 bg-red-900 rounded text-sm">
                         ❌ {deployment.errorDetails}
                       </div>
+                    )}
+                    {deployment.status === 'success' && (
+                      <button
+                        onClick={() => rollbackToDeployment(deployment.id)}
+                        className="mt-2 w-full px-3 py-2 bg-yellow-600 hover:bg-yellow-700 rounded text-sm"
+                      >
+                        ⏪ Rollback to this version
+                      </button>
                     )}
                   </div>
                 ))

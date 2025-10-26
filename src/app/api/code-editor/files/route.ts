@@ -110,19 +110,13 @@ export const POST = requireEnterprise(async (request: NextRequest, user: Authent
 
 // Helper function to get default dashboard files
 async function getDefaultDashboardFiles(): Promise<FileContent[]> {
-  // This will be populated with the actual dashboard files from the repository
-  // For now, return a basic structure
-  return [
-    {
-      path: 'src/app/dashboard/page.tsx',
-      content: `// Dashboard Home Page\nexport default function DashboardPage() {\n  return <div>Welcome to your dashboard!</div>\n}`,
-      lastModified: new Date()
-    },
-    {
-      path: 'src/app/dashboard/layout.tsx',
-      content: `// Dashboard Layout\nexport default function DashboardLayout({ children }: { children: React.ReactNode }) {\n  return <div>{children}</div>\n}`,
-      lastModified: new Date()
-    }
-  ]
+  // Load the extracted dashboard files
+  const defaultFiles = require('@/lib/default-dashboard-files.json')
+  
+  return defaultFiles.map((file: any) => ({
+    path: file.path,
+    content: file.content,
+    lastModified: new Date(file.lastModified)
+  }))
 }
 

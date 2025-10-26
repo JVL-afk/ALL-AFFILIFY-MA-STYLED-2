@@ -4,6 +4,8 @@ import { AuthenticatedUser } from '@/lib/types'
 import { connectToDatabase } from '@/lib/mongodb'
 import { ObjectId } from 'mongodb'
 import { Deployment } from '@/lib/models/UserCode'
+import { GitHubService } from '@/lib/github-service'
+import { AIErrorExplainer } from '@/lib/ai-error-explainer'
 
 const NETLIFY_TOKEN = process.env.NETLIFY_ACCESS_TOKEN || 'nfp_hmio4j7N2WeEMji3c8PbAsiaiw64QD7D85e1'
 const GITHUB_TOKEN = process.env.GITHUB_PAT || 'ghp_sxvhlCXj5Bm0cXMpK7e1QWRElrfj6A1GwZaj'
@@ -172,7 +174,15 @@ async function deployToNetlify(userId: string, userCode: any, deploymentId: stri
   } catch (error: any) {
     console.error('Netlify deployment error:', error)
     
-    // Update deployment as failed
+    // Use AI to explain the error
+    let aiExplanation = null
+    try {
+      aiExplanation = await AIErrorExplainer.explainBuildError(error.message)
+    } catch (aiError) {
+      console.error('AI explanation failed:', aiError)
+    }
+
+    // Update deployment as failed with AI insights
     const { db } = await connectToDatabase()
     await db.collection('userCode').updateOne(
       { userId: new ObjectId(userId), 'deployments.id': deploymentId },
@@ -180,7 +190,9 @@ async function deployToNetlify(userId: string, userCode: any, deploymentId: stri
         $set: {
           'deployments.$.status': 'failed',
           'deployments.$.errorDetails': error.message,
-          'deployments.$.buildLogs': `Deployment failed: ${error.message}`
+          'deployments.$.buildLogs': aiExplanation 
+            ? `Deployment failed: ${error.message}\n\n🤖 AI Analysis:\n${aiExplanation.explanation}\n\n🛠️ Suggested Fixes:\n${aiExplanation.suggestedFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`
+            : `Deployment failed: ${error.message}`
         }
       }
     )
@@ -189,10 +201,22 @@ async function deployToNetlify(userId: string, userCode: any, deploymentId: stri
 
 // Helper function to push code to GitHub
 async function pushToGitHub(files: any[], branchName: string): Promise<string> {
-  // This is a simplified version - in production, you'd use the GitHub API
-  // to create/update files in the repository
-  
-  // For now, return a mock commit hash
-  return `commit-${Date.now()}`
+  try {
+    const fileUpdates = files.map(file => ({
+      path: file.path,
+      content: file.content
+    }))
+
+    const commitSha = await GitHubService.pushFiles(
+      branchName,
+      fileUpdates,
+      `Update user code - ${new Date().toISOString()}`
+    )
+
+    return commitSha
+  } catch (error: any) {
+    console.error('Push to GitHub error:', error)
+    throw new Error(`Failed to push to GitHub: ${error.message}`)
+  }
 }
 
