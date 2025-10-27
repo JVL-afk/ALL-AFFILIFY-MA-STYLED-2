@@ -62,6 +62,10 @@ export default function AboutMePage() {
               <p className="text-xl text-gray-200 leading-relaxed mb-6">
                 I started integrating-error another error and even more errors. Finally, after another three weeks I succeeded. Now I had to set up payment, legal terms and domains. Fortunately, I didn't have any problems with that.
               </p>
+
+              <p className="text-xl text-gray-200 leading-relaxed mb-6">
+                Now at the moment when you're seeing this you may find some errors on the app. You may want to leave and nothing is going to stop you, but I just want you to know that I don't want this to be just another app, I want this to be a community! I want this to be an app that's forever changing, an app where users can write its code. This should be a place created by affiliate marketers, for affiliate marketers! So before you leave AFFILIFY forever because of that one little error, just think what it could've been if JUST YOU got involved!
+              </p>  
               
               <p className="text-xl text-gray-200 leading-relaxed">
                 And here we are, we got to the point where I'm writing this. I just want you to know that if you got here, you're probably a way better person than me because honestly, if the roles were switched, I wouldn't have done the same.
