@@ -13,7 +13,7 @@ export interface Website {
   affiliateLinks: any
   template: string
   url?: string
-  status: 'draft' | 'published' | 'archived'
+  status: 'published' | 'archived'
   views: number
   clicks: number
   conversions: number
@@ -48,9 +48,11 @@ export async function saveWebsite(userId: string, websiteData: GeneratedWebsite)
       description: websiteData.description,
       content: websiteData.content,
       seo: websiteData.seo,
+      status: 'published' as const, // CRITICAL FIX: Ensure new websites are published, not drafts
+
       affiliateLinks: websiteData.affiliateLinks,
       template: websiteData.template,
-      status: 'draft' as const,
+      // Removed duplicated status line
       views: 0,
       clicks: 0,
       conversions: 0,
@@ -347,6 +349,40 @@ export async function getDashboardStats(userId: string): Promise<any> {
       performance: { totalViews: 0, totalClicks: 0, totalRevenue: 0, conversionRate: '0.00' },
       recent: { websites: [], analyses: [] }
     }
+  }
+}
+
+
+
+export async function getDashboardStats(userId: string): Promise<{ websiteCount: number, totalClicks: number, totalRevenue: number }> {
+  try {
+    const { db } = await connectToDatabase()
+    const userObjectId = new ObjectId(userId)
+
+    const websiteCount = await db.collection('websites').countDocuments({ userId: userObjectId })
+    
+    // Aggregate for total clicks and revenue
+    const stats = await db.collection('websites').aggregate([
+      { $match: { userId: userObjectId } },
+      { $group: {
+        _id: null,
+        totalClicks: { $sum: "$clicks" },
+        totalRevenue: { $sum: "$revenue" }
+      }}
+    ]).toArray()
+
+    const totalClicks = stats[0]?.totalClicks || 0
+    const totalRevenue = stats[0]?.totalRevenue || 0
+
+    return {
+      websiteCount,
+      totalClicks,
+      totalRevenue
+    }
+
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error)
+    return { websiteCount: 0, totalClicks: 0, totalRevenue: 0 }
   }
 }
 

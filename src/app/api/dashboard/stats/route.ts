@@ -37,7 +37,20 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      stats
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        plan: user.plan,
+        websiteCount: stats.websiteCount,
+        createdAt: user.createdAt,
+        lastLoginAt: user.lastLoginAt
+      },
+      stats: {
+        totalClicks: stats.totalClicks,
+        totalRevenue: stats.totalRevenue,
+        // Add other stats here if needed
+      }
     })
   } catch (error) {
     console.error('Dashboard stats error:', error)
