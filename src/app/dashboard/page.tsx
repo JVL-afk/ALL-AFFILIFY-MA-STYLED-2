@@ -21,7 +21,7 @@ export default async function DashboardPage() {
   // This is a common pattern to adapt utility functions written for Route Handlers
   // to work in Server Components.
   const cookieStore = cookies();
-  const token = cookieStore.get('token');
+  const token = cookieStore.get('auth-token');
   
   // Create a minimal mock request object that verifyAuth can use
   const mockRequest = {
