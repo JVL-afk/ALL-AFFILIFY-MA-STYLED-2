@@ -1,23 +1,12 @@
-'use client'
-
 import { redirect } from 'next/navigation';
-import { useSession } from 'next-auth/react'; // Use client-side session hook
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 
-export default function DashboardPage() {
-  // Since this page is client-side and only handles redirecting, 
-  // we need to fetch the session client-side.
-  const { data: session, status } = useSession();
+export default async function DashboardPage() {
+  const session = await getServerSession(authOptions);
 
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 flex items-center justify-center">
-        <div className="text-gray-900 text-xl">Loading...</div>
-      </div>
-    );
-  }
-
-  if (status === 'unauthenticated' || !session || !session.user) {
-    // This should ideally be handled by middleware, but as a fallback
+  if (!session || !session.user || !session.user.plan) {
+    // Redirect to login if not authenticated or plan is missing
     redirect('/login');
   }
 
@@ -36,4 +25,5 @@ export default function DashboardPage() {
   redirect('/dashboard/basic');
 }
 
-
+// The original content of the dashboard page has been moved to plan-specific pages.
+// This page now only serves as a plan-based router.
