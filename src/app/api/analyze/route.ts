@@ -12,14 +12,8 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '')
 // Comprehensive website analysis using multiple tools
 async function performComprehensiveAnalysis(url: string) {
   try {
-    // 1. PageSpeed Insights Analysis
-    let pageSpeedData
-    try {
-      pageSpeedData = await getPageSpeedInsights(url)
-    } catch (e) {
-      console.error('PageSpeed Insights failed, using fallback data:', e)
-      pageSpeedData = { mobile: { score: 0, metrics: {} }, desktop: { score: 0, metrics: {} }, error: 'PageSpeed analysis failed' }
-    }
+    // 1. PageSpeed Insights Analysis (Removed due to 403 API error - relying on content/technical SEO data only)
+    const pageSpeedData = { mobile: { score: 0, metrics: {} }, desktop: { score: 0, metrics: {} }, error: 'PageSpeed analysis disabled' }
     
     // 2. Website Content Analysis with Cheerio
     let contentData
@@ -55,113 +49,7 @@ async function performComprehensiveAnalysis(url: string) {
   }
 }
 
-// PageSpeed Insights API integration
-async function getPageSpeedInsights(url: string) {
-  const maxRetries = 3
-  let lastError = null
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const apiKey = process.env.GOOGLE_PAGESPEED_API_KEY || process.env.GOOGLE_AI_API_KEY
-      
-      if (!apiKey) {
-        return {
-          mobile: { score: 0, metrics: {} },
-          desktop: { score: 0, metrics: {} },
-          error: 'PageSpeed API key not configured'
-        }
-      }
-
-      console.log(`PageSpeed attempt ${attempt}/${maxRetries} for ${url}`)
-
-      // Add timeout and better error handling
-      const axiosConfig = {
-        timeout: 30000, // 30 second timeout
-        headers: {
-          'User-Agent': 'AFFILIFY-Analysis-Bot/1.0'
-        }
-      }
-
-      // Mobile analysis with retry logic
-      const mobileResponse = await axios.get(
-        `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&key=${apiKey}&strategy=mobile&category=performance`,
-        axiosConfig
-      )
-
-      // Desktop analysis with retry logic
-      const desktopResponse = await axios.get(
-        `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&key=${apiKey}&strategy=desktop&category=performance`,
-        axiosConfig
-      )
-
-      return {
-        mobile: {
-          score: mobileResponse.data.lighthouseResult?.categories?.performance?.score * 100 || 0,
-          accessibility: mobileResponse.data.lighthouseResult?.categories?.accessibility?.score * 100 || 0,
-          bestPractices: mobileResponse.data.lighthouseResult?.categories?.['best-practices']?.score * 100 || 0,
-          seo: mobileResponse.data.lighthouseResult?.categories?.seo?.score * 100 || 0,
-          metrics: {
-            fcp: mobileResponse.data.lighthouseResult?.audits?.['first-contentful-paint']?.displayValue || 'N/A',
-            lcp: mobileResponse.data.lighthouseResult?.audits?.['largest-contentful-paint']?.displayValue || 'N/A',
-            fid: mobileResponse.data.lighthouseResult?.audits?.['max-potential-fid']?.displayValue || 'N/A',
-            cls: mobileResponse.data.lighthouseResult?.audits?.['cumulative-layout-shift']?.displayValue || 'N/A',
-            speedIndex: mobileResponse.data.lighthouseResult?.audits?.['speed-index']?.displayValue || 'N/A',
-            tti: mobileResponse.data.lighthouseResult?.audits?.['interactive']?.displayValue || 'N/A'
-          }
-        },
-        desktop: {
-          score: desktopResponse.data.lighthouseResult?.categories?.performance?.score * 100 || 0,
-          accessibility: desktopResponse.data.lighthouseResult?.categories?.accessibility?.score * 100 || 0,
-          bestPractices: desktopResponse.data.lighthouseResult?.categories?.['best-practices']?.score * 100 || 0,
-          seo: desktopResponse.data.lighthouseResult?.categories?.seo?.score * 100 || 0,
-          metrics: {
-            fcp: desktopResponse.data.lighthouseResult?.audits?.['first-contentful-paint']?.displayValue || 'N/A',
-            lcp: desktopResponse.data.lighthouseResult?.audits?.['largest-contentful-paint']?.displayValue || 'N/A',
-            fid: desktopResponse.data.lighthouseResult?.audits?.['max-potential-fid']?.displayValue || 'N/A',
-            cls: desktopResponse.data.lighthouseResult?.audits?.['cumulative-layout-shift']?.displayValue || 'N/A',
-            speedIndex: desktopResponse.data.lighthouseResult?.audits?.['speed-index']?.displayValue || 'N/A',
-            tti: desktopResponse.data.lighthouseResult?.audits?.['interactive']?.displayValue || 'N/A'
-          }
-        }
-      }
-
-    } catch (error) {
-      lastError = error
-      console.error(`PageSpeed attempt ${attempt} failed:`, error.response?.status, error.response?.statusText)
-      
-      // If it's a 403 error, don't retry (authentication issue)
-      if (error.response?.status === 403) {
-        console.error('PageSpeed API authentication failed - check API key and permissions')
-        break
-      }
-      
-      // If it's a 429 error, stop retrying and return a specific error message
-      if (error.response?.status === 429) {
-        console.error('PageSpeed API rate limit exceeded (429 Too Many Requests)')
-        lastError = { message: 'PageSpeed API rate limit exceeded (429)', status: 429 }
-        break
-      }
-      
-      // If it's the last attempt, don't wait
-      if (attempt < maxRetries) {
-        const waitTime = attempt * 2000 // Exponential backoff: 2s, 4s, 6s
-        console.log(`Waiting ${waitTime}ms before retry...`)
-        await new Promise(resolve => setTimeout(resolve, waitTime))
-      }
-    }
-  }
-
-  // All attempts failed
-  console.error('All PageSpeed attempts failed:', lastError)
-  const status = lastError?.response?.status || 'Unknown'
-  const message = lastError?.message || 'Unknown Error'
-  return {
-    mobile: { score: 0, metrics: {}, error: `PageSpeed analysis failed (Status: ${status})` },
-    desktop: { score: 0, metrics: {}, error: `PageSpeed analysis failed (Status: ${status})` },
-    error: `Failed to analyze PageSpeed after ${maxRetries} attempts: Status ${status}, Message: ${message}`,
-    fallback_used: true
-  }
-}
 
 // Website content analysis using Cheerio
 async function analyzeWebsiteContent(url: string) {
@@ -283,18 +171,7 @@ YOUR ANALYSIS COULD BE THE DIFFERENCE BETWEEN SOMEONE'S SUCCESS AND FAILURE. TRE
 TARGET ANALYSIS: ${url}
 
 TECHNICAL DATA PROVIDED:
-- Performance Score: ${pageSpeedData.mobile?.score || 'N/A'}
-- Accessibility Score: ${pageSpeedData.mobile?.accessibility || 'N/A'}
-- Best Practices Score: ${pageSpeedData.mobile?.bestPractices || 'N/A'}
-- SEO Score: ${pageSpeedData.mobile?.seo || 'N/A'}
-- Core Web Vitals: ${JSON.stringify(pageSpeedData.mobile?.metrics || {})}
-
-DESKTOP PERFORMANCE:
-- Performance Score: ${pageSpeedData.desktop?.score || 'N/A'}
-- Accessibility Score: ${pageSpeedData.desktop?.accessibility || 'N/A'}
-- Best Practices Score: ${pageSpeedData.desktop?.bestPractices || 'N/A'}
-- SEO Score: ${pageSpeedData.desktop?.seo || 'N/A'}
-- Core Web Vitals: ${JSON.stringify(pageSpeedData.desktop?.metrics || {})}
+	- Performance Data: [REMOVED DUE TO API ERROR - Relying on Content and Technical SEO Data]
 
 WEBSITE CONTENT DATA:
 ${JSON.stringify(contentData, null, 2)}
@@ -333,9 +210,8 @@ PHASE 1: DEEP HISTORICAL ARCHAEOLOGY & DIGITAL FORENSICS
 - Affiliate network feedback (ShareASale, CJ, ClickBank)
 
 1.3 Technical Performance & Conversion Analysis
-- Comprehensive PageSpeed analysis (provided above)
-- Core Web Vitals impact on conversion rates
-- Mobile vs desktop performance comparison
+	- Technical Quality Assessment (Based on Technical SEO Data)
+	- Mobile vs desktop readiness (Based on Technical SEO Data)
 - Accessibility compliance and user experience barriers
 - SEO optimization and organic visibility potential
 - Technical implementation quality assessment
@@ -421,11 +297,9 @@ You MUST respond with a comprehensive JSON object containing:
     }
   },
   "technical_performance": {
-    "pagespeed_score": [Combined mobile/desktop score],
-    "mobile_score": [Mobile performance score],
-    "desktop_score": [Desktop performance score],
-    "core_web_vitals": "Assessment of loading, interactivity, visual stability",
-    "conversion_impact": "How technical performance affects conversions"
+	    "technical_quality_score": [0-100 integer - Based on Technical SEO Data],
+	    "technical_summary": "Summary of technical quality and readiness",
+	    "conversion_impact": "How technical quality affects conversions"
   },
   "financial_analysis": {
     "commission_structure": "Detailed commission analysis",
