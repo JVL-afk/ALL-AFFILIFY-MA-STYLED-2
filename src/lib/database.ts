@@ -354,35 +354,5 @@ export async function getDashboardStats(userId: string): Promise<any> {
 
 
 
-export async function getDashboardStats(userId: string): Promise<{ websiteCount: number, totalClicks: number, totalRevenue: number }> {
-  try {
-    const { db } = await connectToDatabase()
-    const userObjectId = new ObjectId(userId)
 
-    const websiteCount = await db.collection('websites').countDocuments({ userId: userObjectId })
-    
-    // Aggregate for total clicks and revenue
-    const stats = await db.collection('websites').aggregate([
-      { $match: { userId: userObjectId } },
-      { $group: {
-        _id: null,
-        totalClicks: { $sum: "$clicks" },
-        totalRevenue: { $sum: "$revenue" }
-      }}
-    ]).toArray()
-
-    const totalClicks = stats[0]?.totalClicks || 0
-    const totalRevenue = stats[0]?.totalRevenue || 0
-
-    return {
-      websiteCount,
-      totalClicks,
-      totalRevenue
-    }
-
-  } catch (error) {
-    console.error('Error fetching dashboard stats:', error)
-    return { websiteCount: 0, totalClicks: 0, totalRevenue: 0 }
-  }
-}
 
