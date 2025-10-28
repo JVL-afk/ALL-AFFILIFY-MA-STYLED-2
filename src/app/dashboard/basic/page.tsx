@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useSession } from 'next-auth/react' // Assuming a client-side session context is available for user info
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { 
@@ -17,14 +18,68 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
+
+interface DashboardStats {
+  websiteCount: number;
+  websiteLimit: number;
+  totalViews: number;
+  totalClicks: number;
+  totalRevenue: number;
+  conversionRate: string;
+  recentWebsites: any[];
+}
+
 export default function BasicDashboard() {
-  const [stats, setStats] = useState({
-    websites: 1,
-    maxWebsites: 3,
-    totalViews: 1247,
-    totalClicks: 89,
-    conversionRate: 7.1
-  })
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  // Assuming the user object is available via a client-side context (e.g., useSession)
+  // Since the user is authenticated, we can rely on a dedicated API route for data.
+  
+  const fetchStats = useCallback(async () => {
+    try {
+      const response = await fetch('/api/dashboard/stats');
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard stats');
+      }
+      const data = await response.json();
+      setStats({
+        websiteCount: data.websites.total,
+        websiteLimit: 3, // Basic plan limit is 3
+        totalViews: data.performance.totalViews,
+        totalClicks: data.performance.totalClicks,
+        totalRevenue: data.performance.totalRevenue,
+        conversionRate: data.performance.conversionRate,
+        recentWebsites: data.recent.websites,
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      // CRITICAL FIX: Set to zero/null data instead of mock data on failure
+      setStats({
+        websiteCount: 0,
+        websiteLimit: 3,
+        totalViews: 0,
+        totalClicks: 0,
+        totalRevenue: 0,
+        conversionRate: '0.00',
+        recentWebsites: [],
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
+  if (loading || !stats) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 flex items-center justify-center">
+        <div className="text-gray-900 text-xl">Loading Dashboard...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900">
@@ -53,12 +108,17 @@ export default function BasicDashboard() {
           <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">Websites</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-900">{stats.websiteCount}/{stats.websiteLimit}</div>
+              <p className="text-xs text-gray-400">
+                {stats.websiteLimit - stats.websiteCount} remaining
               <Globe className="h-4 w-4 text-purple-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">{stats.websites}/{stats.maxWebsites}</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.websiteCount}/{stats.websiteLimit}</div>
               <p className="text-xs text-gray-400">
-                {stats.maxWebsites - stats.websites} remaining
+                {stats.websiteLimit - stats.websiteCount} remaining
               </p>
             </CardContent>
           </Card>
@@ -71,7 +131,7 @@ export default function BasicDashboard() {
             <CardContent>
               <div className="text-2xl font-bold text-gray-900">{stats.totalViews?.toLocaleString() || "0"}</div>
               <p className="text-xs text-gray-400">
-                +12% from last month
+                {/* Removed mock data for monthly change */}
               </p>
             </CardContent>
           </Card>
@@ -82,9 +142,9 @@ export default function BasicDashboard() {
               <MousePointer className="h-4 w-4 text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">{stats.totalClicks}</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.totalClicks?.toLocaleString() || "0"}</div>
               <p className="text-xs text-gray-400">
-                +8% from last month
+                {/* Removed mock data for monthly change */}
               </p>
             </CardContent>
           </Card>
@@ -97,7 +157,7 @@ export default function BasicDashboard() {
             <CardContent>
               <div className="text-2xl font-bold text-gray-900">{stats.conversionRate}%</div>
               <p className="text-xs text-gray-400">
-                +2.1% from last month
+                {/* Removed mock data for monthly change */}
               </p>
             </CardContent>
           </Card>
@@ -176,27 +236,31 @@ export default function BasicDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <Globe className="w-5 h-5 text-purple-400" />
-                  <div>
-                    <p className="text-gray-900 font-medium">Basketball Hoop Website</p>
-                    <p className="text-gray-400 text-sm">Created 2 days ago</p>
-                  </div>
-                </div>
-                <Badge variant="secondary" className="bg-green-600 text-gray-900">Active</Badge>
-              </div>
-              
-              <div className="text-center py-8">
-                <p className="text-gray-400">Create more websites to see additional activity</p>
-                <Button asChild className="mt-4 bg-purple-600 hover:bg-purple-700">
-                  <Link href="/dashboard/create-website/basic">
-                    Create Website
-                  </Link>
-                </Button>
-              </div>
-            </div>
+	            <div className="space-y-4">
+	              {stats.recentWebsites.length > 0 ? (
+	                stats.recentWebsites.map((website) => (
+	                  <div key={website.id} className="flex items-center justify-between p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
+	                    <div className="flex items-center space-x-3">
+	                      <Globe className="w-5 h-5 text-purple-400" />
+	                      <div>
+	                        <p className="text-gray-900 font-medium">{website.title}</p>
+	                        <p className="text-gray-400 text-sm">Created {new Date(website.createdAt).toLocaleDateString()}</p>
+	                      </div>
+	                    </div>
+	                    <Badge variant="secondary" className={website.status === 'published' ? 'bg-green-600 text-gray-900' : 'bg-yellow-600 text-gray-900'}>{website.status}</Badge>
+	                  </div>
+	                ))
+	              ) : (
+	                <div className="text-center py-8">
+	                  <p className="text-gray-400">Create your first website to see activity</p>
+	                  <Button asChild className="mt-4 bg-purple-600 hover:bg-purple-700">
+	                    <Link href="/dashboard/create-website/basic">
+	                      Create Website
+	                    </Link>
+	                  </Button>
+	                </div>
+	              )}
+	            </div>
           </CardContent>
         </Card>
       </div>
