@@ -108,11 +108,6 @@ export default function BasicDashboard() {
           <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">Websites</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900">{stats.websiteCount}/{stats.websiteLimit}</div>
-              <p className="text-xs text-gray-400">
-                {stats.websiteLimit - stats.websiteCount} remaining
               <Globe className="h-4 w-4 text-purple-400" />
             </CardHeader>
             <CardContent>
@@ -236,31 +231,31 @@ export default function BasicDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-	            <div className="space-y-4">
-	              {stats.recentWebsites.length > 0 ? (
-	                stats.recentWebsites.map((website) => (
-	                  <div key={website.id} className="flex items-center justify-between p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
-	                    <div className="flex items-center space-x-3">
-	                      <Globe className="w-5 h-5 text-purple-400" />
-	                      <div>
-	                        <p className="text-gray-900 font-medium">{website.title}</p>
-	                        <p className="text-gray-400 text-sm">Created {new Date(website.createdAt).toLocaleDateString()}</p>
-	                      </div>
-	                    </div>
-	                    <Badge variant="secondary" className={website.status === 'published' ? 'bg-green-600 text-gray-900' : 'bg-yellow-600 text-gray-900'}>{website.status}</Badge>
-	                  </div>
-	                ))
-	              ) : (
-	                <div className="text-center py-8">
-	                  <p className="text-gray-400">Create your first website to see activity</p>
-	                  <Button asChild className="mt-4 bg-purple-600 hover:bg-purple-700">
-	                    <Link href="/dashboard/create-website/basic">
-	                      Create Website
-	                    </Link>
-	                  </Button>
-	                </div>
-	              )}
-	            </div>
+            <div className="space-y-4">
+              {stats.recentWebsites.length > 0 ? (
+                stats.recentWebsites.map((website) => (
+                  <div key={website.id} className="flex items-center justify-between p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <Globe className="w-5 h-5 text-purple-400" />
+                      <div>
+                        <p className="text-gray-900 font-medium">{website.title}</p>
+                        <p className="text-gray-400 text-sm">Created {new Date(website.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <Badge variant="secondary" className={website.status === 'published' ? 'bg-green-600 text-gray-900' : 'bg-yellow-600 text-gray-900'}>{website.status}</Badge>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-400">Create your first website to see activity</p>
+                  <Button asChild className="mt-4 bg-purple-600 hover:bg-purple-700">
+                    <Link href="/dashboard/create-website/basic">
+                      Create Website
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
