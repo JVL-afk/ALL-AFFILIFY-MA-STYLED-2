@@ -27,7 +27,7 @@ export const POST = requirePremium(async (request: NextRequest, user: Authentica
 
     // Best-in-class implementation using Gemini for a conversational, context-aware chat
     const chat = ai.chats.create({
-      model: 'gemini-2.5-flash', // Use gemini-2.5-flash for speed, but the context implies it's "Pro" quality
+      model: 'gemini-2.5-flash', // Use gemini-2.5-flash for speed, but the context implies it's "Pro" qualityty
       history: history || [],
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
