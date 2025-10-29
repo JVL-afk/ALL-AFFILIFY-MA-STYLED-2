@@ -634,9 +634,30 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Increment user's analysis count
-    await incrementUserAnalyses(user.id)
+    // Save analysis to database
+    const savedAnalysis = await saveAnalysis(user.id, {
+      url: transformedAnalysis.url,
+      analysisType: transformedAnalysis.analysis_type,
+      score: transformedAnalysis.main_score,
+      metrics: {
+        pagespeed: transformedAnalysis.pagespeed_data,
+        content: transformedAnalysis.content_data,
+        technical: transformedAnalysis.technical_data,
+        ai: transformedAnalysis.ai_analysis
+      },
+      competitors: transformedAnalysis.ai_analysis.competitors || [],
+      suggestions: transformedAnalysis.ai_analysis.recommendations || []
+    })
 
+    if (!savedAnalysis) {
+      console.error('Failed to save analysis to database.')
+      // Proceed with response but log error
+    } else {
+      // Increment user's analysis count ONLY if save was successful
+      await incrementUserAnalyses(user.id)
+    }
+
+    // The client is likely expecting the analysis data directly.
     return NextResponse.json({
       success: true,
       message: 'Comprehensive website analysis completed',
