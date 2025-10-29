@@ -160,6 +160,12 @@ export default function EnterpriseDashboard() {
                   Manage All Sites
                 </Link>
               </Button>
+              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20">
+                <Link href="https://discord.gg/cdePwUQB" target="_blank" rel="noopener noreferrer">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2"><path d="M11.66 2.05c-4.4 0-8.12 3.63-8.12 8.1 0 3.1 1.7 5.8 4.25 7.2-1.2.4-2.3.9-3.3 1.5.1.1.2.2.3.3 1.1.8 2.3 1.4 3.6 1.8.8.2 1.6.3 2.4.3 4.4 0 8.1-3.6 8.1-8.1 0-4.4-3.7-8.1-8.1-8.1zm-4.3 12.3c-.9 0-1.6-.7-1.6-1.6 0-.9.7-1.6 1.6-1.6.9 0 1.6.7 1.6 1.6 0 .9-.7 1.6-1.6 1.6zm8.6 0c-.9 0-1.6-.7-1.6-1.6 0-.9.7-1.6 1.6-1.6.9 0 1.6.7 1.6 1.6 0 .9-.7 1.6-1.6 1.6z"/></svg>
+                  Join Discord Server
+                </Link>
+              </Button>
             </CardContent>
           </Card>
 
@@ -234,47 +240,27 @@ export default function EnterpriseDashboard() {
         </div>
 
         {/* Advanced Dashboard Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
             <CardHeader>
-              <CardTitle className="text-gray-900">Top Performing Websites</CardTitle>
+              <CardTitle className="text-gray-900">Team Activity Feed</CardTitle>
               <CardDescription className="text-gray-700">
-                Your highest converting sites
+                Real-time updates from your team
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <Target className="w-5 h-5 text-green-400" />
-                    <div>
-                      <p className="text-gray-900 font-medium">Tech Reviews Hub</p>
-                      <p className="text-gray-400 text-sm">12.4% conversion</p>
-                    </div>
-                  </div>
-                  <Badge variant="secondary" className="bg-green-600 text-gray-900">$8,247</Badge>
+                <div className="flex items-center space-x-3 p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
+                  <Users className="w-5 h-5 text-cyan-400" />
+                  <p className="text-gray-900"><span className="font-medium">Alice</span> deployed a new website: <span className="font-medium">"Top 10 Gadgets"</span></p>
                 </div>
-                
-                <div className="flex items-center justify-between p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <Target className="w-5 h-5 text-blue-400" />
-                    <div>
-                      <p className="text-gray-900 font-medium">Fitness Equipment</p>
-                      <p className="text-gray-400 text-sm">9.8% conversion</p>
-                    </div>
-                  </div>
-                  <Badge variant="secondary" className="bg-blue-600 text-gray-900">$6,892</Badge>
+                <div className="flex items-center space-x-3 p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
+                  <TestTube className="w-5 h-5 text-pink-400" />
+                  <p className="text-gray-900"><span className="font-medium">Bob</span> started an A/B test on <span className="font-medium">"Best Coffee Makers"</span></p>
                 </div>
-
-                <div className="flex items-center justify-between p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <Target className="w-5 h-5 text-purple-400" />
-                    <div>
-                      <p className="text-gray-900 font-medium">Home & Garden</p>
-                      <p className="text-gray-400 text-sm">8.1% conversion</p>
-                    </div>
-                  </div>
-                  <Badge variant="secondary" className="bg-purple-600 text-gray-900">$5,234</Badge>
+                <div className="flex items-center space-x-3 p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
+                  <Briefcase className="w-5 h-5 text-yellow-400" />
+                  <p className="text-gray-900"><span className="font-medium">Charlie</span> generated a Q3 Revenue Report</p>
                 </div>
               </div>
             </CardContent>
@@ -282,72 +268,15 @@ export default function EnterpriseDashboard() {
 
           <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
             <CardHeader>
-              <CardTitle className="text-gray-900">Team Activity</CardTitle>
+              <CardTitle className="text-gray-900">API Usage</CardTitle>
               <CardDescription className="text-gray-700">
-                Recent team member actions
+                Monitor your custom API key usage
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3 p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
-                  <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
-                    <span className="text-gray-900 text-sm font-medium">JS</span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-gray-900 font-medium">John Smith</p>
-                    <p className="text-gray-400 text-sm">Created "Smart Home" website</p>
-                  </div>
-                  <span className="text-gray-400 text-xs">2h ago</span>
-                </div>
-
-                <div className="flex items-center space-x-3 p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                    <span className="text-gray-900 text-sm font-medium">MJ</span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-gray-900 font-medium">Maria Johnson</p>
-                    <p className="text-gray-400 text-sm">Started A/B test on CTA buttons</p>
-                  </div>
-                  <span className="text-gray-400 text-xs">4h ago</span>
-                </div>
-
-                <div className="flex items-center space-x-3 p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
-                  <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                    <span className="text-gray-900 text-sm font-medium">DL</span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-gray-900 font-medium">David Lee</p>
-                    <p className="text-gray-400 text-sm">Generated analytics report</p>
-                  </div>
-                  <span className="text-gray-400 text-xs">6h ago</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
-            <CardHeader>
-              <CardTitle className="text-gray-900">AI Insights & Recommendations</CardTitle>
-              <CardDescription className="text-gray-700">
-                Enterprise-level optimization suggestions
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="p-4 bg-green-600/20 border border-green-600/30 rounded-lg">
-                  <h4 className="text-green-400 font-medium mb-2">🎯 Revenue Opportunity</h4>
-                  <p className="text-gray-700 text-sm">Scale your "Tech Reviews" template to 5 more niches for potential $15k+ monthly increase.</p>
-                </div>
-                
-                <div className="p-4 bg-blue-600/20 border border-blue-600/30 rounded-lg">
-                  <h4 className="text-blue-400 font-medium mb-2">📊 Team Efficiency</h4>
-                  <p className="text-gray-700 text-sm">Your team's productivity increased 34% this month. Consider expanding to 12 members.</p>
-                </div>
-
-                <div className="p-4 bg-purple-600/20 border border-purple-600/30 rounded-lg">
-                  <h4 className="text-purple-400 font-medium mb-2">🚀 Market Trend</h4>
-                  <p className="text-gray-700 text-sm">AI tools niche showing 67% growth. Perfect timing to create content in this space.</p>
-                </div>
+              {/* Placeholder for a chart */}
+              <div className="h-64 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-10 rounded-lg flex items-center justify-center">
+                <Zap className="w-16 h-16 text-gray-700" />
               </div>
             </CardContent>
           </Card>
@@ -356,4 +285,3 @@ export default function EnterpriseDashboard() {
     </div>
   )
 }
-

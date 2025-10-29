@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -149,6 +150,12 @@ export default function ProDashboard() {
                   Advanced Analytics
                 </Link>
               </Button>
+              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20">
+                <Link href="https://discord.gg/cdePwUQB" target="_blank" rel="noopener noreferrer">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2"><path d="M11.66 2.05c-4.4 0-8.12 3.63-8.12 8.1 0 3.1 1.7 5.8 4.25 7.2-1.2.4-2.3.9-3.3 1.5.1.1.2.2.3.3 1.1.8 2.3 1.4 3.6 1.8.8.2 1.6.3 2.4.3 4.4 0 8.1-3.6 8.1-8.1 0-4.4-3.7-8.1-8.1-8.1zm-4.3 12.3c-.9 0-1.6-.7-1.6-1.6 0-.9.7-1.6 1.6-1.6.9 0 1.6.7 1.6 1.6 0 .9-.7 1.6-1.6 1.6zm8.6 0c-.9 0-1.6-.7-1.6-1.6 0-.9.7-1.6 1.6-1.6.9 0 1.6.7 1.6 1.6 0 .9-.7 1.6-1.6 1.6z"/></svg>
+                  Join Discord Server
+                </Link>
+              </Button>
             </CardContent>
           </Card>
 
@@ -249,13 +256,13 @@ export default function ProDashboard() {
 
                 <div className="flex items-center justify-between p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
                   <div className="flex items-center space-x-3">
-                    <BarChart3 className="w-5 h-5 text-green-400" />
+                    <MessageSquare className="w-5 h-5 text-green-400" />
                     <div>
-                      <p className="text-gray-900 font-medium">Analytics Report</p>
-                      <p className="text-gray-400 text-sm">Generated 1 week ago</p>
+                      <p className="text-gray-900 font-medium">New Review: Product X</p>
+                      <p className="text-gray-400 text-sm">Received 5 days ago</p>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-blue-600 text-gray-900">Completed</Badge>
+                  <Badge variant="secondary" className="bg-blue-600 text-gray-900">New</Badge>
                 </div>
               </div>
             </CardContent>
@@ -263,27 +270,15 @@ export default function ProDashboard() {
 
           <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
             <CardHeader>
-              <CardTitle className="text-gray-900">Performance Insights</CardTitle>
+              <CardTitle className="text-gray-900">Performance Overview</CardTitle>
               <CardDescription className="text-gray-700">
-                AI-powered recommendations
+                Your affiliate performance at a glance
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="p-4 bg-green-600/20 border border-green-600/30 rounded-lg">
-                  <h4 className="text-green-400 font-medium mb-2">🎯 Optimization Tip</h4>
-                  <p className="text-gray-700 text-sm">Your "Gaming Laptop" page has 15% higher conversion. Consider creating similar content.</p>
-                </div>
-                
-                <div className="p-4 bg-blue-600/20 border border-blue-600/30 rounded-lg">
-                  <h4 className="text-blue-400 font-medium mb-2">📊 Traffic Insight</h4>
-                  <p className="text-gray-700 text-sm">Mobile traffic increased 28% this month. Optimize for mobile experience.</p>
-                </div>
-
-                <div className="p-4 bg-purple-600/20 border border-purple-600/30 rounded-lg">
-                  <h4 className="text-purple-400 font-medium mb-2">🚀 Growth Opportunity</h4>
-                  <p className="text-gray-700 text-sm">You're using 4/10 websites. Create 2 more to maximize your Pro plan benefits.</p>
-                </div>
+              {/* Placeholder for a chart */}
+              <div className="h-64 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-10 rounded-lg flex items-center justify-center">
+                <BarChart3 className="w-16 h-16 text-gray-700" />
               </div>
             </CardContent>
           </Card>
@@ -292,4 +287,3 @@ export default function ProDashboard() {
     </div>
   )
 }
-
