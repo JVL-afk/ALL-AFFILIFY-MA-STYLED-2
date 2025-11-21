@@ -74,7 +74,7 @@ export const POST = requireAuth(async (request: NextRequest, user: Authenticated
   } catch (error) {
     console.error('Website creation error:', error)
     return NextResponse.json(
-      { error: 'Failed to create website' },
+      { error: 'Failed to create website', details: error.message || error.toString() },
       { status: 500 }
     )
   }
