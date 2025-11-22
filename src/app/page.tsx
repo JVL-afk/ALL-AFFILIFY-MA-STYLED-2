@@ -653,7 +653,7 @@ export default function HomePage() {
               <div className="bg-gray-900 rounded-xl overflow-hidden mb-6 border border-white/10">
                 <div className="bg-gray-800 px-4 py-2 flex items-center gap-2">
                   <Globe className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-300 text-sm font-mono">general-1750440900583-bdls9w.affilify.eu</span>
+                  <span className="text-gray-300 text-sm font-mono">https://db12-super-gt-aston-martinplay-gcpm45.netlify.app/</span>
                 </div>
                 <div className="p-8 bg-gradient-to-br from-orange-50 to-red-50">
                   <div className="text-center">
