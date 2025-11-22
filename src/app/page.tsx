@@ -486,7 +486,7 @@ export default function HomePage() {
                     <div className="text-white/70 text-sm">
                       <div className="font-mono bg-gray-900 rounded p-3">
                         <span className="text-green-400">"</span>
-                        <span className="text-white">Transform your game with the FORZA Pro Basketball Hoop - engineered for champions who demand excellence...</span>
+                        <span className="text-white">Transform your game with the Aston Martin DB12 Super GT Landing Page - engineered for champions who demand excellence...</span>
                         <span className="text-green-400">"</span>
                       </div>
                     </div>
@@ -638,7 +638,7 @@ export default function HomePage() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h3 className="text-2xl font-bold text-white mb-2">
-                    FORZA Basketball Hoop
+                    Aston Martin DB12 Super GT
                   </h3>
                   <p className="text-white/70">Professional affiliate marketing website</p>
                 </div>
@@ -657,9 +657,9 @@ export default function HomePage() {
                 </div>
                 <div className="p-8 bg-gradient-to-br from-orange-50 to-red-50">
                   <div className="text-center">
-                    <div className="text-gray-800 text-4xl font-bold mb-4">🏀</div>
-                    <div className="text-gray-900 text-2xl font-bold mb-2">FORZA Pro Basketball Hoop</div>
-                    <div className="text-gray-700 mb-4">Transform your game with professional-grade equipment</div>
+                    <div className="text-gray-800 text-4xl font-bold mb-4">🏎️</div>
+                    <div className="text-gray-900 text-2xl font-bold mb-2">Aston Martin DB12 Super GT Landing Page</div>
+                    <div className="text-gray-700 mb-4">The ultimate landing page for the ultimate Super Tourer. Designed for luxury conversions.</div>
                     <div className="inline-block bg-orange-600 text-white px-6 py-3 rounded-lg font-bold">
                       View Product →
                     </div>
@@ -683,7 +683,7 @@ export default function HomePage() {
               </div>
 
               <Link 
-                href="https://general-1750440900583-bdls9w.affilify.eu/" 
+                href="https://db12-super-gt-aston-martinplay-gcpm45.netlify.app/" 
                 target="_blank"
                 className="block w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white text-center font-bold py-4 rounded-xl transition-all"
               >
