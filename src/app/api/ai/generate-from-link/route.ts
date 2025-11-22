@@ -192,7 +192,7 @@ The Most Comprehensive Evaluation System Ever Created
 
 1.1 DEEP HISTORICAL ARCHAEOLOGY & DIGITAL FORENSICS
 
-TARGET ANALYSIS: ${productUrl}
+TARGET ANALYSIS: ${productInfo.productUrl}
 
 INTERNET ARCHIVE DEEP DIVE (WAYBACK MACHINE MASTERY):
 
