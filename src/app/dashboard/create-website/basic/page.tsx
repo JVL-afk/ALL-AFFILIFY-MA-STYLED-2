@@ -141,7 +141,10 @@ export default function BasicCreateWebsite() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          productUrl: affiliateLink.trim()
+          productUrl: affiliateLink.trim(),
+          niche: 'Mock Niche', // Added mock data
+          targetAudience: 'Mock Audience', // Added mock data
+          template: 'Mock Template' // Added mock data
         }),
       })
 
