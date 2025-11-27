@@ -33,7 +33,9 @@ export default function CreateWebsitePage() {
   const [upgradeLoading, setUpgradeLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [affiliateLink, setAffiliateLink] = useState('')
+  const [affiliateLink, setAffiliateLink] = useState("")
+  const [affiliateId, setAffiliateId] = useState("")
+  const [affiliateType, setAffiliateType] = useState("link") // "link" or "id"
   const [generatedWebsite, setGeneratedWebsite] = useState<any>(null)
   const router = useRouter()
 
@@ -127,8 +129,10 @@ export default function CreateWebsitePage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          productUrl: affiliateLink.trim()
+        body: JSON.stringify({
+          productUrl: affiliateLink.trim(),
+          affiliateId: affiliateId.trim(),
+          affiliateType: affiliateType
         }),
       })
 
@@ -246,6 +250,45 @@ export default function CreateWebsitePage() {
                   Works with Amazon, ClickBank, ShareASale, and any product URL
                 </p>
               </div>
+
+              {/* Affiliate ID/Type Toggle */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-900">
+                  Affiliate Integration
+                </label>
+                <div className="flex rounded-md shadow-sm">
+                  <button
+                    type="button"
+                    onClick={() => setAffiliateType("link")}
+                    className={`relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 text-sm font-medium ${affiliateType === "link" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}
+                  >
+                    Full Link
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAffiliateType("id")}
+                    className={`-ml-px relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 text-sm font-medium ${affiliateType === "id" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}
+                  >
+                    Affiliate ID
+                  </button>
+                </div>
+              </div>
+
+              {affiliateType === "id" && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-900">
+                    Affiliate ID *
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="e.g., your-affiliate-id"
+                    value={affiliateId}
+                    onChange={(e) => setAffiliateId(e.target.value)}
+                    className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder:text-gray-900/50"
+                    disabled={loading}
+                  />
+                </div>
+              )}
 
               {/* Generate Button */}
               <div className="space-y-4">

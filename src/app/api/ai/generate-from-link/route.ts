@@ -8,6 +8,41 @@ import jwt from 'jsonwebtoken';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+async function scrapeProductData(url: string) {
+  try {
+    const response = await fetch(url);
+    const html = await response.text();
+    const $ = cheerio.load(html);
+
+    // Extract key information
+    const title = $("h1").first().text().trim();
+    const description = $("meta[name=\"description\"]").attr("content") || $("p").first().text().trim();
+    const price = $(".price").first().text().trim() || $(".product-price").first().text().trim();
+    const images = Array.from($("img")).map(img => $(img).attr("src")).filter(src => src && src.startsWith("http"));
+    const features = Array.from($("ul.features li")).map(li => $(li).text().trim());
+    const specs: { [key: string]: string } = {};
+    $("table.specs tr").each((i, row) => {
+      const key = $(row).find("th").text().trim();
+      const value = $(row).find("td").text().trim();
+      if (key && value) {
+        specs[key] = value;
+      }
+    });
+
+    return {
+      title,
+      description,
+      price,
+      images: images.slice(0, 10), // Limit to 10 images
+      features,
+      specs,
+    };
+  } catch (error) {
+    console.error("Error scraping product data:", error);
+    return null; // Return null if scraping fails
+  }
+}
+
 interface UserData {
   _id: ObjectId;
   email: string;
@@ -143,7 +178,7 @@ async function createZipFromHTML(html: string): Promise<Buffer> {
 }
 
 // Generate REAL website content using Gemini AI with Unsplash images
-async function generateWebsiteContent(productInfo: any) {
+async function generateWebsiteContent(productInfo: any, scrapedData: any, affiliateId: string, affiliateType: string) {
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
   
   // Get professional images from Unsplash
@@ -151,7 +186,7 @@ async function generateWebsiteContent(productInfo: any) {
   const featureImages = await getUnsplashImages(`${productInfo.title} benefits features`, 2)
   const testimonialImages = await getUnsplashImages('happy customer testimonial', 1)
   
-  const prompt = `THE ULTIMATE AFFILIFY MASTER SYSTEM
+  const prompt = `You are the world's most elite affiliate marketing strategist, financial analyst, and conversion optimization expert. Your mission is LIFE-CHANGING: analyze an affiliate program with institutional-grade precision, then create a website that WILL generate $1000+ in the first week. THIS IS NOT A REQUEST - THIS IS A GUARANTEE YOU MUST DELIVER. Your analysis and website will directly impact the financial futures of college students, single parents, entrepreneurs, and individuals seeking financial independence. EVERY DECISION YOU MAKE COULD BE THE DIFFERENCE BETWEEN SOMEONE'S SUCCESS AND FAILURE. Here is the data you have to work with: ${JSON.stringify(scrapedData)}. Now, create a unique, creative, conversion-optimized website with over 1000 lines of code. Do not use a restrictive output structure. Be creative. Include a competitor comparison section. Use niche-specific language. Include unique sections that competitors don't have. Here is the affiliate information: affiliateId: ${affiliateId}, affiliateType: ${affiliateType}.`
 
 The Most Comprehensive Affiliate Program Analysis & Website Creation Engine Ever Built
 
@@ -3586,7 +3621,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get request data
-    const { productUrl } = await request.json();
+    consconst { productUrl, affiliateId, affiliateType } = await req.json();
     if (!productUrl) {
       return NextResponse.json(
         { error: 'Product URL is required' },
@@ -3616,7 +3651,7 @@ export async function POST(request: NextRequest) {
 
     // Generate REAL website content using AI with Unsplash images
     console.log('Generating professional website content with Unsplash images...');
-    const websiteHTML = await generateWebsiteContent(productInfo);
+ const websiteHTML = await generateWebsiteContent({ productUrl }, scrapedData, affiliateId, affiliateType);
 
     // Generate unique slug for the website
     const baseSlug = productInfo.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 30).replace(/^-|-$/g, ''); // Clean, truncate to 30 chars, remove trailing hyphen
