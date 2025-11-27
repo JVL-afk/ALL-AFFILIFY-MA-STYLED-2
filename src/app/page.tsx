@@ -234,31 +234,6 @@ export default function HomePage() {
             </motion.div>
           </motion.div>
 
-          {/* Social Proof Stats */}
-          <motion.div 
-            variants={fadeInUp}
-            className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto"
-          >
-            {[
-              { number: '10,000+', label: 'Websites Created', icon: Globe },
-              { number: '$2.5M+', label: 'Revenue Generated', icon: DollarSign },
-              { number: '99.5%', label: 'Uptime', icon: Zap },
-              { number: '4.9/5', label: 'User Rating', icon: Star },
-            ].map((stat, index) => (
-              <motion.div
-                key={index}
-                className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20"
-                whileHover={{ scale: 1.05, borderColor: 'rgba(251, 146, 60, 0.5)' }}
-              >
-                <stat.icon className="w-8 h-8 text-orange-400 mx-auto mb-2" />
-                <div className="text-3xl font-bold text-white mb-1">{stat.number}</div>
-                <div className="text-sm text-white/70">{stat.label}</div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </motion.div>
-      </section>
-
       {/* How It Works - Visual Process */}
       <section id="how-it-works" className="relative z-10 py-20 bg-gradient-to-b from-transparent to-black/30">
         <div className="container mx-auto px-4">
