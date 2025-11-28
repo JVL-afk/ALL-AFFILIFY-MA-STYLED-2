@@ -408,7 +408,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get request data
-    const { productUrl, affiliateId, affiliateType } = await req.json();
+    const { productUrl, affiliateId, affiliateType } = await request.json();
     if (!productUrl) {
       return NextResponse.json(
         { error: 'Product URL is required' },
