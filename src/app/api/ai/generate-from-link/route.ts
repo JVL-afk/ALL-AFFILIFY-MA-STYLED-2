@@ -438,7 +438,7 @@ export async function POST(request: NextRequest) {
 
     // Generate REAL website content using AI with Unsplash images
     console.log('Generating professional website content with Unsplash images...');
- const websiteHTML = await generateWebsiteContent({ productUrl }, scrapedData, affiliateId, affiliateType);
+ const websiteHTML = await generateWebsiteContent({ productUrl }, productInfo, affiliateId, affiliateType);
 
     // Generate unique slug for the website
     const baseSlug = productInfo.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 30).replace(/^-|-$/g, ''); // Clean, truncate to 30 chars, remove trailing hyphen
