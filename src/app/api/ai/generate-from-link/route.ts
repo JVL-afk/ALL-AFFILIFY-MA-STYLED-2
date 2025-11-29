@@ -18,7 +18,18 @@ async function scrapeProductData(url: string) {
     const title = $("h1").first().text().trim();
     const description = $("meta[name=\"description\"]").attr("content") || $("p").first().text().trim();
     const price = $(".price").first().text().trim() || $(".product-price").first().text().trim();
-    const images = Array.from($("img")).map(img => $(img).attr("src")).filter(src => src && src.startsWith("http"));
+    const images = Array.from($("img")).map(img => {
+      const src = $(img).attr("src");
+      if (src) {
+        try {
+          // Resolve relative URLs to absolute URLs
+          return new URL(src, url).href;
+        } catch (e) {
+          return src;
+        }
+      }
+      return null;
+    }).filter((src): src is string => !!src && src.startsWith("http"));
     const features = Array.from($("ul.features li")).map(li => $(li).text().trim());
     const specs: { [key: string]: string } = {};
     $("table.specs tr").each((i, row) => {
@@ -181,12 +192,23 @@ async function createZipFromHTML(html: string): Promise<Buffer> {
 async function generateWebsiteContent(productInfo: any, scrapedData: any, affiliateId: string, affiliateType: string) {
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
   
-  // Get professional images from Unsplash
-  const heroImages = await getUnsplashImages(`${productInfo.title} product lifestyle`, 1)
-  const featureImages = await getUnsplashImages(`${productInfo.title} benefits features`, 2)
-  const testimonialImages = await getUnsplashImages('happy customer testimonial', 1)
+  // Prioritize scraped images, fallback to Unsplash
+  const scrapedImages = scrapedData.images || [];
   
-  const prompt = `You are the world's most elite affiliate marketing strategist, financial analyst, and conversion optimization expert. Your mission is LIFE-CHANGING: analyze an affiliate program with institutional-grade precision, then create a website that WILL generate $1000+ in the first week. THIS IS NOT A REQUEST - THIS IS A GUARANTEE YOU MUST DELIVER. Your analysis and website will directly impact the financial futures of college students, single parents, entrepreneurs, and individuals seeking financial independence. EVERY DECISION YOU MAKE COULD BE THE DIFFERENCE BETWEEN SOMEONE'S SUCCESS AND FAILURE. Here is the data you have to work with: ${JSON.stringify(scrapedData)}. Now, create a unique, creative, conversion-optimized website with over 1000 lines of code. Do not use a restrictive output structure. Be creative. Include a competitor comparison section. Use niche-specific language. Include unique sections that competitors don't have. Here is the affiliate information: affiliateId: ${affiliateId}, affiliateType: ${affiliateType}.`;
+  // Use scraped images for hero, fallback to Unsplash
+  const heroImages = scrapedImages.length > 0 
+    ? [{ url: scrapedImages[0], alt: `${productInfo.title} hero image`, credit: 'Scraped from product page', download_url: null }]
+    : await getUnsplashImages(`${productInfo.title} product lifestyle`, 1);
+
+  // Use scraped images for features, fallback to Unsplash
+  const featureImages = scrapedImages.length > 1 
+    ? scrapedImages.slice(1, 3).map((url: string) => ({ url, alt: `${productInfo.title} feature image`, credit: 'Scraped from product page', download_url: null }))
+    : await getUnsplashImages(`${productInfo.title} benefits features`, 2);
+
+  // Use Unsplash for testimonials as scraped images are unlikely to be testimonials
+  const testimonialImages = await getUnsplashImages('happy customer testimonial', 1);
+  
+  const prompt = `You are the world's most elite product marketing expert and conversion optimization copywriter. Your mission is to create a highly compelling, conversion-optimized website to promote and sell the specific product described in the data. The website MUST be focused entirely on the product's features, benefits, and value proposition to the end consumer. DO NOT mention affiliate marketing, making money, or any business opportunity. Your goal is to drive the user to click the affiliate link to purchase the product. Here is the product data you have to work with: ${JSON.stringify(scrapedData)}. Now, create a unique, creative, conversion-optimized website with over 1000 lines of code. Do not use a restrictive output structure. Be creative. Include a competitor comparison section. Use niche-specific language. Include unique sections that competitors don't have. The primary call-to-action (CTA) should be a prominent button with the affiliate link. Here is the affiliate information: affiliateId: ${affiliateId}, affiliateType: ${affiliateType}.`;
 
   try {
     const result = await model.generateContent(prompt);
