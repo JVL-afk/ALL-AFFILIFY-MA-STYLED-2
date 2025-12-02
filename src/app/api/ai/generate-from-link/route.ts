@@ -208,7 +208,13 @@ async function generateWebsiteContent(productInfo: any, scrapedData: any, affili
   // Use Unsplash for testimonials as scraped images are unlikely to be testimonials
   const testimonialImages = await getUnsplashImages('happy customer testimonial', 1);
   
-  const prompt = `You are the world's most elite product marketing expert and conversion optimization copywriter. Your mission is to create a highly compelling, conversion-optimized website to promote and sell the specific product described in the data. The website MUST be focused entirely on the product's features, benefits, and value proposition to the end consumer. DO NOT mention affiliate marketing, making money, or any business opportunity. Your goal is to drive the user to click the affiliate link to purchase the product. Here is the product data you have to work with: ${JSON.stringify(scrapedData)}. Now, create a unique, creative, conversion-optimized website with over 1000 lines of code. Do not use a restrictive output structure. Be creative. Include a competitor comparison section. Use niche-specific language. Include unique sections that competitors don't have. The primary call-to-action (CTA) should be a prominent button with the affiliate link. Here is the affiliate information: affiliateId: ${affiliateId}, affiliateType: ${affiliateType}.`;
+  const prompt = `You are the world's most elite product marketing expert and conversion optimization copywriter. Your mission is to create a highly compelling, conversion-optimized website to promote and sell the specific product described in the data. The website MUST be focused entirely on the product's features, benefits, and value proposition to the end consumer. DO NOT mention affiliate marketing, making money, or any business opportunity. Your goal is to drive the user to click the affiliate link to purchase the product.Here is the product data you have to work with: ${JSON.stringify(scrapedData)}.
+Here are the high-quality image URLs you MUST use in the generated HTML for the hero section and features:
+Hero Image: ${heroImages[0]?.url || 'NO_HERO_IMAGE'}
+Feature Image 1: ${featureImages[0]?.url || 'NO_FEATURE_IMAGE_1'}
+Feature Image 2: ${featureImages[1]?.url || 'NO_FEATURE_IMAGE_2'}
+Testimonial Image: ${testimonialImages[0]?.url || 'NO_TESTIMONIAL_IMAGE'}
+Now, create a unique, creative, conversion-optimized website with over 1000 lines of code. Do not use a restrictive output structure. Be creative. Include a competitor comparison section. Use niche-specific language. Include unique sections that competitors don't have. The primary call-to-action (CTA) should be a prominent button with the affiliate link. Here is the affiliate information: affiliateId: ${affiliateId}, affiliateType: ${affiliateType};.`;
 
   try {
     const result = await model.generateContent(prompt);
@@ -277,12 +283,12 @@ function generateProfessionalTemplate(productInfo: any, heroImages: any[], featu
             <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 20px;">Why Choose ${productInfo.title}?</h2>
             <div class="feature-grid">
                 <div class="feature">
-                    <img src="${featureImages[0]?.url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43'}" alt="Premium Quality">
+                    <img src="${featureImages[0]?.url || heroImages[0]?.url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43'}" alt="Premium Quality">
                     <h3>Premium Quality</h3>
                     <p>Experience the highest quality standards with ${productInfo.title}. Built to last and designed to impress.</p>
                 </div>
                 <div class="feature">
-                    <img src="${featureImages[1]?.url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43'}" alt="Amazing Value">
+                    <img src="${featureImages[1]?.url || heroImages[0]?.url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43'}" alt="Amazing Value">
                     <h3>Amazing Value</h3>
                     <p>Get incredible value for your money. ${productInfo.title} delivers results that exceed expectations.</p>
                 </div>
@@ -293,7 +299,7 @@ function generateProfessionalTemplate(productInfo: any, heroImages: any[], featu
     <section class="testimonials">
         <div class="container">
             <div class="testimonial">
-                <img src="${testimonialImages[0]?.url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43'}" alt="Happy Customer">
+                <img src="${testimonialImages[0]?.url || heroImages[0]?.url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43'}" alt="Happy Customer">
                 <h3>"Life-changing results!"</h3>
                 <p>"${productInfo.title} has completely transformed my experience. I couldn't be happier with my purchase!"</p>
                 <strong>- Sarah Johnson, Verified Customer</strong>
