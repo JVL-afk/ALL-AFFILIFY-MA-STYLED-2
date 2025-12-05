@@ -103,8 +103,8 @@ function generatePlaceholderImages(query: string, count: number) {
   const images = []
   for (let i = 0; i < count; i++) {
     images.push({
-      url: `https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=600&fit=crop&crop=center`,
-      thumb: `https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop&crop=center`,
+      url: \`https://via.placeholder.com/800x600/e0e0e0/333333?text=${encodeURIComponent(query.replace(/ /g, '+'))}\`,
+      thumb: \`https://via.placeholder.com/400x300/e0e0e0/333333?text=${encodeURIComponent(query.replace(/ /g, '+'))}\`,
       alt: query,
       credit: 'Professional stock photo',
       download_url: null
