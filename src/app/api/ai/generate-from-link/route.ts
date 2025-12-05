@@ -100,18 +100,17 @@ async function getUnsplashImages(query: string, count: number = 3) {
 
 // Generate placeholder images if Unsplash fails
 function generatePlaceholderImages(query: string, count: number) {
-  const images = [];
-  const fallbackImageUrl = 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43'; // A generic, high-quality image
+  const images = []
   for (let i = 0; i < count; i++) {
     images.push({
-      url: `${fallbackImageUrl}?w=800&h=600&fit=crop&crop=center`,
-      thumb: `${fallbackImageUrl}?w=400&h=300&fit=crop&crop=center`,
+      url: `https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=600&fit=crop&crop=center`,
+      thumb: `https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop&crop=center`,
       alt: query,
       credit: 'Professional stock photo',
       download_url: null
-    });
+    })
   }
-  return images;
+  return images
 }
 
 // Deploy website to Netlify
@@ -210,50 +209,22 @@ async function generateWebsiteContent(productInfo: any, scrapedData: any, affili
   const testimonialImages = await getUnsplashImages('happy customer testimonial', 1);
   
   const prompt = `You are the world's most elite product marketing expert and conversion optimization copywriter. Your mission is to create a highly compelling, conversion-optimized website to promote and sell the specific product described in the data. The website MUST be focused entirely on the product's features, benefits, and value proposition to the end consumer. DO NOT mention affiliate marketing, making money, or any business opportunity. Your goal is to drive the user to click the affiliate link to purchase the product.Here is the product data you have to work with: ${JSON.stringify(scrapedData)}.
-<<<<<<< HEAD
 Here are the high-quality image URLs you MUST use in the generated HTML for the hero section and features:
 Hero Image: ${heroImages[0]?.url || 'NO_HERO_IMAGE'}
 Feature Image 1: ${featureImages[0]?.url || 'NO_FEATURE_IMAGE_1'}
 Feature Image 2: ${featureImages[1]?.url || 'NO_FEATURE_IMAGE_2'}
 Testimonial Image: ${testimonialImages[0]?.url || 'NO_TESTIMONIAL_IMAGE'}
-Now, create a unique, creative, conversion-optimized website with over 1000 lines of code. Do not use a restrictive output structure. Be creative. Include a competitor comparison section. Use niche-specific language. Include unique sections that competitors don't have. The primary call-to-action (CTA) should be a prominent button with the affiliate link. Do NOT insert any prices if you don't know the price exactly. Make each website unique (DON'T USE the same colors, if the scraped data and the website in general has a specific color that's recognizable, make that color the color of the writing)! Compare with REAL COMPETITORS of the product and specify the competitors names. Respond ONLY with the full code! If you can, find the appropiate images  and insert them in the code! Here is the affiliate information: affiliateId: ${affiliateId}, affiliateType: ${affiliateType};.`;
+Now, create a unique, creative, conversion-optimized website with over 1000 lines of code. Do not use a restrictive output structure. Be creative. Include a competitor comparison section. Use niche-specific language. Include unique sections that competitors don't have. The primary call-to-action (CTA) should be a prominent button with the affiliate link. Do NOT insert any prices if you don't know the price exactly. Make each website unique (DON'T USE the same colors, if the scraped data and the website in general has a specific color that's recognizable, make that color the color of the writing)! Compare with REAL COMPETITORS of the product and specify the competitors names. Respond ONLY with the full code! Here is the affiliate information: affiliateId: ${affiliateId}, affiliateType: ${affiliateType};.`;
 
   try {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     let websiteHTML = response.text();
-     // Clean up the response to ensure it's valid HTML
-    websiteHTML = websiteHTML.replace(/```html/g, '').replace(/```/g, '').trim();
-
-    // --- START: Robust Image URL Fix ---
-    // Create a map of placeholder text to full URL
-    const imageMap = new Map<string, string>();
-    const allImages = [...heroImages, ...featureImages, ...testimonialImages];
-    allImages.forEach(img => {
-      if (img.url.includes('via.placeholder.com')) {
-        // Extract the text part of the placeholder URL
-        const textMatch = img.url.match(/text=([^&]+)/);
-        if (textMatch) {
-          // The AI seems to be using the text part as the src, sometimes with a color prefix
-          const placeholderText = decodeURIComponent(textMatch[1]);
-          // Create a key that matches the console error pattern (color code + text)
-          const colorMatch = img.url.match(/\/([a-fA-F0-9]{6})\//);
-          const colorPrefix = colorMatch ? colorMatch[1] : 'e0e0e0'; // Default to e0e0e0
-          const key = `${colorPrefix}?text=${placeholderText}`;
-          imageMap.set(key, img.url);
-        }
-      }
-    });
-
-    // Replace truncated URLs in the generated HTML
-    imageMap.forEach((fullUrl, truncatedKey) => {
-      // Create a regex to find the truncated key in the src attribute
-      const regex = new RegExp(`src=["'](.*?${truncatedKey}.*?)["']`, 'g');
-      websiteHTML = websiteHTML.replace(regex, `src="${fullUrl}"`);
-    });
-    // --- END: Robust Image URL Fix ---
     
-    // If the response doesn't start with HTML, extract itt
+    // Clean up the response to ensure it's valid HTML
+    websiteHTML = websiteHTML.replace(/```html/g, '').replace(/```/g, '').trim();
+    
+    // If the response doesn't start with HTML, extract it
     if (!websiteHTML.toLowerCase().includes('<!doctype') && !websiteHTML.toLowerCase().includes('<html')) {
       // Try to find HTML content in the response
       const htmlMatch = websiteHTML.match(/<!DOCTYPE[\s\S]*<\/html>/i);
@@ -579,4 +550,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
