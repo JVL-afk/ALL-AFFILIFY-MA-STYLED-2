@@ -260,34 +260,7 @@ Now, create a unique, creative, conversion-optimized website with over 1000 line
     });
     // --- END: Robust Image URL Fix ---
     
-    // If the response doesn't start with HTML, extract it map of placeholder text to full URL
-    const imageMap = new Map<string, string>();
-    const allImages = [...heroImages, ...featureImages, ...testimonialImages];
-    allImages.forEach(img => {
-      if (img.url.includes('via.placeholder.com')) {
-        // Extract the text part of the placeholder URL
-        const textMatch = img.url.match(/text=([^&]+)/);
-        if (textMatch) {
-          // The AI seems to be using the text part as the src, sometimes with a color prefix
-          const placeholderText = decodeURIComponent(textMatch[1]);
-          // Create a key that matches the console error pattern (color code + text)
-          const colorMatch = img.url.match(/\/([a-fA-F0-9]{6})\//);
-          const colorPrefix = colorMatch ? colorMatch[1] : 'e0e0e0'; // Default to e0e0e0
-          const key = `${colorPrefix}?text=${placeholderText}`;
-          imageMap.set(key, img.url);
-        }
-      }
-    });
-
-    // Replace truncated URLs in the generated HTML
-    imageMap.forEach((fullUrl, truncatedKey) => {
-      // Create a regex to find the truncated key in the src attribute
-      const regex = new RegExp(`src=["'](.*?${truncatedKey}.*?)["']`, 'g');
-      websiteHTML = websiteHTML.replace(regex, `src="${fullUrl}"`);
-    });
-    // --- END: Robust Image URL Fix ---
-    
-    // If the response doesn't start with HTML, extract it
+    // If the response doesn't start with HTML, extract itt
     if (!websiteHTML.toLowerCase().includes('<!doctype') && !websiteHTML.toLowerCase().includes('<html')) {
       // Try to find HTML content in the response
       const htmlMatch = websiteHTML.match(/<!DOCTYPE[\s\S]*<\/html>/i);
