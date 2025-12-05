@@ -100,17 +100,18 @@ async function getUnsplashImages(query: string, count: number = 3) {
 
 // Generate placeholder images if Unsplash fails
 function generatePlaceholderImages(query: string, count: number) {
-  const images = []
+  const images = [];
+  const fallbackImageUrl = 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43'; // A generic, high-quality image
   for (let i = 0; i < count; i++) {
     images.push({
-      url: \`https://via.placeholder.com/800x600/e0e0e0/333333?text=${encodeURIComponent(query.replace(/ /g, '+'))}\`,
-      thumb: \`https://via.placeholder.com/400x300/e0e0e0/333333?text=${encodeURIComponent(query.replace(/ /g, '+'))}\`,
+      url: `${fallbackImageUrl}?w=800&h=600&fit=crop&crop=center`,
+      thumb: `${fallbackImageUrl}?w=400&h=300&fit=crop&crop=center`,
       alt: query,
       credit: 'Professional stock photo',
       download_url: null
-    })
+    });
   }
-  return images
+  return images;
 }
 
 // Deploy website to Netlify
