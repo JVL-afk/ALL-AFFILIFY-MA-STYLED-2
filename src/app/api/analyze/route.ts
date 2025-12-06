@@ -645,7 +645,7 @@ if (!userId) {
     }
 
     // Save analysis to database
-    const savedAnalysis = await saveAnalysis(user.id, {
+    const savedAnalysis = await saveAnalysis(userId, {
       url: transformedAnalysis.url,
       analysisType: transformedAnalysis.analysis_type,
       score: transformedAnalysis.main_score,
@@ -664,7 +664,7 @@ if (!userId) {
       // Proceed with response but log error
     } else {
       // Increment user's analysis count ONLY if save was successful
-      await incrementUserAnalyses(user.id)
+      await incrementUserAnalyses(userId)
     }
 
     // The client is likely expecting the analysis data directly.
