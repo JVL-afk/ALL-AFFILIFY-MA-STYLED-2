@@ -27,21 +27,21 @@ export const POST = requireEnterprise(async (request: NextRequest, user: Authent
       )
     }
 
-    // Create deployment record
-    const deploymentId = `deploy-${Date.now()}`
-    const deployment: Deployment = {
-      id: deploymentId,
-      timestamp: new Date(),
-      commitHash: '',
-      status: 'pending',
-      buildLogs: 'Starting deployment...'
-    }
+   // Create deployment record (remove type annotation)
+const deploymentId = `deploy-${Date.now()}`
+const deployment = {
+  id: deploymentId,
+  timestamp: new Date(),
+  commitHash: '',
+  status: 'pending' as const,
+  buildLogs: 'Starting deployment...'
+}
 
     // Add deployment to database
     await db.collection('userCode').updateOne(
       { userId: new ObjectId(user._id) },
       {
-        $push: { deployments: deployment },
+        $push: { deployments: deployment as any },
         $set: { lastDeployed: new Date() }
       }
     )
