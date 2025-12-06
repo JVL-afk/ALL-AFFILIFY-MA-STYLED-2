@@ -142,9 +142,10 @@ async function deployToNetlify(websiteHTML: string, siteName: string) {
     const siteData = await siteResponse.json()
     const siteId = siteData.id
 
-    // ✅ FIX: Convert Buffer to Blob before sending
+// ✅ FIX: Convert Buffer to Uint8Array, then to Blob
 const zipBuffer = await createZipFromHTML(websiteHTML)
-const zipBlob = new Blob([zipBuffer], { type: 'application/zip' })
+const zipUint8Array = new Uint8Array(zipBuffer)
+const zipBlob = new Blob([zipUint8Array], { type: 'application/zip' })
 
 // Deploy the HTML content
 const deployResponse = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}/deploys`, {
