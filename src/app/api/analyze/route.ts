@@ -574,6 +574,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+	// Extract user ID (handle different possible property names)
+const userId = (user as any).id || (user as any)._id?.toString() || (user as any).userId
+
+if (!userId) {
+  return NextResponse.json(
+    { error: 'User ID not found' },
+    { status: 401 }
+  )
+}
+
     const { url, analysisType } = await request.json()
 
     if (!url) {
