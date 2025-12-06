@@ -10,13 +10,13 @@ export async function GET(request: NextRequest) {
       data: {
         activeUsers: parseInt(data.activeUsers),
         pageViews: parseInt(data.pageViews),
-        topCountries: data.rows
-          .filter(row => row.dimensionValues[0]?.name === 'country')
-          .slice(0, 5)
-          .map(row => ({
-            country: row.dimensionValues[0]?.value || 'Unknown',
-            users: parseInt(row.metricValues[0]?.value || '0'),
-          })),
+       topCountries: data.rows
+  ?.filter(row => row.dimensionValues?.[0]?.name === 'country')  // ✅ Added ?. before filter
+  .slice(0, 5)
+  .map(row => ({
+    country: row.dimensionValues?.[0]?.value || 'Unknown',
+    visits: parseInt(row.metricValues?.[0]?.value || '0')
+  })) || []  // ✅ Added fallback
         deviceBreakdown: data.rows
           .filter(row => row.dimensionValues[0]?.name === 'deviceCategory')
           .map(row => ({
