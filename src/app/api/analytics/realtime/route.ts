@@ -8,18 +8,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        activeUsers: parseInt(data.activeUsers),
-        pageViews: parseInt(data.pageViews),
+        activeUsers: parseInt(data.activeUsers) || 0,
+        pageViews: parseInt(data.pageViews) || 0,
         topCountries: data.rows
-          ?.filter(row => row.dimensionValues?.[0]?.name === 'country')
-          .slice(0, 5)
-          .map(row => ({
+          ?.slice(0, 5)
+          .map((row: any) => ({
             country: row.dimensionValues?.[0]?.value || 'Unknown',
             visits: parseInt(row.metricValues?.[0]?.value || '0')
           })) || [],
         deviceBreakdown: data.rows
-          ?.filter(row => row.dimensionValues?.[0]?.name === 'deviceCategory')
-          .map(row => ({
+          ?.map((row: any) => ({
             device: row.dimensionValues?.[0]?.value || 'Unknown',
             visits: parseInt(row.metricValues?.[0]?.value || '0')
           })) || []
@@ -48,4 +46,3 @@ export async function GET(request: NextRequest) {
     });
   }
 }
-
