@@ -142,16 +142,19 @@ async function deployToNetlify(websiteHTML: string, siteName: string) {
     const siteData = await siteResponse.json()
     const siteId = siteData.id
 
-    // Deploy the HTML content
-    const deployResponse = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}/deploys`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${netlifyToken}`,
-        'Content-Type': 'application/zip'
-      },
-      body: await createZipFromHTML(websiteHTML)
-    })
+    // ✅ FIX: Convert Buffer to Blob before sending
+const zipBuffer = await createZipFromHTML(websiteHTML)
+const zipBlob = new Blob([zipBuffer], { type: 'application/zip' })
 
+// Deploy the HTML content
+const deployResponse = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}/deploys`, {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${netlifyToken}`,
+    'Content-Type': 'application/zip'
+  },
+  body: zipBlob  // ✅ Now using Blob instead of Buffer
+})
     if (!deployResponse.ok) {
       throw new Error(`Netlify deploy error: ${deployResponse.status}`)
     }
