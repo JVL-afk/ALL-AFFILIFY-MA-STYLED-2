@@ -5,28 +5,25 @@ export async function GET(request: NextRequest) {
   try {
     const data = await googleAnalytics.getRealtimeData();
     
-return NextResponse.json({
-  data: {
-    activeUsers: parseInt(data.activeUsers),
-    pageViews: parseInt(data.pageViews),
-    topCountries: data.rows?.filter(...).map(...) || [],
-    deviceBreakdown: data.rows?.filter(...).map(...) || []
-  }
-})
-    ?.filter(row => row.dimensionValues?.[0]?.name === 'country')
-    .slice(0, 5)
-    .map(row => ({
-      country: row.dimensionValues?.[0]?.value || 'Unknown',
-      visits: parseInt(row.metricValues?.[0]?.value || '0')
-    })) || [],  // ✅ Comma here
-  deviceBreakdown: data.rows  // ✅ Add optional chaining below
-    ?.filter(row => row.dimensionValues?.[0]?.name === 'deviceCategory')
-    .map(row => ({
-      device: row.dimensionValues?.[0]?.value || 'Unknown',
-      visits: parseInt(row.metricValues?.[0]?.value || '0')
-    })) || []  // ✅ Add fallback
-}
-      },
+    return NextResponse.json({
+      success: true,
+      data: {
+        activeUsers: parseInt(data.activeUsers),
+        pageViews: parseInt(data.pageViews),
+        topCountries: data.rows
+          ?.filter(row => row.dimensionValues?.[0]?.name === 'country')
+          .slice(0, 5)
+          .map(row => ({
+            country: row.dimensionValues?.[0]?.value || 'Unknown',
+            visits: parseInt(row.metricValues?.[0]?.value || '0')
+          })) || [],
+        deviceBreakdown: data.rows
+          ?.filter(row => row.dimensionValues?.[0]?.name === 'deviceCategory')
+          .map(row => ({
+            device: row.dimensionValues?.[0]?.value || 'Unknown',
+            visits: parseInt(row.metricValues?.[0]?.value || '0')
+          })) || []
+      }
     });
   } catch (error) {
     console.error('Error fetching realtime analytics:', error);
