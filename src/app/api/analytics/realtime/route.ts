@@ -5,13 +5,14 @@ export async function GET(request: NextRequest) {
   try {
     const data = await googleAnalytics.getRealtimeData();
     
-    return NextResponse.json({
-      success: true,
-      data: {
-        activeUsers: parseInt(data.activeUsers),
-        {
-  pageViews: parseInt(data.pageViews),
-  topCountries: data.rows
+return NextResponse.json({
+  data: {
+    activeUsers: parseInt(data.activeUsers),
+    pageViews: parseInt(data.pageViews),
+    topCountries: data.rows?.filter(...).map(...) || [],
+    deviceBreakdown: data.rows?.filter(...).map(...) || []
+  }
+})
     ?.filter(row => row.dimensionValues?.[0]?.name === 'country')
     .slice(0, 5)
     .map(row => ({
