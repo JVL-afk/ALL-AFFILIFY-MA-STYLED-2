@@ -21,31 +21,38 @@ import {
 
 interface AnalysisResult {
   url: string
-  score: number
-  metrics: {
-    performance: number
-    seo: number
-    accessibility: number
-    bestPractices: number
+  timestamp: string
+  main_score: number
+  rating_category: string
+  pagespeed_data: any
+  content_data: any
+  technical_data: any
+  ai_analysis: {
+    main_score: number
+    rating_category: string
+    historical_analysis?: any
+    reputation_analysis?: any
+    technical_performance?: any
+    financial_analysis?: any
+    risk_assessment?: any
+    strategic_insights?: {
+      key_strengths?: string[]
+      improvement_areas?: string[]
+      market_positioning?: string
+      why_its_special?: string
+    }
+    recommendations?: {
+      traffic_sources?: string[]
+      content_strategy?: string
+      target_audience?: string
+      optimization_tips?: string[]
+      timeline_expectations?: string
+    }
+    financial_projections?: any
+    error?: string
+    fallback_used?: boolean
   }
-  insights: {
-    category: string
-    title: string
-    description: string
-    impact: 'high' | 'medium' | 'low'
-    type: 'opportunity' | 'issue' | 'success'
-  }[]
-  recommendations: {
-    title: string
-    description: string
-    priority: 'high' | 'medium' | 'low'
-    effort: 'easy' | 'medium' | 'hard'
-  }[]
-  competitors?: {
-    url: string
-    score: number
-    traffic: number
-  }[]
+  analysis_type: string
 }
 
 export default function AnalyzeWebsitePage() {
@@ -89,6 +96,7 @@ export default function AnalyzeWebsitePage() {
       const data = await response.json()
 
       if (response.ok) {
+        // ✅ FIX: Properly access the nested analysis object
         setResult(data.analysis)
       } else {
         setError(data.error || 'Analysis failed')
@@ -113,6 +121,124 @@ export default function AnalyzeWebsitePage() {
     return 'bg-red-100'
   }
 
+  // Helper function to safely get metric scores from the AI analysis
+  const getMetricScore = (metricName: string): number => {
+    if (!result?.ai_analysis) return 0
+    
+    // Try different possible locations for the metric
+    const aiAnalysis = result.ai_analysis
+    
+    switch (metricName) {
+      case 'performance':
+        return aiAnalysis.technical_performance?.pagespeed_score || 
+               aiAnalysis.technical_performance?.technical_quality_score || 
+               result.main_score || 0
+      case 'seo':
+        return aiAnalysis.reputation_analysis?.reputation_score || 
+               result.main_score || 0
+      case 'accessibility':
+        return aiAnalysis.historical_analysis?.stability_score || 
+               result.main_score || 0
+      case 'bestPractices':
+        return result.main_score || 0
+      default:
+        return 0
+    }
+  }
+
+  // Generate insights from AI analysis
+  const generateInsights = () => {
+    if (!result?.ai_analysis) return []
+    
+    const insights: any[] = []
+    const ai = result.ai_analysis
+
+    // Add key strengths as success insights
+    if (ai.strategic_insights?.key_strengths) {
+      ai.strategic_insights.key_strengths.slice(0, 3).forEach(strength => {
+        insights.push({
+          category: 'Strength',
+          title: strength,
+          description: 'This is a competitive advantage for this program',
+          impact: 'high',
+          type: 'success'
+        })
+      })
+    }
+
+    // Add improvement areas as opportunities
+    if (ai.strategic_insights?.improvement_areas) {
+      ai.strategic_insights.improvement_areas.slice(0, 2).forEach(area => {
+        insights.push({
+          category: 'Opportunity',
+          title: area,
+          description: 'Consider improving this area for better results',
+          impact: 'medium',
+          type: 'opportunity'
+        })
+      })
+    }
+
+    // Add risk factors as issues
+    if (ai.risk_assessment?.primary_risks) {
+      ai.risk_assessment.primary_risks.slice(0, 2).forEach(risk => {
+        insights.push({
+          category: 'Risk',
+          title: risk,
+          description: 'Be aware of this potential risk factor',
+          impact: 'medium',
+          type: 'issue'
+        })
+      })
+    }
+
+    return insights
+  }
+
+  // Generate recommendations from AI analysis
+  const generateRecommendations = () => {
+    if (!result?.ai_analysis?.recommendations) return []
+    
+    const recs: any[] = []
+    const recommendations = result.ai_analysis.recommendations
+
+    // Traffic sources
+    if (recommendations.traffic_sources) {
+      recommendations.traffic_sources.slice(0, 3).forEach((source, idx) => {
+        recs.push({
+          title: `Focus on ${source}`,
+          description: 'Leverage this traffic source for maximum reach',
+          priority: idx === 0 ? 'high' : 'medium',
+          effort: 'medium'
+        })
+      })
+    }
+
+    // Content strategy
+    if (recommendations.content_strategy) {
+      recs.push({
+        title: 'Content Strategy',
+        description: recommendations.content_strategy,
+        priority: 'high',
+        effort: 'medium'
+      })
+    }
+
+    // Optimization tips
+    if (recommendations.optimization_tips) {
+      recommendations.optimization_tips.slice(0, 3).forEach(tip => {
+        recs.push({
+          title: tip,
+          description: 'Implement this optimization for better performance',
+          priority: 'medium',
+          effort: 'easy'
+        })
+      })
+    }
+
+    return recs
+  }
+
   const getImpactColor = (impact: string) => {
     switch (impact) {
       case 'high':
@@ -122,7 +248,7 @@ export default function AnalyzeWebsitePage() {
       case 'low':
         return 'bg-green-100 text-green-800'
       default:
-        return 'bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 text-gray-800'
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
@@ -135,7 +261,7 @@ export default function AnalyzeWebsitePage() {
       case 'low':
         return 'bg-blue-100 text-blue-800'
       default:
-        return 'bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 text-gray-800'
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
@@ -220,133 +346,149 @@ export default function AnalyzeWebsitePage() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Overall Performance Score</span>
-                <div className={`text-3xl font-bold ${getScoreColor(result.score)}`}>
-                  {result.score}/100
+                <div className="flex items-center gap-3">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    result.rating_category === 'EXCELLENT' ? 'bg-green-100 text-green-800' :
+                    result.rating_category === 'GOOD' ? 'bg-blue-100 text-blue-800' :
+                    result.rating_category === 'FAIR' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {result.rating_category}
+                  </span>
+                  <div className={`text-3xl font-bold ${getScoreColor(result.main_score)}`}>
+                    {result.main_score}/100
+                  </div>
                 </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center">
-                  <div className={`w-16 h-16 rounded-full ${getScoreBg(result.metrics.performance)} flex items-center justify-center mx-auto mb-2`}>
-                    <span className={`text-lg font-bold ${getScoreColor(result.metrics?.performance || 0)}`}>
-                      {result.metrics?.performance || 0}
+                  <div className={`w-16 h-16 rounded-full ${getScoreBg(getMetricScore('performance'))} flex items-center justify-center mx-auto mb-2`}>
+                    <span className={`text-lg font-bold ${getScoreColor(getMetricScore('performance'))}`}>
+                      {getMetricScore('performance')}
                     </span>
                   </div>
                   <p className="text-sm font-medium">Performance</p>
                 </div>
                 
                 <div className="text-center">
-                  <div className={`w-16 h-16 rounded-full ${getScoreBg(result.metrics.seo)} flex items-center justify-center mx-auto mb-2`}>
-                    <span className={`text-lg font-bold ${getScoreColor(result.metrics?.seo || 0)}`}>
-                      {result.metrics?.seo || 0}
+                  <div className={`w-16 h-16 rounded-full ${getScoreBg(getMetricScore('seo'))} flex items-center justify-center mx-auto mb-2`}>
+                    <span className={`text-lg font-bold ${getScoreColor(getMetricScore('seo'))}`}>
+                      {getMetricScore('seo')}
                     </span>
                   </div>
                   <p className="text-sm font-medium">SEO</p>
                 </div>
                 
                 <div className="text-center">
-                  <div className={`w-16 h-16 rounded-full ${getScoreBg(result.metrics.accessibility)} flex items-center justify-center mx-auto mb-2`}>
-                    <span className={`text-lg font-bold ${getScoreColor(result.metrics?.accessibility || 0)}`}>
-                      {result.metrics?.accessibility || 0}
+                  <div className={`w-16 h-16 rounded-full ${getScoreBg(getMetricScore('accessibility'))} flex items-center justify-center mx-auto mb-2`}>
+                    <span className={`text-lg font-bold ${getScoreColor(getMetricScore('accessibility'))}`}>
+                      {getMetricScore('accessibility')}
                     </span>
                   </div>
-                  <p className="text-sm font-medium">Accessibility</p>
+                  <p className="text-sm font-medium">Stability</p>
                 </div>
                 
                 <div className="text-center">
-                  <div className={`w-16 h-16 rounded-full ${getScoreBg(result.metrics.bestPractices)} flex items-center justify-center mx-auto mb-2`}>
-                    <span className={`text-lg font-bold ${getScoreColor(result.metrics?.bestPractices || 0)}`}>
-                      {result.metrics?.bestPractices || 0}
+                  <div className={`w-16 h-16 rounded-full ${getScoreBg(getMetricScore('bestPractices'))} flex items-center justify-center mx-auto mb-2`}>
+                    <span className={`text-lg font-bold ${getScoreColor(getMetricScore('bestPractices'))}`}>
+                      {getMetricScore('bestPractices')}
                     </span>
                   </div>
-                  <p className="text-sm font-medium">Best Practices</p>
+                  <p className="text-sm font-medium">Overall Quality</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Key Insights */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Key Insights</CardTitle>
-              <CardDescription>Important findings from the analysis</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {result.insights.map((insight, index) => (
-                  <div key={index} className="flex items-start space-x-3 p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 rounded-lg">
-                    <div className="flex-shrink-0 mt-1">
-                      {insight.type === 'success' && <CheckCircle className="w-5 h-5 text-green-600" />}
-                      {insight.type === 'opportunity' && <TrendingUp className="w-5 h-5 text-blue-600" />}
-                      {insight.type === 'issue' && <AlertCircle className="w-5 h-5 text-red-600" />}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-medium">{insight.title}</h4>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getImpactColor(insight.impact)}`}>
-                          {insight.impact} impact
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600">{insight.description}</p>
-                      <p className="text-xs text-gray-500 mt-1">{insight.category}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recommendations */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Optimization Recommendations</CardTitle>
-              <CardDescription>Actionable steps to improve your website</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {result.recommendations.map((rec, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium">{rec.title}</h4>
-                      <div className="flex space-x-2">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(rec.priority)}`}>
-                          {rec.priority} priority
-                        </span>
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 text-gray-800">
-                          {rec.effort} effort
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-600">{rec.description}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Competitor Analysis */}
-          {result.competitors && result.competitors.length > 0 && (
+          {generateInsights().length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Competitor Analysis</CardTitle>
-                <CardDescription>How you compare to similar websites</CardDescription>
+                <CardTitle>Key Insights</CardTitle>
+                <CardDescription>Important findings from the analysis</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {result.competitors.map((competitor, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 rounded-lg">
-                      <div>
-                        <h4 className="font-medium">{competitor.url}</h4>
-                        <p className="text-sm text-gray-600">
-                          {competitor.traffic?.toLocaleString() || "0"} monthly visitors
-                        </p>
+                  {generateInsights().map((insight, index) => (
+                    <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <div className="flex-shrink-0 mt-1">
+                        {insight.type === 'success' && <CheckCircle className="w-5 h-5 text-green-600" />}
+                        {insight.type === 'opportunity' && <TrendingUp className="w-5 h-5 text-blue-600" />}
+                        {insight.type === 'issue' && <AlertCircle className="w-5 h-5 text-red-600" />}
                       </div>
-                      <div className={`text-lg font-bold ${getScoreColor(competitor.score)}`}>
-                        {competitor.score}/100
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-medium">{insight.title}</h4>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getImpactColor(insight.impact)}`}>
+                            {insight.impact} impact
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600">{insight.description}</p>
+                        <p className="text-xs text-gray-500 mt-1">{insight.category}</p>
                       </div>
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Recommendations */}
+          {generateRecommendations().length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Optimization Recommendations</CardTitle>
+                <CardDescription>Actionable steps to improve your website</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {generateRecommendations().map((rec, index) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium">{rec.title}</h4>
+                        <div className="flex space-x-2">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(rec.priority)}`}>
+                            {rec.priority} priority
+                          </span>
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            {rec.effort} effort
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600">{rec.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* AI Analysis Details */}
+          {result.ai_analysis?.strategic_insights?.why_its_special && (
+            <Card>
+              <CardHeader>
+                <CardTitle>What Makes This Special</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700">{result.ai_analysis.strategic_insights.why_its_special}</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Fallback Notice */}
+          {result.ai_analysis?.fallback_used && (
+            <Card className="border-yellow-200 bg-yellow-50">
+              <CardContent className="pt-6">
+                <div className="flex items-start space-x-3">
+                  <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-yellow-900">Limited Analysis</h4>
+                    <p className="text-sm text-yellow-800 mt-1">
+                      Some advanced analysis features were temporarily unavailable. Basic comprehensive analysis has been provided.
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -367,4 +509,3 @@ export default function AnalyzeWebsitePage() {
     </div>
   )
 }
-
