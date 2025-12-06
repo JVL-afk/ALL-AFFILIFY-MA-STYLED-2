@@ -1,47 +1,41 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  serverExternalPackages: ['mongodb', 'jsonwebtoken', 'bcryptjs'],
+import type { NextConfig } from 'next'
 
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
-          },
-        ],
-      },
-    ]
+const nextConfig: NextConfig = {
+  // Remove eslint configuration (no longer supported in next.config)
+  // eslint: {
+  //   ignoreDuringBuilds: true,
+  // },
+  
+  typescript: {
+    // Optionally ignore build errors during development
+    ignoreBuildErrors: false,
   },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-        crypto: false,
-      }
-    }
-    return config
-  }
+
+  // Turbopack configuration for Next.js 16+
+  experimental: {
+    // Enable Turbopack in development
+    turbo: {
+      // Add any Turbopack-specific configuration here
+    },
+  },
+
+  // Image optimization
+  images: {
+    domains: ['localhost'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
+  },
+
+  // Environment variables
+  env: {
+    GOOGLE_AI_API_KEY: process.env.GOOGLE_AI_API_KEY,
+    MONGODB_URI: process.env.MONGODB_URI,
+  },
 }
 
-module.exports = nextConfig
+export default nextConfig
 
