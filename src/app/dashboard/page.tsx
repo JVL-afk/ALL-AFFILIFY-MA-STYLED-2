@@ -20,7 +20,7 @@ export default async function DashboardPage() {
   // Create a mock NextRequest object to pass to verifyAuth
   // This is a common pattern to adapt utility functions written for Route Handlers
   // to work in Server Components.
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const token = cookieStore.get('auth-token');
   
   // Create a minimal mock request object that verifyAuth can use
