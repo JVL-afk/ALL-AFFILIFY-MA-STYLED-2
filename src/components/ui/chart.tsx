@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
-  BarChart,
+  BarChart as RechartsBarChart,
   Bar,
   XAxis,
   YAxis,
@@ -11,11 +11,11 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  LineChart,
+  LineChart as RechartsLineChart,
   Line,
-  AreaChart,
+  AreaChart as RechartsAreaChart,
   Area,
-  PieChart,
+  PieChart as RechartsPieChart,
   Pie,
   Cell,
   RadialBarChart,
@@ -25,7 +25,7 @@ import {
   ScatterChart,
   ReferenceLine,
   Brush,
-  FunnelChart,
+  FunnelChart as RechartsFunnelChart,
   Funnel,
   LabelList
 } from 'recharts'
@@ -211,7 +211,7 @@ export const LineChart = ({
 }: LineChartProps) => {
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+      <RechartsLineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
         {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />}
         <XAxis dataKey={xKey} stroke="#6b7280" fontSize={12} />
         <YAxis stroke="#6b7280" fontSize={12} />
@@ -260,7 +260,7 @@ export const BarChart = ({
 }: BarChartProps) => {
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+      <RechartsBarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
         {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />}
         <XAxis dataKey={xKey} stroke="#6b7280" fontSize={12} />
         <YAxis stroke="#6b7280" fontSize={12} />
@@ -306,7 +306,7 @@ export const AreaChart = ({
 }: AreaChartProps) => {
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <AreaChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+      <RechartsAreaChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
         {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />}
         <XAxis dataKey={xKey} stroke="#6b7280" fontSize={12} />
         <YAxis stroke="#6b7280" fontSize={12} />
@@ -354,7 +354,7 @@ export const PieChart = ({
 }: PieChartProps) => {
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <PieChart>
+      <RechartsPieChart>
         <Pie
           data={data}
           cx="50%"
@@ -506,7 +506,7 @@ export const FunnelChart = ({
 }: FunnelChartProps) => {
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <FunnelChart>
+      <RechartsFunnelChart>
         <Tooltip />
         <Funnel
           dataKey="value"
