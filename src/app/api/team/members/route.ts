@@ -67,7 +67,7 @@ export const POST = requireEnterprise(async (request: NextRequest, user: Authent
 
     const result = await db.collection('teams').updateOne(
       { _id: team._id },
-      { $push: { members: newMember } }
+      { $push: { members: newMember as any } }
     )
 
     if (result.modifiedCount === 0) {
