@@ -188,7 +188,7 @@ export default function BasicDashboard() {
               </Button>
               <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20">
                 <Link href="https://discord.gg/cdePwUQB" target="_blank" rel="noopener noreferrer">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-2">
+                  <Users className="w-4 h-4 mr-2" />
                   Join Discord Server
                 </Link>
               </Button>
