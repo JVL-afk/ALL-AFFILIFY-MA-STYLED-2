@@ -125,7 +125,7 @@ export const DELETE = requireEnterprise(async (request: NextRequest, user: Authe
     // Best-in-Class: Remove the member from the team
     const result = await db.collection('teams').updateOne(
       { _id: team._id },
-      { $pull: { members: { userId: new ObjectId(memberId) } } }
+      { $pull: { members: { userId: new ObjectId(memberId) } } as any }
     )
 
     if (result.modifiedCount === 0) {
