@@ -57,8 +57,7 @@ export default function ProCreateWebsite() {
     enterprise: { websites: 999, name: 'Enterprise ($99)' }
   }
 
-  useEffect(() => {
-    const fetchUserData = async () => {
+  const fetchUserData = async () => {
   try {
     const response = await fetch("/api/user/data");
     if (response.ok) {
@@ -75,6 +74,10 @@ export default function ProCreateWebsite() {
     router.push('/login');
   }
 };
+
+useEffect(() => {
+  fetchUserData();
+}, []);
 
 useEffect(() => {
   fetchUserData();
