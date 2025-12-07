@@ -229,7 +229,7 @@ export const LineChart = ({
           />
         ))}
         {showBrush && <Brush dataKey={xKey} height={30} stroke={colors[0]} />}
-      </LineChart>
+      </RechartsLineChart>
     </ResponsiveContainer>
   )
 }
@@ -275,7 +275,7 @@ export const BarChart = ({
             radius={[2, 2, 0, 0]}
           />
         ))}
-      </BarChart>
+      </RechartsBarChart>
     </ResponsiveContainer>
   )
 }
@@ -323,7 +323,7 @@ export const AreaChart = ({
             fillOpacity={0.6}
           />
         ))}
-      </AreaChart>
+      </RechartsAreaChart>
     </ResponsiveContainer>
   )
 }
@@ -372,7 +372,7 @@ export const PieChart = ({
         </Pie>
         <Tooltip content={<CustomTooltip formatter={formatter} />} />
         {showLegend && <Legend />}
-      </PieChart>
+      </RechartsPieChart>
     </ResponsiveContainer>
   )
 }
@@ -518,7 +518,7 @@ export const FunnelChart = ({
           ))}
           <LabelList position="center" fill="#fff" stroke="none" />
         </Funnel>
-      </FunnelChart>
+      </RechartsFunnelChart>
     </ResponsiveContainer>
   )
 }
