@@ -479,7 +479,6 @@ export const ProgressChart = ({
     <ResponsiveContainer width="100%" height={height}>
       <RadialBarChart cx="50%" cy="50%" innerRadius="20%" outerRadius="90%" data={data}>
         <RadialBar
-          minAngle={15}
           label={{ position: 'insideStart', fill: '#fff' }}
           background
           clockWise
