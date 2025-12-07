@@ -65,7 +65,7 @@ export const POST = requireEnterprise(async (request: NextRequest, user: Authent
       await db.collection('userCode').updateOne(
         { userId: new ObjectId(user._id) },
         {
-          $push: { deployments: rollbackDeployment }
+          $push: { deployments: rollbackDeployment as any }
         }
       )
 
