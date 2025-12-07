@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
         plan: user.plan,
         websiteCount: stats.websiteCount,
         createdAt: user.createdAt,
-        lastLoginAt: user.lastLoginAt
+        lastLoginAt: (user as any).lastLoginAt || user.createdAt
       },
       stats: {
         totalClicks: stats.totalClicks,
