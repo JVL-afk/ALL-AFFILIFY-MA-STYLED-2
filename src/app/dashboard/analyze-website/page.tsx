@@ -155,7 +155,7 @@ export default function AnalyzeWebsitePage() {
 
     // Add key strengths as success insights
     if (ai.strategic_insights?.key_strengths) {
-      ai.strategic_insights.key_strengths.slice(0, 3).forEach(strength => {
+      ai.strategic_insights.key_strengths.slice(0, 3).forEach((strength: any) => {
         insights.push({
           category: 'Strength',
           title: strength,
@@ -168,7 +168,7 @@ export default function AnalyzeWebsitePage() {
 
     // Add improvement areas as opportunities
     if (ai.strategic_insights?.improvement_areas) {
-      ai.strategic_insights.improvement_areas.slice(0, 2).forEach(area => {
+      ai.strategic_insights.improvement_areas.slice(0, 2).forEach((area: any) => {
         insights.push({
           category: 'Opportunity',
           title: area,
@@ -181,7 +181,7 @@ export default function AnalyzeWebsitePage() {
 
     // Add risk factors as issues
     if (ai.risk_assessment?.primary_risks) {
-      ai.risk_assessment.primary_risks.slice(0, 2).forEach(risk => {
+      ai.risk_assessment.primary_risks.slice(0, 2).forEach((risk: any) => {
         insights.push({
           category: 'Risk',
           title: risk,
@@ -204,7 +204,7 @@ export default function AnalyzeWebsitePage() {
 
     // Traffic sources
     if (recommendations.traffic_sources) {
-      recommendations.traffic_sources.slice(0, 3).forEach((source, idx) => {
+      recommendations.traffic_sources.slice(0, 3).forEach((source: any, idx) => {
         recs.push({
           title: `Focus on ${source}`,
           description: 'Leverage this traffic source for maximum reach',
@@ -226,7 +226,7 @@ export default function AnalyzeWebsitePage() {
 
     // Optimization tips
     if (recommendations.optimization_tips) {
-      recommendations.optimization_tips.slice(0, 3).forEach(tip => {
+      recommendations.optimization_tips.slice(0, 3).forEach((tip: any) => {
         recs.push({
           title: tip,
           description: 'Implement this optimization for better performance',
