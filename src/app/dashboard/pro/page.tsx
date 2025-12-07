@@ -152,7 +152,7 @@ export default function ProDashboard() {
               </Button>
               <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20">
                 <Link href="https://discord.gg/cdePwUQB" target="_blank" rel="noopener noreferrer">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2"><path d="M11.66 2.05c-4.4 0-8.12 3.63-8.12 8.1 0 3.1 1.7 5.8 4.25 7.2-1.2.4-2.3.9-3.3 1.5.1.1.2.2.3.3 1.1.8 2.3 1.4 3.6 1.8.8.2 1.6.3 2.4.3 4.4 0 8.1-3.6 8.1-8.1 0-4.4-3.7-8.1-8.1-8.1zm-4.3 12.3c-.9 0-1.6-.7-1.6-1.6 0-.9.7-1.6 1.6-1.6.9 0 1.6.7 1.6 1.6 0 .9-.7 1.6-1.6 1.6zm8.6 0c-.9 0-1.6-.7-1.6-1.6 0-.9.7-1.6 1.6-1.6.9 0 1.6.7 1.6 1.6 0 .9-.7 1.6-1.6 1.6z"/></svg>
+                  <Users className="w-4 h-4 mr-2" />
                   Join Discord Server
                 </Link>
               </Button>
