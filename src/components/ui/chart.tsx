@@ -481,7 +481,6 @@ export const ProgressChart = ({
         <RadialBar
           label={{ position: 'insideStart', fill: '#fff' }}
           background
-          clockwise
           dataKey="value"
           fill={colors[0]}
         />
