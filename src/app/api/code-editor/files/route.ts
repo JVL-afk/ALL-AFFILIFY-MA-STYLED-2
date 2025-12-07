@@ -78,21 +78,21 @@ export const POST = requireEnterprise(async (request: NextRequest, user: Authent
     )
 
     // If file doesn't exist, add it
-    if (!result) {
-      await db.collection('userCode').updateOne(
-        { userId: new ObjectId(user._id) },
-        {
-          $push: {
-            files: {
-              path: filePath,
-              content: content,
-              lastModified: new Date()
-            }
-          },
-          $set: { lastModified: new Date() }
-        }
-      )
+if (!result) {
+  await db.collection('userCode').updateOne(
+    { userId: new ObjectId(user._id) },
+    {
+      $push: {
+        files: {
+          path: filePath,
+          content: content,
+          lastModified: new Date()
+        } as any  // ✅ Cast to any
+      } as any,  // ✅ Also cast the entire $push
+      $set: { lastModified: new Date() }
     }
+  )
+}
 
     return NextResponse.json({
       success: true,
