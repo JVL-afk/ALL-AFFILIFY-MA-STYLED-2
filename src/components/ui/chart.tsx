@@ -443,21 +443,21 @@ export const MetricCard = ({
       
       <div className="flex items-end justify-between">
         <div className="text-3xl font-bold text-gray-900">{value}</div>
-        {trend && (
-          <div className="w-20 h-8">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trend}>
-                <Line 
-                  type="monotone" 
-                  dataKey="value" 
-                  stroke={COLORS.primary[0]} 
-                  strokeWidth={2}
-                  dot={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        )}
+          {trend && (
+  <div className="w-20 h-8">
+    <ResponsiveContainer width="100%" height="100%">
+      <RechartsLineChart data={trend}>
+        <Line 
+          type="monotone" 
+          dataKey="value" 
+          stroke={COLORS.primary[0]} 
+          strokeWidth={2}
+          dot={false}
+        />
+      </RechartsLineChart>
+    </ResponsiveContainer>
+  </div>
+)}
       </div>
     </div>
   )
