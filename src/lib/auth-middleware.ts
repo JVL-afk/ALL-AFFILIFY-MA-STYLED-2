@@ -69,11 +69,23 @@ export async function authenticateRequest(request: NextRequest): Promise<{ succe
     }
 
     // 4. Return authenticated user
-    const user: AuthenticatedUser = {
-      ...userDoc,
-      _id: userDoc._id.toString(),
-      id: userDoc._id.toString(),
-    };
+const user: AuthenticatedUser = {
+  _id: userDoc._id.toString(),
+  id: userDoc._id.toString(),
+  name: userDoc.name || '',
+  email: userDoc.email || '',
+  plan: (userDoc.plan as any) || 'basic',
+  websitesCreated: userDoc.websitesCreated || 0,
+  websiteLimit: userDoc.websiteLimit || 3,
+  analysesUsed: userDoc.analysesUsed || 0,
+  analysisLimit: userDoc.analysisLimit || 10,
+  stripeCustomerId: userDoc.stripeCustomerId,
+  subscriptionId: userDoc.subscriptionId,
+  subscriptionStatus: userDoc.subscriptionStatus,
+  createdAt: userDoc.createdAt || new Date(),
+  updatedAt: userDoc.updatedAt || new Date(),
+  isVerified: userDoc.isVerified || false,
+}
 
     return { success: true, user };
   } catch (error) {
