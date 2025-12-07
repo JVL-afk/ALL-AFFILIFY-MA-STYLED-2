@@ -59,24 +59,26 @@ export default function ProCreateWebsite() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      try {
-        const response = await fetch("/api/user/data"); // Assuming an API endpoint for user data
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data);
-          setCurrentWebsites(data.websiteCount || 0); // Assuming websiteCount is part of user data
-          setUserPlan(data.plan || "pro"); // Assuming plan is part of user data
-        } else {
-          console.error("Failed to fetch user data");
-          router.push('/login'); // Redirect to login if user data cannot be fetched
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        router.push('/login'); // Redirect to login on error
-      }
-    };
-    fetchUserData();
-  }, []);
+  try {
+    const response = await fetch("/api/user/data");
+    if (response.ok) {
+      const data = await response.json();
+      setUser(data);
+      setCurrentWebsites(data.websiteCount || 0);
+      setUserPlan(data.plan || "pro");
+    } else {
+      console.error("Failed to fetch user data");
+      router.push('/login');
+    }
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    router.push('/login');
+  }
+};
+
+useEffect(() => {
+  fetchUserData();
+}, []);
 
   const validateUrl = (url: string) => {
     try {
