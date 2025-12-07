@@ -52,7 +52,7 @@ export const GET = requireEnterprise(async (request: NextRequest, user: Authenti
         ownerId: team.ownerId.toString(),
         name: team.name,
         memberCount: team.members.length,
-        members: team.members.map(member => ({
+        members: team.members.map((member: any) => ({
           id: member.userId.toString(),
           email: member.email,
           role: member.role,
