@@ -29,7 +29,7 @@ export interface User {
 export interface AuthenticatedUser extends Omit<User, 'password'> {}
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key'
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
+const JWT_EXPIRES_IN: string | number = process.env.JWT_EXPIRES_IN || '7d'
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12)
@@ -40,7 +40,8 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 }
 
 export function generateToken(userId: string): string {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN as string | number})
+  return jwt.sign({ userId }, JWT_SECRET as string, { expiresIn: JWT_EXPIRES_IN })
+}
 }
 
 export function verifyToken(token: string): { userId: string } | null {
