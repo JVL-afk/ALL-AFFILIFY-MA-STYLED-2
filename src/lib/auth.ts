@@ -40,7 +40,8 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 }
 
 export function generateToken(userId: string): string {
-  return jwt.sign({ userId }, JWT_SECRET as string, { expiresIn: JWT_EXPIRES_IN })
+  const secret = process.env.JWT_SECRET || 'your-super-secret-jwt-key'
+  return jwt.sign({ userId }, secret, { expiresIn: '7d' })
 }
 
 export function verifyToken(token: string): { userId: string } | null {
