@@ -258,10 +258,6 @@ export async function getUserAnalyses(userId: string, limit?: number): Promise<A
     
     const analyses = await db.collection('analyses').find(query, options).toArray()
     
-    const websites = await db.collection('websites').find(query, options).toArray()
-    
-    const analyses = await db.collection('analyses').find(query, options).toArray()
-    
     return analyses.map(analysis => ({
       ...analysis,
       id: analysis._id.toString()
