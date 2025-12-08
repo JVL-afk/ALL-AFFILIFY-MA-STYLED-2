@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-
+import { NextRequest, NextResponse } from 'next/server'
 import { ObjectId } from 'mongodb'
 import { connectToDatabase } from './mongodb'
 
