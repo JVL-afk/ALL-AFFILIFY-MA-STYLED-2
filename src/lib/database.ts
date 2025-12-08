@@ -93,8 +93,6 @@ export async function getUserWebsites(userId: string, limit?: number): Promise<W
     
     const websites = await db.collection('websites').find(query, options).toArray()
     
-    const websites = await db.collection('websites').find(query, options).toArray()
-    
     return websites.map(website => ({
       ...website,
       id: website._id.toString()
