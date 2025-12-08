@@ -14,12 +14,14 @@ interface WelcomeEmailData {
 
 interface WebsiteCreatedEmailData {
   userName: string;
+  userEmail: string;  // ← Added this
   websiteName: string;
   websiteUrl: string;
 }
 
 interface PasswordResetEmailData {
   userName: string;
+  userEmail: string;  // ← Added this
   resetLink: string;
 }
 
