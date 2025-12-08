@@ -86,10 +86,12 @@ export async function getUserWebsites(userId: string, limit?: number): Promise<W
     // CRITICAL FIX: Query with ObjectId for consistency
     const userObjectId = new ObjectId(userId)
     const query = { userId: userObjectId }
-    const options = {
-      sort: { createdAt: -1 },
+    const options: any = {
+      sort: { createdAt: -1 as const },
       ...(limit && { limit })
     }
+    
+    const websites = await db.collection('websites').find(query, options).toArray()
     
     const websites = await db.collection('websites').find(query, options).toArray()
     
@@ -251,10 +253,14 @@ export async function getUserAnalyses(userId: string, limit?: number): Promise<A
     // CRITICAL FIX: Query with ObjectId for consistency
     const userObjectId = new ObjectId(userId)
     const query = { userId: userObjectId }
-    const options = {
-      sort: { createdAt: -1 },
+    const options: any = {
+      sort: { createdAt: -1 as const },
       ...(limit && { limit })
     }
+    
+    const analyses = await db.collection('analyses').find(query, options).toArray()
+    
+    const websites = await db.collection('websites').find(query, options).toArray()
     
     const analyses = await db.collection('analyses').find(query, options).toArray()
     
