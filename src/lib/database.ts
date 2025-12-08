@@ -50,7 +50,7 @@ export async function saveWebsite(userId: string, websiteData: GeneratedWebsite)
       seo: websiteData.seo,
       status: 'published' as const, // CRITICAL FIX: Ensure new websites are published, not drafts
 
-      affiliateLinks: websiteData.affiliateLinks,
+      affiliateLinks: (websiteData as any).affiliateLinks || [],
       template: websiteData.template,
       // Removed duplicated status line
       views: 0,
