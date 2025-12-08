@@ -21,7 +21,7 @@ interface AnalyticsResponse {
 }
 
 class GoogleAnalyticsService {
-  private client: BetaAnalyticsDataClient;
+  private client: BetaAnalyticsDataClient | null;
   private propertyId: string;
 
   constructor() {
@@ -29,6 +29,7 @@ class GoogleAnalyticsService {
     if (!process.env.GOOGLE_ANALYTICS_PROPERTY_ID || !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY) {
       console.warn('Google Analytics credentials not configured, using mock data');
       this.propertyId = 'properties/mock';
+      this.client = null;
       return;
     }
 
