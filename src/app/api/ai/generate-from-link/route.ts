@@ -122,7 +122,17 @@ async function deployToNetlify(websiteHTML: string, siteName: string) {
       return null
     }
 
-    // Create a new site on Netlify
+    // ✅ FIX 1: Clean the site name to meet Netlify requirements
+    // Site names must be lowercase, alphanumeric, and can contain hyphens
+    const cleanSiteName = siteName
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .substring(0, 63) // Max 63 characters
+
+    console.log('Creating Netlify site with name:', cleanSiteName)
+
+    // ✅ FIX 2: Don't specify site name in creation (let Netlify generate it)
     const siteResponse = await fetch('https://api.netlify.com/api/v1/sites', {
       method: 'POST',
       headers: {
@@ -130,38 +140,49 @@ async function deployToNetlify(websiteHTML: string, siteName: string) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        name: siteName,
-        custom_domain: null
+        // Don't specify name - let Netlify auto-generate
+        // name: cleanSiteName,
       })
     })
 
     if (!siteResponse.ok) {
+      const errorText = await siteResponse.text()
+      console.error(`Netlify site creation error: ${siteResponse.status}`, errorText)
       throw new Error(`Netlify site creation error: ${siteResponse.status}`)
     }
 
     const siteData = await siteResponse.json()
     const siteId = siteData.id
 
-// ✅ FIX: Convert Buffer to Uint8Array, then to Blob
-const zipBuffer = await createZipFromHTML(websiteHTML)
-const zipUint8Array = new Uint8Array(zipBuffer)
-const zipBlob = new Blob([zipUint8Array], { type: 'application/zip' })
+    console.log('Netlify site created:', siteId)
 
-// Deploy the HTML content
-const deployResponse = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}/deploys`, {
-  method: 'POST',
-  headers: {
-    'Authorization': `Bearer ${netlifyToken}`,
-    'Content-Type': 'application/zip'
-  },
-  body: zipBlob  // ✅ Now using Blob instead of Buffer
-})
+    // ✅ FIX 3: Convert Buffer to Uint8Array, then to Blob
+    const zipBuffer = await createZipFromHTML(websiteHTML)
+    const zipUint8Array = new Uint8Array(zipBuffer)
+    const zipBlob = new Blob([zipUint8Array], { type: 'application/zip' })
+
+    console.log('Deploying to Netlify site:', siteId)
+
+    // Deploy the HTML content
+    const deployResponse = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}/deploys`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${netlifyToken}`,
+        'Content-Type': 'application/zip'
+      },
+      body: zipBlob
+    })
+
     if (!deployResponse.ok) {
+      const errorText = await deployResponse.text()
+      console.error(`Netlify deploy error: ${deployResponse.status}`, errorText)
       throw new Error(`Netlify deploy error: ${deployResponse.status}`)
     }
 
     const deployData = await deployResponse.json()
     
+    console.log('Netlify deployment successful:', deployData.id)
+
     return {
       url: siteData.ssl_url || siteData.url,
       deploy_id: deployData.id,
@@ -170,6 +191,7 @@ const deployResponse = await fetch(`https://api.netlify.com/api/v1/sites/${siteI
     }
   } catch (error) {
     console.error('Netlify deployment error:', error)
+    // Return null so the system falls back to local URL
     return null
   }
 }
