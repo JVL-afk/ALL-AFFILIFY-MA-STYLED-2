@@ -216,7 +216,7 @@ async function createZipFromHTML(html: string): Promise<Buffer> {
 
 // Generate REAL website content using Gemini AI with Unsplash images
 async function generateWebsiteContent(productInfo: any, scrapedData: any, affiliateId: string, affiliateType: string) {
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
   
   // Prioritize scraped images, fallback to Unsplash
   const scrapedImages = scrapedData.images || [];
