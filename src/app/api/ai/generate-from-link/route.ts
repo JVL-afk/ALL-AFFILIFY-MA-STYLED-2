@@ -250,7 +250,7 @@ async function generateWebsiteContent(productInfo: any, scrapedData: any, affili
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
   
   // Prioritize scraped images, fallback to Unsplash
-  const scrapedImages = scrapedData.images || [];
+  const scrapedImages = scrapedData?.images || [];
   console.log('🖼️ [IMAGE] Scraped images available:', scrapedImages.length)
   if (scrapedImages.length > 0) {
     console.log('🖼️ [IMAGE] Sample scraped image:', scrapedImages[0])
@@ -284,12 +284,20 @@ async function generateWebsiteContent(productInfo: any, scrapedData: any, affili
   console.log('🖼️ [IMAGE] Feature 2:', featureImages[1]?.url ? '✅ VALID' : '❌ MISSING')
   console.log('🖼️ [IMAGE] Testimonial:', testimonialImages[0]?.url ? '✅ VALID' : '❌ MISSING')
   
-  const prompt = `You are the world's most elite product marketing expert and conversion optimization copywriter. Your mission is to create a highly compelling, conversion-optimized website to promote and sell the specific product described in the data. The website MUST be focused entirely on the product's features, benefits, and value proposition to the end consumer. DO NOT mention affiliate marketing, making money, or any business opportunity. Your goal is to drive the user to click the affiliate link to purchase the product.Here is the product data you have to work with: ${JSON.stringify(scrapedData)}.
+  const prompt = `You are the world's most elite product marketing expert and conversion optimization copywriter. Your mission is to create a highly compelling, conversion-optimized website to promote and sell the specific product described in the data. The website MUST be focused entirely on the product's features, benefits, and value proposition to the end consumer. DO NOT mention affiliate marketing, making money, or any business opportunity. Your goal is to drive the user to click the affiliate link to purchase the product.
+
+Here is the product data you have to work with: ${JSON.stringify(scrapedData)}.
+
 Here are the high-quality image URLs you MUST use in the generated HTML for the hero section and features:
 Hero Image: ${heroImages[0]?.url || 'NO_HERO_IMAGE'}
 Feature Image 1: ${featureImages[0]?.url || 'NO_FEATURE_IMAGE_1'}
 Feature Image 2: ${featureImages[1]?.url || 'NO_FEATURE_IMAGE_2'}
 Testimonial Image: ${testimonialImages[0]?.url || 'NO_TESTIMONIAL_IMAGE'}
+
+CRITICAL: The affiliate link is: ${productInfo.originalUrl}
+ALL call-to-action (CTA) buttons MUST use this exact URL: ${productInfo.originalUrl}
+Do NOT use placeholder links like "#" or relative links. Every CTA button must have href="${productInfo.originalUrl}"
+
 Now, create a unique, creative, conversion-optimized website with over 1000 lines of code. Do not use a restrictive output structure. Be creative. Include a competitor comparison section. Use niche-specific language. Include unique sections that competitors don't have. The primary call-to-action (CTA) should be a prominent button with the affiliate link. Do NOT insert any prices if you don't know the price exactly. Make each website unique (DON'T USE the same colors, if the scraped data and the website in general has a specific color that's recognizable, make that color the color of the writing)! Compare with REAL COMPETITORS of the product and specify the competitors names. Also don't only get your info from the scraped data, research blogs, reviews, articles everything on this internet about the product, make ONLY THE BEST WEBSITE that promotes the specific product! Respond ONLY with the full code! Here is the affiliate information: affiliateId: ${affiliateId}, affiliateType: ${affiliateType};.`;
 
   console.log('🤖 [AI] Sending to Gemini, prompt length:', prompt.length, 'chars')
@@ -548,10 +556,14 @@ export async function POST(request: NextRequest) {
     // Analyze REAL product URL
     console.log('Analyzing affiliate URL:', productUrl);
     const productInfo = await analyzeProductURL(productUrl);
+    
+    // Scrape product data for images and details
+    console.log('Scraping product data...');
+    const scrapedData = await scrapeProductData(productUrl);
 
     // Generate REAL website content using AI with Unsplash images
     console.log('Generating professional website content with Unsplash images...');
- const websiteHTML = await generateWebsiteContent({ productUrl }, productInfo, affiliateId, affiliateType);
+    const websiteHTML = await generateWebsiteContent(productInfo, scrapedData, affiliateId, affiliateType);
 
     // Generate unique slug for the website
     const baseSlug = productInfo.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 30).replace(/^-|-$/g, ''); // Clean, truncate to 30 chars, remove trailing hyphen
