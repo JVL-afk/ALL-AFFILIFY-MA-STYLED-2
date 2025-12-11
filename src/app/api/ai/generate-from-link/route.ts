@@ -63,43 +63,69 @@ interface UserData {
 
 // Get professional images from Unsplash API
 async function getUnsplashImages(query: string, count: number = 3) {
+  console.log('🖼️ [IMAGE] ========== STARTING UNSPLASH FETCH ==========')
+  console.log('🖼️ [IMAGE] Query:', query)
+  console.log('🖼️ [IMAGE] Count requested:', count)
+  
   try {
     const unsplashApiKey = process.env.UNSPLASH_ACCESS_KEY
+    console.log('🖼️ [IMAGE] API Key exists:', !!unsplashApiKey)
+    console.log('🖼️ [IMAGE] API Key length:', unsplashApiKey?.length || 0)
+    
     if (!unsplashApiKey) {
-      console.log('Unsplash API key not found, using placeholder images')
+      console.log('🖼️ [IMAGE] ❌ No API key - using placeholders')
       return generatePlaceholderImages(query, count)
     }
 
-    const response = await fetch(
-      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=${count}&orientation=landscape&order_by=relevant`,
-      {
-        headers: {
-          'Authorization': `Client-ID ${unsplashApiKey}`
-        }
+    const apiUrl = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=${count}&orientation=landscape&order_by=relevant`
+    console.log('🖼️ [IMAGE] Fetching from:', apiUrl)
+
+    const response = await fetch(apiUrl, {
+      headers: {
+        'Authorization': `Client-ID ${unsplashApiKey}`
       }
-    )
+    })
+
+    console.log('🖼️ [IMAGE] Response status:', response.status)
+    console.log('🖼️ [IMAGE] Response OK:', response.ok)
 
     if (!response.ok) {
+      const errorText = await response.text()
+      console.error('🖼️ [IMAGE] ❌ API Error Response:', errorText)
       throw new Error(`Unsplash API error: ${response.status}`)
     }
 
     const data = await response.json()
+    console.log('🖼️ [IMAGE] Results found:', data.results?.length || 0)
+    console.log('🖼️ [IMAGE] Total available:', data.total || 0)
     
-    return data.results.map((photo: any) => ({
-      url: photo.urls.regular,
-      thumb: photo.urls.thumb,
-      alt: photo.alt_description || query,
-      credit: `Photo by ${photo.user.name} on Unsplash`,
-      download_url: photo.links.download_location
-    }))
+    const images = data.results.map((photo: any, index: number) => {
+      const imageData = {
+        url: photo.urls.regular,
+        thumb: photo.urls.thumb,
+        alt: photo.alt_description || query,
+        credit: `Photo by ${photo.user.name} on Unsplash`,
+        download_url: photo.links.download_location
+      }
+      console.log(`🖼️ [IMAGE] [${index + 1}/${data.results.length}] URL: ${imageData.url}`)
+      console.log(`🖼️ [IMAGE] [${index + 1}/${data.results.length}] Alt: ${imageData.alt}`)
+      console.log(`🖼️ [IMAGE] [${index + 1}/${data.results.length}] By: ${photo.user.name}`)
+      return imageData
+    })
+    
+    console.log('🖼️ [IMAGE] ✅ Successfully fetched', images.length, 'images')
+    console.log('🖼️ [IMAGE] ========== END UNSPLASH FETCH ==========')
+    return images
   } catch (error) {
-    console.error('Unsplash API error:', error)
+    console.error('🖼️ [IMAGE] ❌ EXCEPTION in getUnsplashImages:', error)
+    console.log('🖼️ [IMAGE] Falling back to placeholders')
     return generatePlaceholderImages(query, count)
   }
 }
 
 // Generate placeholder images if Unsplash fails
 function generatePlaceholderImages(query: string, count: number) {
+  console.log('🖼️ [IMAGE] 🎨 Generating', count, 'placeholder images for:', query)
   const images = []
   for (let i = 0; i < count; i++) {
     images.push({
@@ -110,6 +136,7 @@ function generatePlaceholderImages(query: string, count: number) {
       download_url: null
     })
   }
+  console.log('🖼️ [IMAGE] ✅ Generated', images.length, 'placeholders')
   return images
 }
 
@@ -216,23 +243,46 @@ async function createZipFromHTML(html: string): Promise<Buffer> {
 
 // Generate REAL website content using Gemini AI with Unsplash images
 async function generateWebsiteContent(productInfo: any, scrapedData: any, affiliateId: string, affiliateType: string) {
+  console.log('🌐 [WEBSITE] ========== STARTING WEBSITE GENERATION ==========')
+  console.log('🌐 [WEBSITE] Product title:', productInfo.title)
+  console.log('🌐 [WEBSITE] Product URL:', productInfo.originalUrl)
+  
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
   
   // Prioritize scraped images, fallback to Unsplash
   const scrapedImages = scrapedData.images || [];
+  console.log('🖼️ [IMAGE] Scraped images available:', scrapedImages.length)
+  if (scrapedImages.length > 0) {
+    console.log('🖼️ [IMAGE] Sample scraped image:', scrapedImages[0])
+  }
   
   // Use scraped images for hero, fallback to Unsplash
+  console.log('🖼️ [IMAGE] ========== FETCHING HERO IMAGE ==========')
   const heroImages = scrapedImages.length > 0 
     ? [{ url: scrapedImages[0], alt: `${productInfo.title} hero image`, credit: 'Scraped from product page', download_url: null }]
     : await getUnsplashImages(`${productInfo.title} product lifestyle`, 1);
+  
+  console.log('🖼️ [IMAGE] Hero image selected:', heroImages[0]?.url)
 
   // Use scraped images for features, fallback to Unsplash
+  console.log('🖼️ [IMAGE] ========== FETCHING FEATURE IMAGES ==========')
   const featureImages = scrapedImages.length > 1 
     ? scrapedImages.slice(1, 3).map((url: string) => ({ url, alt: `${productInfo.title} feature image`, credit: 'Scraped from product page', download_url: null }))
     : await getUnsplashImages(`${productInfo.title} benefits features`, 2);
+  
+  console.log('🖼️ [IMAGE] Feature image 1:', featureImages[0]?.url)
+  console.log('🖼️ [IMAGE] Feature image 2:', featureImages[1]?.url)
 
   // Use Unsplash for testimonials as scraped images are unlikely to be testimonials
+  console.log('🖼️ [IMAGE] ========== FETCHING TESTIMONIAL IMAGE ==========')
   const testimonialImages = await getUnsplashImages('happy customer testimonial', 1);
+  console.log('🖼️ [IMAGE] Testimonial image:', testimonialImages[0]?.url)
+  
+  console.log('🖼️ [IMAGE] ========== IMAGE SUMMARY ==========')
+  console.log('🖼️ [IMAGE] Hero:', heroImages[0]?.url ? '✅ VALID' : '❌ MISSING')
+  console.log('🖼️ [IMAGE] Feature 1:', featureImages[0]?.url ? '✅ VALID' : '❌ MISSING')
+  console.log('🖼️ [IMAGE] Feature 2:', featureImages[1]?.url ? '✅ VALID' : '❌ MISSING')
+  console.log('🖼️ [IMAGE] Testimonial:', testimonialImages[0]?.url ? '✅ VALID' : '❌ MISSING')
   
   const prompt = `You are the world's most elite product marketing expert and conversion optimization copywriter. Your mission is to create a highly compelling, conversion-optimized website to promote and sell the specific product described in the data. The website MUST be focused entirely on the product's features, benefits, and value proposition to the end consumer. DO NOT mention affiliate marketing, making money, or any business opportunity. Your goal is to drive the user to click the affiliate link to purchase the product.Here is the product data you have to work with: ${JSON.stringify(scrapedData)}.
 Here are the high-quality image URLs you MUST use in the generated HTML for the hero section and features:
@@ -242,35 +292,44 @@ Feature Image 2: ${featureImages[1]?.url || 'NO_FEATURE_IMAGE_2'}
 Testimonial Image: ${testimonialImages[0]?.url || 'NO_TESTIMONIAL_IMAGE'}
 Now, create a unique, creative, conversion-optimized website with over 1000 lines of code. Do not use a restrictive output structure. Be creative. Include a competitor comparison section. Use niche-specific language. Include unique sections that competitors don't have. The primary call-to-action (CTA) should be a prominent button with the affiliate link. Do NOT insert any prices if you don't know the price exactly. Make each website unique (DON'T USE the same colors, if the scraped data and the website in general has a specific color that's recognizable, make that color the color of the writing)! Compare with REAL COMPETITORS of the product and specify the competitors names. Also don't only get your info from the scraped data, research blogs, reviews, articles everything on this internet about the product, make ONLY THE BEST WEBSITE that promotes the specific product! Respond ONLY with the full code! Here is the affiliate information: affiliateId: ${affiliateId}, affiliateType: ${affiliateType};.`;
 
+  console.log('🤖 [AI] Sending to Gemini, prompt length:', prompt.length, 'chars')
+
   try {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     let websiteHTML = response.text();
+    
+    console.log('🤖 [AI] ✅ Received response, length:', websiteHTML.length, 'chars')
     
     // Clean up the response to ensure it's valid HTML
     websiteHTML = websiteHTML.replace(/```html/g, '').replace(/```/g, '').trim();
     
     // If the response doesn't start with HTML, extract it
     if (!websiteHTML.toLowerCase().includes('<!doctype') && !websiteHTML.toLowerCase().includes('<html')) {
-      // Try to find HTML content in the response
+      console.log('⚠️ [AI] Response missing HTML tags, extracting...')
       const htmlMatch = websiteHTML.match(/<!DOCTYPE[\s\S]*<\/html>/i);
       if (htmlMatch) {
         websiteHTML = htmlMatch[0];
+        console.log('✅ [AI] Extracted HTML successfully')
       } else {
-        // Fallback to professional template
+        console.log('❌ [AI] Could not extract, using fallback template')
         websiteHTML = generateProfessionalTemplate(productInfo, heroImages, featureImages, testimonialImages);
       }
     }
     
+    console.log('✅ [WEBSITE] Website generated successfully!')
+    console.log('🌐 [WEBSITE] ========== END WEBSITE GENERATION ==========')
     return websiteHTML;
   } catch (error) {
-    console.error('Gemini AI Error:', error);
+    console.error('❌ [AI] Gemini error:', error);
+    console.log('⚠️ [AI] Using fallback template')
     return generateProfessionalTemplate(productInfo, heroImages, featureImages, testimonialImages);
   }
 }
 
 // Professional fallback template with Unsplash images
 function generateProfessionalTemplate(productInfo: any, heroImages: any[], featureImages: any[], testimonialImages: any[]) {
+  console.log('🎨 [TEMPLATE] Generating fallback template')
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
