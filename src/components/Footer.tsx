@@ -41,7 +41,6 @@ export default function Footer() {
                   Proof
                 </Link> 
               </li>
-              <li>
             </ul>
           </div>
 
