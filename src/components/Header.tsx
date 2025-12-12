@@ -46,6 +46,13 @@ export default function Header() {
             >
               Documentation
             </Link>
+            <Link 
+              href="/proof" 
+              className="nav-badge text-white hover:text-green-400 transition-colors font-medium"
+              data-badge="6"
+            >
+              Proof
+            </Link>
   
             <Link 
               href="/login" 
@@ -105,6 +112,13 @@ export default function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Documentation
+              </Link>
+              <Link 
+                href="/proof" 
+                className="text-white hover:text-green-400 transition-colors font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Proof
               </Link>
               <Link 
                 href="/about-me" 
