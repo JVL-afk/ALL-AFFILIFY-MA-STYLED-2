@@ -36,6 +36,10 @@ export default function Footer() {
                   Documentation
                 </Link>
               </li>
+              <li>
+                <Link href="/proof" className="text-gray-400 hover:text-white transition-colors text-sm">
+                  Proof
+               </li> 
             </ul>
           </div>
 
