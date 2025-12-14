@@ -748,11 +748,6 @@ export default function EmailMarketingPage() {
             </Card>
           </motion.div>
         )}
-      </div>
-    </div>
-  )
-}
-
 
         {/* Best Practices Section */}
         <motion.div
@@ -1148,3 +1143,7 @@ export default function EmailMarketingPage() {
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+    </div>
+  )
+}

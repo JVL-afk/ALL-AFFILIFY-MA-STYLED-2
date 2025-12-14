@@ -390,7 +390,7 @@ export default function AdvancedAnalyticsPage() {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ device, users }) => {
+                      label={({ device, users }: any) => {
                         const total = analyticsData?.devices.reduce((sum, d) => sum + d.users, 0) || 1
                         const percentage = ((users / total) * 100).toFixed(1)
                         return `${device}: ${percentage}%`
@@ -835,7 +835,7 @@ export default function AdvancedAnalyticsPage() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-4 h-4 bg-gray-700 rounded"></div>
-                  <span className="text-sm text-gray-300">Low Activity (<40%)</span>
+                  <span className="text-sm text-gray-300">Low Activity (&lt;40%)</span>
                 </div>
               </div>
             </CardContent>

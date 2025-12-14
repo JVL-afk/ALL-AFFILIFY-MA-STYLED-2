@@ -36,7 +36,8 @@ import {
   Sparkles,
   ChevronRight,
   Book,
-  Globe
+  Globe,
+  Calendar
 } from 'lucide-react'
 
 interface ApiKey {

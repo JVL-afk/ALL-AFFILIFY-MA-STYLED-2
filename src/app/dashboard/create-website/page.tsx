@@ -38,7 +38,8 @@ import {
   Info,
   ChevronRight,
   Star,
-  Zap as ZapIcon
+  Zap as ZapIcon,
+  Eye
 } from 'lucide-react'
 
 interface User {

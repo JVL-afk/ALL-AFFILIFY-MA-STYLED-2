@@ -34,12 +34,7 @@ import {
   TrendingDown,
   Zap,
   Target,
-  PieChart,
-  LineChart,
-  BarChart,
-  FileSpreadsheet,
-  FilePdf,
-  FileCode
+  File
 } from 'lucide-react'
 
 interface Report {
@@ -239,11 +234,11 @@ export default function AdvancedReportingPage() {
   const getFormatIcon = (format: string) => {
     switch (format) {
       case 'pdf':
-        return <FilePdf className="w-4 h-4" />
+        return <File className="w-4 h-4" />
       case 'excel':
-        return <FileSpreadsheet className="w-4 h-4" />
+        return <File className="w-4 h-4" />
       case 'csv':
-        return <FileCode className="w-4 h-4" />
+        return <File className="w-4 h-4" />
       default:
         return <FileText className="w-4 h-4" />
     }
@@ -657,7 +652,7 @@ export default function AdvancedReportingPage() {
             <Card className="bg-black/40 backdrop-blur-sm border-gray-700">
               <CardHeader>
                 <CardTitle className="text-white flex items-center space-x-2">
-                  <PieChart className="w-5 h-5 text-blue-400" />
+                  <BarChart3 className="w-5 h-5 text-blue-400" />
                   <span>Report Type Distribution</span>
                 </CardTitle>
                 <CardDescription className="text-gray-400">Breakdown by report category</CardDescription>
@@ -1006,7 +1001,7 @@ export default function AdvancedReportingPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <button className="p-4 bg-gray-800/50 rounded-lg border border-gray-700 hover:border-blue-600 transition-all text-left">
                   <div className="flex items-center space-x-3 mb-2">
-                    <FilePdf className="w-8 h-8 text-red-400" />
+                    <File className="w-8 h-8 text-red-400" />
                     <div>
                       <div className="text-white font-semibold">PDF Export</div>
                       <div className="text-xs text-gray-400">Professional format</div>
@@ -1016,7 +1011,7 @@ export default function AdvancedReportingPage() {
 
                 <button className="p-4 bg-gray-800/50 rounded-lg border border-gray-700 hover:border-blue-600 transition-all text-left">
                   <div className="flex items-center space-x-3 mb-2">
-                    <FileSpreadsheet className="w-8 h-8 text-green-400" />
+                    <File className="w-8 h-8 text-green-400" />
                     <div>
                       <div className="text-white font-semibold">Excel Export</div>
                       <div className="text-xs text-gray-400">Editable spreadsheet</div>
@@ -1026,7 +1021,7 @@ export default function AdvancedReportingPage() {
 
                 <button className="p-4 bg-gray-800/50 rounded-lg border border-gray-700 hover:border-blue-600 transition-all text-left">
                   <div className="flex items-center space-x-3 mb-2">
-                    <FileCode className="w-8 h-8 text-blue-400" />
+                    <File className="w-8 h-8 text-blue-400" />
                     <div>
                       <div className="text-white font-semibold">CSV Export</div>
                       <div className="text-xs text-gray-400">Raw data format</div>
