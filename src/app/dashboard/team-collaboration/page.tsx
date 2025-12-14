@@ -1,56 +1,98 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Users, Plus, Settings, MessageSquare, Calendar, FileText, UserPlus, Crown, Shield, Eye, Edit, Trash2, Clock, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { 
+  Users, 
+  Plus, 
+  Settings, 
+  MessageSquare, 
+  Calendar, 
+  FileText, 
+  UserPlus, 
+  Crown, 
+  Shield, 
+  Eye, 
+  Edit, 
+  Trash2, 
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  X,
+  Search,
+  Filter,
+  Download,
+  Mail,
+  Phone,
+  MapPin,
+  Briefcase,
+  Award,
+  TrendingUp,
+  Activity,
+  Target,
+  Zap,
+  Star,
+  ChevronRight,
+  Sparkles,
+  ArrowUp,
+  ArrowDown
+} from 'lucide-react'
 
 interface TeamMember {
-  id: string;
-  name: string;
-  email: string;
-  role: 'owner' | 'admin' | 'editor' | 'viewer';
-  avatar: string;
-  status: 'active' | 'pending' | 'inactive';
-  lastActive: Date;
-  joinedDate: Date;
-  permissions: string[];
+  id: string
+  name: string
+  email: string
+  role: 'owner' | 'admin' | 'editor' | 'viewer'
+  avatar: string
+  status: 'active' | 'pending' | 'inactive'
+  lastActive: Date
+  joinedDate: Date
+  permissions: string[]
+  tasksCompleted?: number
+  projectsActive?: number
 }
 
 interface Project {
-  id: string;
-  name: string;
-  description: string;
-  status: 'active' | 'completed' | 'on-hold';
-  progress: number;
-  assignedTo: string[];
-  dueDate: Date;
-  createdDate: Date;
+  id: string
+  name: string
+  description: string
+  status: 'active' | 'completed' | 'on-hold'
+  progress: number
+  assignedTo: string[]
+  dueDate: Date
+  createdDate: Date
+  priority?: 'low' | 'medium' | 'high'
 }
 
 interface Activity {
-  id: string;
-  user: string;
-  action: string;
-  target: string;
-  timestamp: Date;
-  type: 'create' | 'edit' | 'delete' | 'comment' | 'assign';
+  id: string
+  user: string
+  action: string
+  target: string
+  timestamp: Date
+  type: 'create' | 'edit' | 'delete' | 'comment' | 'assign'
 }
 
 export default function TeamCollaborationPage() {
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [activeTab, setActiveTab] = useState<'members' | 'projects' | 'activity' | 'permissions'>('members');
-  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [projects, setProjects] = useState<Project[]>([])
+  const [activities, setActivities] = useState<Activity[]>([])
+  const [activeTab, setActiveTab] = useState<'members' | 'projects' | 'activity' | 'permissions'>('members')
+  const [showInviteModal, setShowInviteModal] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterRole, setFilterRole] = useState<'all' | 'owner' | 'admin' | 'editor' | 'viewer'>('all')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   useEffect(() => {
-    loadTeamData();
-  }, []);
+    loadTeamData()
+  }, [])
 
   const loadTeamData = () => {
-    // Mock team members
     const mockMembers: TeamMember[] = [
       {
         id: '1',
@@ -62,6 +104,8 @@ export default function TeamCollaborationPage() {
         lastActive: new Date(),
         joinedDate: new Date(Date.now() - 86400000 * 30),
         permissions: ['all'],
+        tasksCompleted: 145,
+        projectsActive: 5
       },
       {
         id: '2',
@@ -73,6 +117,8 @@ export default function TeamCollaborationPage() {
         lastActive: new Date(Date.now() - 3600000),
         joinedDate: new Date(Date.now() - 86400000 * 15),
         permissions: ['manage_websites', 'manage_analytics', 'manage_team'],
+        tasksCompleted: 89,
+        projectsActive: 3
       },
       {
         id: '3',
@@ -84,6 +130,8 @@ export default function TeamCollaborationPage() {
         lastActive: new Date(Date.now() - 7200000),
         joinedDate: new Date(Date.now() - 86400000 * 7),
         permissions: ['create_websites', 'edit_content', 'view_analytics'],
+        tasksCompleted: 56,
+        projectsActive: 2
       },
       {
         id: '4',
@@ -95,10 +143,11 @@ export default function TeamCollaborationPage() {
         lastActive: new Date(Date.now() - 86400000),
         joinedDate: new Date(Date.now() - 86400000 * 2),
         permissions: ['view_websites', 'view_analytics'],
+        tasksCompleted: 12,
+        projectsActive: 1
       },
-    ];
+    ]
 
-    // Mock projects
     const mockProjects: Project[] = [
       {
         id: '1',
@@ -109,6 +158,7 @@ export default function TeamCollaborationPage() {
         assignedTo: ['2', '3'],
         dueDate: new Date(Date.now() + 86400000 * 14),
         createdDate: new Date(Date.now() - 86400000 * 10),
+        priority: 'high'
       },
       {
         id: '2',
@@ -119,6 +169,7 @@ export default function TeamCollaborationPage() {
         assignedTo: ['1', '2', '3'],
         dueDate: new Date(Date.now() + 86400000 * 21),
         createdDate: new Date(Date.now() - 86400000 * 5),
+        priority: 'medium'
       },
       {
         id: '3',
@@ -129,10 +180,10 @@ export default function TeamCollaborationPage() {
         assignedTo: ['2'],
         dueDate: new Date(Date.now() - 86400000 * 3),
         createdDate: new Date(Date.now() - 86400000 * 20),
+        priority: 'low'
       },
-    ];
+    ]
 
-    // Mock activities
     const mockActivities: Activity[] = [
       {
         id: '1',
@@ -166,359 +217,818 @@ export default function TeamCollaborationPage() {
         timestamp: new Date(Date.now() - 14400000),
         type: 'comment',
       },
-    ];
+    ]
 
-    setTeamMembers(mockMembers);
-    setProjects(mockProjects);
-    setActivities(mockActivities);
-  };
+    setTeamMembers(mockMembers)
+    setProjects(mockProjects)
+    setActivities(mockActivities)
+  }
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'owner': return <Crown className="h-4 w-4 text-yellow-600" />;
-      case 'admin': return <Shield className="h-4 w-4 text-blue-600" />;
-      case 'editor': return <Edit className="h-4 w-4 text-green-600" />;
-      case 'viewer': return <Eye className="h-4 w-4 text-gray-600" />;
-      default: return <Users className="h-4 w-4" />;
+      case 'owner':
+        return <Crown className="h-4 w-4" />
+      case 'admin':
+        return <Shield className="h-4 w-4" />
+      case 'editor':
+        return <Edit className="h-4 w-4" />
+      case 'viewer':
+        return <Eye className="h-4 w-4" />
+      default:
+        return <Users className="h-4 w-4" />
     }
-  };
+  }
+
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'owner':
+        return 'from-yellow-500 to-orange-600'
+      case 'admin':
+        return 'from-indigo-500 to-blue-600'
+      case 'editor':
+        return 'from-green-500 to-emerald-600'
+      case 'viewer':
+        return 'from-gray-500 to-gray-600'
+      default:
+        return 'from-gray-500 to-gray-600'
+    }
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'text-green-600 bg-green-100';
-      case 'pending': return 'text-orange-600 bg-orange-100';
-      case 'inactive': return 'text-gray-600 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900';
-      default: return 'text-gray-600 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900';
+      case 'active':
+        return 'from-green-500 to-emerald-600'
+      case 'pending':
+        return 'from-orange-500 to-yellow-600'
+      case 'inactive':
+        return 'from-gray-500 to-gray-600'
+      default:
+        return 'from-gray-500 to-gray-600'
     }
-  };
+  }
 
   const getProjectStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'text-blue-600 bg-blue-100';
-      case 'completed': return 'text-green-600 bg-green-100';
-      case 'on-hold': return 'text-orange-600 bg-orange-100';
-      default: return 'text-gray-600 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900';
+      case 'active':
+        return 'from-blue-500 to-indigo-600'
+      case 'completed':
+        return 'from-green-500 to-emerald-600'
+      case 'on-hold':
+        return 'from-orange-500 to-yellow-600'
+      default:
+        return 'from-gray-500 to-gray-600'
     }
-  };
+  }
+
+  const getPriorityColor = (priority?: string) => {
+    switch (priority) {
+      case 'high':
+        return 'from-red-500 to-orange-600'
+      case 'medium':
+        return 'from-yellow-500 to-orange-600'
+      case 'low':
+        return 'from-blue-500 to-cyan-600'
+      default:
+        return 'from-gray-500 to-gray-600'
+    }
+  }
 
   const getActivityIcon = (type: string) => {
     switch (type) {
-      case 'create': return <Plus className="h-4 w-4 text-green-600" />;
-      case 'edit': return <Edit className="h-4 w-4 text-blue-600" />;
-      case 'delete': return <Trash2 className="h-4 w-4 text-red-600" />;
-      case 'comment': return <MessageSquare className="h-4 w-4 text-purple-600" />;
-      case 'assign': return <UserPlus className="h-4 w-4 text-orange-600" />;
-      default: return <Clock className="h-4 w-4 text-gray-600" />;
+      case 'create':
+        return <Plus className="h-4 w-4" />
+      case 'edit':
+        return <Edit className="h-4 w-4" />
+      case 'delete':
+        return <Trash2 className="h-4 w-4" />
+      case 'comment':
+        return <MessageSquare className="h-4 w-4" />
+      case 'assign':
+        return <UserPlus className="h-4 w-4" />
+      default:
+        return <Clock className="h-4 w-4" />
     }
-  };
+  }
+
+  const filteredMembers = teamMembers.filter(member => {
+    const matchesSearch = member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         member.email.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesFilter = filterRole === 'all' || member.role === filterRole
+    return matchesSearch && matchesFilter
+  })
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center">
-            <Users className="h-8 w-8 mr-3 text-blue-600" />
-            Team Collaboration
-          </h1>
-          <p className="text-gray-600 mt-2">Manage your team and collaborate on affiliate marketing projects</p>
-        </div>
-        <Button onClick={() => setShowInviteModal(true)}>
-          <UserPlus className="h-4 w-4 mr-2" />
-          Invite Member
-        </Button>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-gray-900 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+            <div>
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center">
+                  <Users className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-blue-400 to-indigo-400">
+                    Team Collaboration
+                  </h1>
+                  <p className="text-indigo-200/70 text-sm">Manage your team and collaborate on projects</p>
+                </div>
+              </div>
+            </div>
 
-      {/* Team Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Members</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{teamMembers.length}</div>
-            <p className="text-xs text-muted-foreground">
-              {teamMembers.filter(m => m.status === 'active').length} active
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{projects.filter(p => p.status === 'active').length}</div>
-            <p className="text-xs text-muted-foreground">
-              {projects.filter(p => p.status === 'completed').length} completed
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">This Week's Activity</CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">47</div>
-            <p className="text-xs text-muted-foreground">+12% from last week</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Response Time</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">2.4h</div>
-            <p className="text-xs text-muted-foreground">-15% from last week</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Tabs */}
-      <div className="border-b">
-        <nav className="flex space-x-8">
-          {[
-            { id: 'members', label: 'Team Members', icon: Users },
-            { id: 'projects', label: 'Projects', icon: FileText },
-            { id: 'activity', label: 'Activity', icon: MessageSquare },
-            { id: 'permissions', label: 'Permissions', icon: Settings },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
+            <Button 
+              onClick={() => setShowInviteModal(true)}
+              className="bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white shadow-lg shadow-indigo-500/30"
             >
-              <tab.icon className="h-4 w-4" />
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      {/* Team Members Tab */}
-      {activeTab === 'members' && (
-        <div className="space-y-4">
-          {teamMembers.map((member) => (
-            <Card key={member.id}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                      <Users className="h-6 w-6 text-gray-600" />
-                    </div>
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <h3 className="font-semibold">{member.name}</h3>
-                        {getRoleIcon(member.role)}
-                        <span className="text-sm text-gray-600 capitalize">{member.role}</span>
-                      </div>
-                      <p className="text-sm text-gray-600">{member.email}</p>
-                      <p className="text-xs text-gray-500">
-                        Last active: {member.lastActive.toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(member.status)}`}>
-                      {member.status.charAt(0).toUpperCase() + member.status.slice(1)}
-                    </span>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Settings className="h-4 w-4" />
-                      </Button>
-                      {member.role !== 'owner' && (
-                        <Button variant="outline" size="sm">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-4">
-                  <p className="text-sm text-gray-600">
-                    <strong>Permissions:</strong> {member.permissions.join(', ')}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Joined: {member.joinedDate.toLocaleDateString()}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {/* Projects Tab */}
-      {activeTab === 'projects' && (
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Team Projects</h2>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              New Project
+              <UserPlus className="w-4 h-4 mr-2" />
+              Invite Member
             </Button>
           </div>
-          
-          {projects.map((project) => (
-            <Card key={project.id}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <h3 className="font-semibold">{project.name}</h3>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getProjectStatusColor(project.status)}`}>
-                        {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
-                      </span>
+        </motion.div>
+
+        {/* Team Stats */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+        >
+          <Card className="bg-black/40 backdrop-blur-sm border-indigo-500/30">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-indigo-200">Total Members</CardTitle>
+              <Users className="h-4 w-4 text-indigo-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-white">{teamMembers.length}</div>
+              <p className="text-xs text-indigo-300/60 mt-1">
+                {teamMembers.filter(m => m.status === 'active').length} active
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-black/40 backdrop-blur-sm border-blue-500/30">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-blue-200">Active Projects</CardTitle>
+              <FileText className="h-4 w-4 text-blue-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-white">{projects.filter(p => p.status === 'active').length}</div>
+              <p className="text-xs text-blue-300/60 mt-1">
+                {projects.length} total projects
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-black/40 backdrop-blur-sm border-indigo-500/30">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-indigo-200">Tasks Completed</CardTitle>
+              <CheckCircle className="h-4 w-4 text-indigo-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-white">
+                {teamMembers.reduce((sum, m) => sum + (m.tasksCompleted || 0), 0)}
+              </div>
+              <p className="text-xs text-indigo-300/60 mt-1 flex items-center">
+                <ArrowUp className="w-3 h-3 mr-1 text-green-400" />
+                +12% this month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-black/40 backdrop-blur-sm border-blue-500/30">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-blue-200">Team Activity</CardTitle>
+              <Activity className="h-4 w-4 text-blue-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-white">{activities.length}</div>
+              <p className="text-xs text-blue-300/60 mt-1">
+                Recent actions
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Error/Success Messages */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg backdrop-blur-sm flex items-center justify-between"
+            >
+              <div className="flex items-center">
+                <AlertCircle className="w-5 h-5 text-red-400 mr-3" />
+                <span className="text-red-200">{error}</span>
+              </div>
+              <button onClick={() => setError('')} className="text-red-400 hover:text-red-300">
+                <X className="w-5 h-5" />
+              </button>
+            </motion.div>
+          )}
+
+          {success && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-6 p-4 bg-green-500/20 border border-green-500/50 rounded-lg backdrop-blur-sm flex items-center justify-between"
+            >
+              <div className="flex items-center">
+                <CheckCircle className="w-5 h-5 text-green-400 mr-3" />
+                <span className="text-green-200">{success}</span>
+              </div>
+              <button onClick={() => setSuccess('')} className="text-green-400 hover:text-green-300">
+                <X className="w-5 h-5" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Tabs */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-6"
+        >
+          <Card className="bg-black/40 backdrop-blur-sm border-indigo-500/30">
+            <CardContent className="p-2">
+              <nav className="flex space-x-2">
+                {[
+                  { id: 'members', label: 'Team Members', icon: Users },
+                  { id: 'projects', label: 'Projects', icon: FileText },
+                  { id: 'activity', label: 'Activity', icon: Activity },
+                  { id: 'permissions', label: 'Permissions', icon: Shield },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`flex items-center space-x-2 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
+                      activeTab === tab.id
+                        ? 'bg-gradient-to-r from-indigo-500 to-blue-600 text-white'
+                        : 'text-indigo-300 hover:bg-indigo-500/20'
+                    }`}
+                  >
+                    <tab.icon className="h-4 w-4" />
+                    <span>{tab.label}</span>
+                  </button>
+                ))}
+              </nav>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Team Members Tab */}
+        {activeTab === 'members' && (
+          <div className="space-y-6">
+            {/* Search and Filter */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="flex flex-col sm:flex-row gap-4"
+            >
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-indigo-400" />
+                <Input
+                  placeholder="Search team members..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-black/50 border-indigo-500/30 text-white placeholder:text-indigo-300/50 h-12"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant={filterRole === 'all' ? 'default' : 'outline'}
+                  onClick={() => setFilterRole('all')}
+                  className={filterRole === 'all' ? 'bg-indigo-500 hover:bg-indigo-600' : 'border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/20'}
+                >
+                  All
+                </Button>
+                <Button
+                  variant={filterRole === 'owner' ? 'default' : 'outline'}
+                  onClick={() => setFilterRole('owner')}
+                  className={filterRole === 'owner' ? 'bg-yellow-500 hover:bg-yellow-600' : 'border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/20'}
+                >
+                  Owner
+                </Button>
+                <Button
+                  variant={filterRole === 'admin' ? 'default' : 'outline'}
+                  onClick={() => setFilterRole('admin')}
+                  className={filterRole === 'admin' ? 'bg-blue-500 hover:bg-blue-600' : 'border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/20'}
+                >
+                  Admin
+                </Button>
+              </div>
+            </motion.div>
+
+            {/* Members Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredMembers.map((member, index) => (
+                <motion.div
+                  key={member.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Card className="bg-black/40 backdrop-blur-sm border-indigo-500/30 hover:border-blue-500/50 transition-all h-full">
+                    <CardHeader>
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-start space-x-3 flex-1">
+                          <div className={`w-12 h-12 bg-gradient-to-r ${getRoleColor(member.role)} rounded-full flex items-center justify-center text-white font-bold text-lg`}>
+                            {member.name.charAt(0)}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-white text-lg">{member.name}</h3>
+                            <p className="text-sm text-indigo-200/70">{member.email}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <div className={`px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${getRoleColor(member.role)} text-white flex items-center space-x-1`}>
+                          {getRoleIcon(member.role)}
+                          <span>{member.role}</span>
+                        </div>
+                        <div className={`px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${getStatusColor(member.status)} text-white`}>
+                          {member.status}
+                        </div>
+                      </div>
+                    </CardHeader>
+
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-indigo-200/70">Tasks Completed</span>
+                          <span className="text-white font-semibold">{member.tasksCompleted}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-indigo-200/70">Active Projects</span>
+                          <span className="text-white font-semibold">{member.projectsActive}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-indigo-200/70">Last Active</span>
+                          <span className="text-white font-semibold text-xs">
+                            {Math.floor((Date.now() - member.lastActive.getTime()) / 3600000)}h ago
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 mt-4">
+                        <Button size="sm" variant="outline" className="flex-1 border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/20">
+                          <Mail className="w-4 h-4 mr-1" />
+                          Message
+                        </Button>
+                        <Button size="sm" variant="outline" className="border-blue-500/50 text-blue-300 hover:bg-blue-500/20">
+                          <Settings className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Projects Tab */}
+        {activeTab === 'projects' && (
+          <div className="space-y-4">
+            {projects.map((project, index) => (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <Card className="bg-black/40 backdrop-blur-sm border-indigo-500/30 hover:border-blue-500/50 transition-all">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <h3 className="font-semibold text-white text-lg">{project.name}</h3>
+                          <div className={`px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${getProjectStatusColor(project.status)} text-white`}>
+                            {project.status}
+                          </div>
+                          {project.priority && (
+                            <div className={`px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${getPriorityColor(project.priority)} text-white`}>
+                              {project.priority} priority
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-sm text-indigo-200/70">{project.description}</p>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">{project.description}</p>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Settings className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                
+
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm text-indigo-200/70">Progress</span>
+                          <span className="text-sm text-white font-semibold">{project.progress}%</span>
+                        </div>
+                        <div className="w-full bg-gray-800 rounded-full h-2">
+                          <div 
+                            className="h-full bg-gradient-to-r from-indigo-500 to-blue-600 rounded-full transition-all"
+                            style={{ width: `${project.progress}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center space-x-2 text-sm">
+                          <Calendar className="w-4 h-4 text-indigo-400" />
+                          <span className="text-indigo-200/70">Due:</span>
+                          <span className="text-white font-semibold">{project.dueDate.toLocaleDateString()}</span>
+                        </div>
+                        <div className="flex items-center space-x-2 text-sm">
+                          <Users className="w-4 h-4 text-indigo-400" />
+                          <span className="text-indigo-200/70">Team:</span>
+                          <span className="text-white font-semibold">{project.assignedTo.length} members</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {/* Activity Tab */}
+        {activeTab === 'activity' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Card className="bg-black/40 backdrop-blur-sm border-indigo-500/30">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center space-x-2">
+                  <Activity className="w-5 h-5 text-indigo-400" />
+                  <span>Recent Activity</span>
+                </CardTitle>
+                <CardDescription className="text-indigo-200/60">Latest team actions and updates</CardDescription>
+              </CardHeader>
+              <CardContent>
                 <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Progress</span>
-                      <span>{project.progress}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-blue-600 h-2 rounded-full" 
-                        style={{ width: `${project.progress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between text-sm">
-                    <div>
-                      <span className="text-gray-600">Assigned to: </span>
-                      <span className="font-medium">
-                        {project.assignedTo.map(id => 
-                          teamMembers.find(m => m.id === id)?.name
-                        ).join(', ')}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">Due: </span>
-                      <span className="font-medium">{project.dueDate.toLocaleDateString()}</span>
-                    </div>
-                  </div>
+                  {activities.map((activity, index) => (
+                    <motion.div
+                      key={activity.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="flex items-start space-x-3 p-3 bg-indigo-500/10 rounded-lg border border-indigo-500/30"
+                    >
+                      <div className={`w-8 h-8 bg-gradient-to-r ${
+                        activity.type === 'create' ? 'from-green-500 to-emerald-600' :
+                        activity.type === 'edit' ? 'from-blue-500 to-indigo-600' :
+                        activity.type === 'delete' ? 'from-red-500 to-orange-600' :
+                        activity.type === 'comment' ? 'from-purple-500 to-pink-600' :
+                        'from-orange-500 to-yellow-600'
+                      } rounded-lg flex items-center justify-center flex-shrink-0 text-white`}>
+                        {getActivityIcon(activity.type)}
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-white font-medium text-sm">
+                          <span className="text-indigo-300">{activity.user}</span> {activity.action} <span className="text-blue-300">{activity.target}</span>
+                        </div>
+                        <div className="text-xs text-indigo-200/70 mt-1 flex items-center">
+                          <Clock className="w-3 h-3 mr-1" />
+                          {Math.floor((Date.now() - activity.timestamp.getTime()) / 3600000)}h ago
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
-      )}
+          </motion.div>
+        )}
 
-      {/* Activity Tab */}
-      {activeTab === 'activity' && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Recent Activity</h2>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                {activities.map((activity) => (
-                  <div key={activity.id} className="flex items-center space-x-4 p-3 border rounded-lg">
-                    <div className="flex-shrink-0">
-                      {getActivityIcon(activity.type)}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm">
-                        <span className="font-medium">{activity.user}</span>
-                        {' '}{activity.action}{' '}
-                        <span className="font-medium">{activity.target}</span>
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {activity.timestamp.toLocaleDateString()} at {activity.timestamp.toLocaleTimeString()}
-                      </p>
-                    </div>
+        {/* Permissions Tab */}
+        {activeTab === 'permissions' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Card className="bg-black/40 backdrop-blur-sm border-indigo-500/30">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center space-x-2">
+                  <Shield className="w-5 h-5 text-indigo-400" />
+                  <span>Role Permissions</span>
+                </CardTitle>
+                <CardDescription className="text-indigo-200/60">Manage what each role can do</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {['owner', 'admin', 'editor', 'viewer'].map((role, index) => (
+                    <motion.div
+                      key={role}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className={`p-4 bg-gradient-to-r ${getRoleColor(role)} bg-opacity-10 rounded-lg border border-indigo-500/30`}
+                    >
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className={`w-10 h-10 bg-gradient-to-r ${getRoleColor(role)} rounded-lg flex items-center justify-center text-white`}>
+                          {getRoleIcon(role)}
+                        </div>
+                        <div>
+                          <div className="text-white font-semibold capitalize">{role}</div>
+                          <div className="text-xs text-indigo-200/70">
+                            {role === 'owner' && 'Full access to everything'}
+                            {role === 'admin' && 'Manage team and websites'}
+                            {role === 'editor' && 'Create and edit content'}
+                            {role === 'viewer' && 'View-only access'}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {role === 'owner' && (
+                          <>
+                            <div className="flex items-center space-x-2 text-sm text-green-300">
+                              <CheckCircle className="w-4 h-4" />
+                              <span>All Permissions</span>
+                            </div>
+                          </>
+                        )}
+                        {role === 'admin' && (
+                          <>
+                            <div className="flex items-center space-x-2 text-sm text-green-300">
+                              <CheckCircle className="w-4 h-4" />
+                              <span>Manage Websites</span>
+                            </div>
+                            <div className="flex items-center space-x-2 text-sm text-green-300">
+                              <CheckCircle className="w-4 h-4" />
+                              <span>Manage Analytics</span>
+                            </div>
+                            <div className="flex items-center space-x-2 text-sm text-green-300">
+                              <CheckCircle className="w-4 h-4" />
+                              <span>Manage Team</span>
+                            </div>
+                          </>
+                        )}
+                        {role === 'editor' && (
+                          <>
+                            <div className="flex items-center space-x-2 text-sm text-green-300">
+                              <CheckCircle className="w-4 h-4" />
+                              <span>Create Websites</span>
+                            </div>
+                            <div className="flex items-center space-x-2 text-sm text-green-300">
+                              <CheckCircle className="w-4 h-4" />
+                              <span>Edit Content</span>
+                            </div>
+                            <div className="flex items-center space-x-2 text-sm text-green-300">
+                              <CheckCircle className="w-4 h-4" />
+                              <span>View Analytics</span>
+                            </div>
+                          </>
+                        )}
+                        {role === 'viewer' && (
+                          <>
+                            <div className="flex items-center space-x-2 text-sm text-green-300">
+                              <CheckCircle className="w-4 h-4" />
+                              <span>View Websites</span>
+                            </div>
+                            <div className="flex items-center space-x-2 text-sm text-green-300">
+                              <CheckCircle className="w-4 h-4" />
+                              <span>View Analytics</span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Invite Member Modal */}
+        <AnimatePresence>
+          {showInviteModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+              onClick={() => setShowInviteModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-gradient-to-br from-gray-900 via-indigo-950 to-gray-900 border border-indigo-500/30 rounded-xl p-6 w-full max-w-2xl"
+              >
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-blue-400">
+                    Invite Team Member
+                  </h2>
+                  <button
+                    onClick={() => setShowInviteModal(false)}
+                    className="text-indigo-200 hover:text-white transition-colors"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-medium text-indigo-200 mb-2">Email Address</label>
+                    <Input 
+                      placeholder="colleague@example.com" 
+                      className="bg-black/50 border-indigo-500/30 text-white placeholder:text-indigo-300/50 h-12"
+                    />
                   </div>
-                ))}
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-indigo-200 mb-2">Role</label>
+                    <select className="w-full p-3 border border-indigo-500/30 rounded-lg bg-black/50 text-white h-12">
+                      <option value="">Select role</option>
+                      <option value="admin">Admin</option>
+                      <option value="editor">Editor</option>
+                      <option value="viewer">Viewer</option>
+                    </select>
+                  </div>
+                  
+                  <div className="bg-indigo-500/10 border border-indigo-500/30 p-5 rounded-lg">
+                    <h3 className="font-semibold text-white mb-2 flex items-center">
+                      <Sparkles className="w-4 h-4 mr-2 text-indigo-400" />
+                      What happens next?
+                    </h3>
+                    <ul className="space-y-2 text-sm text-indigo-200/70">
+                      <li className="flex items-start space-x-2">
+                        <ChevronRight className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                        <span>An invitation email will be sent</span>
+                      </li>
+                      <li className="flex items-start space-x-2">
+                        <ChevronRight className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                        <span>They'll create an account or sign in</span>
+                      </li>
+                      <li className="flex items-start space-x-2">
+                        <ChevronRight className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                        <span>Access granted based on selected role</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                
+                <div className="flex gap-3 mt-6">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowInviteModal(false)}
+                    className="flex-1 border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/20"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowInviteModal(false)
+                      setSuccess('Invitation sent successfully!')
+                    }}
+                    className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white"
+                  >
+                    <Mail className="w-4 h-4 mr-2" />
+                    Send Invitation
+                  </Button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}
+
+
+        {/* Team Performance Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="mt-8"
+        >
+          <Card className="bg-black/40 backdrop-blur-sm border-indigo-500/30">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center space-x-2">
+                <TrendingUp className="w-5 h-5 text-indigo-400" />
+                <span>Team Performance</span>
+              </CardTitle>
+              <CardDescription className="text-indigo-200/60">Track your team's productivity</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 bg-indigo-500/10 rounded-lg border border-indigo-500/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-indigo-200/70">Completion Rate</span>
+                    <ArrowUp className="w-4 h-4 text-green-400" />
+                  </div>
+                  <div className="text-2xl font-bold text-white mb-1">94%</div>
+                  <div className="w-full bg-gray-800 rounded-full h-2">
+                    <div className="h-full bg-gradient-to-r from-indigo-500 to-blue-600 rounded-full" style={{ width: '94%' }}></div>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-blue-500/10 rounded-lg border border-blue-500/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-blue-200/70">Avg Response Time</span>
+                    <ArrowDown className="w-4 h-4 text-green-400" />
+                  </div>
+                  <div className="text-2xl font-bold text-white mb-1">2.3h</div>
+                  <div className="text-xs text-blue-200/70">15% faster than last month</div>
+                </div>
+
+                <div className="p-4 bg-indigo-500/10 rounded-lg border border-indigo-500/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-indigo-200/70">Team Satisfaction</span>
+                    <Star className="w-4 h-4 text-yellow-400" />
+                  </div>
+                  <div className="text-2xl font-bold text-white mb-1">4.8/5</div>
+                  <div className="flex gap-1">
+                    {[1,2,3,4,5].map((i) => (
+                      <Star key={i} className={`w-4 h-4 ${i <= 4 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-600'}`} />
+                    ))}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
-        </div>
-      )}
+        </motion.div>
 
-      {/* Permissions Tab */}
-      {activeTab === 'permissions' && (
-        <div className="space-y-6">
-          <h2 className="text-xl font-semibold">Role Permissions</h2>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {[
-              {
-                role: 'Owner',
-                icon: <Crown className="h-5 w-5 text-yellow-600" />,
-                permissions: ['Full access to all features', 'Manage billing and subscription', 'Add/remove team members', 'Delete organization'],
-                color: 'border-yellow-200 bg-yellow-50',
-              },
-              {
-                role: 'Admin',
-                icon: <Shield className="h-5 w-5 text-blue-600" />,
-                permissions: ['Manage websites and campaigns', 'View all analytics', 'Manage team members', 'Configure integrations'],
-                color: 'border-blue-200 bg-blue-50',
-              },
-              {
-                role: 'Editor',
-                icon: <Edit className="h-5 w-5 text-green-600" />,
-                permissions: ['Create and edit websites', 'View assigned analytics', 'Comment on projects', 'Upload assets'],
-                color: 'border-green-200 bg-green-50',
-              },
-              {
-                role: 'Viewer',
-                icon: <Eye className="h-5 w-5 text-gray-600" />,
-                permissions: ['View websites and campaigns', 'View basic analytics', 'Comment on projects', 'Export reports'],
-                color: 'border-gray-200 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900',
-              },
-            ].map((roleInfo) => (
-              <Card key={roleInfo.role} className={roleInfo.color}>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    {roleInfo.icon}
-                    <span>{roleInfo.role}</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {roleInfo.permissions.map((permission, index) => (
-                      <li key={index} className="flex items-center space-x-2 text-sm">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        <span>{permission}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9 }}
+          className="mt-8 mb-8"
+        >
+          <Card className="bg-black/40 backdrop-blur-sm border-blue-500/30">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center space-x-2">
+                <Zap className="w-5 h-5 text-blue-400" />
+                <span>Quick Actions</span>
+              </CardTitle>
+              <CardDescription className="text-blue-200/60">Common team management tasks</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <button className="p-4 bg-indigo-500/10 rounded-lg border border-indigo-500/30 hover:border-blue-500/50 transition-all text-left group">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <UserPlus className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-white font-semibold mb-1 group-hover:text-indigo-300 transition-colors">Add Member</div>
+                      <div className="text-xs text-indigo-200/70">Invite new team member</div>
+                    </div>
+                  </div>
+                </button>
 
+                <button className="p-4 bg-blue-500/10 rounded-lg border border-blue-500/30 hover:border-indigo-500/50 transition-all text-left group">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Plus className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-white font-semibold mb-1 group-hover:text-blue-300 transition-colors">New Project</div>
+                      <div className="text-xs text-blue-200/70">Create a new project</div>
+                    </div>
+                  </div>
+                </button>
+
+                <button className="p-4 bg-indigo-500/10 rounded-lg border border-indigo-500/30 hover:border-blue-500/50 transition-all text-left group">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Calendar className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-white font-semibold mb-1 group-hover:text-indigo-300 transition-colors">Schedule Meeting</div>
+                      <div className="text-xs text-indigo-200/70">Plan team sync</div>
+                    </div>
+                  </div>
+                </button>
+
+                <button className="p-4 bg-blue-500/10 rounded-lg border border-blue-500/30 hover:border-indigo-500/50 transition-all text-left group">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Download className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-white font-semibold mb-1 group-hover:text-blue-300 transition-colors">Export Report</div>
+                      <div className="text-xs text-blue-200/70">Download team data</div>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
