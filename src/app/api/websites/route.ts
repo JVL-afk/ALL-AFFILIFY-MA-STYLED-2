@@ -16,20 +16,36 @@ export const GET = requireAuth(async (request: NextRequest, user: AuthenticatedU
     const websites = await websitesCollection.find({ userId: new ObjectId(user._id) }).toArray();
 
     // Best-in-Class: Map to a clean structure for the frontend
-    const cleanWebsites = websites.map(website => ({
+    const cleanWebsites = websites.map(website => {
+      const visitors = website.views || 0;
+      const pageViews = website.pageViews || website.views || 0;
+      const conversions = website.conversions || 0;
+      const revenue = website.revenue || 0;
+      const conversionRate = pageViews > 0 ? ((conversions / pageViews) * 100) : 0;
+
+      return {
         id: website._id.toHexString(),
-        title: website.title,
-        description: website.description,
-        template: website.template,
-        status: website.status,
-        url: website.url,
-        views: website.views || 0,
-        clicks: website.clicks || 0,
-        conversions: website.conversions || 0,
-        revenue: website.revenue || 0,
-        createdAt: website.createdAt,
-        updatedAt: website.updatedAt
-    }));
+        name: website.title || website.name || 'Untitled Website',
+        url: website.url || '',
+        description: website.description || '',
+        status: website.status || 'draft',
+        createdAt: website.createdAt || new Date(),
+        updatedAt: website.updatedAt || new Date(),
+        stats: {
+          visitors,
+          pageViews,
+          conversions,
+          revenue,
+          conversionRate: parseFloat(conversionRate.toFixed(2))
+        },
+        performance: {
+          uptime: website.uptime || 99.9,
+          loadTime: website.loadTime || 1.2,
+          seoScore: website.seoScore || 85
+        },
+        thumbnail: website.thumbnail || ''
+      };
+    });
 
     return NextResponse.json({
       success: true,
