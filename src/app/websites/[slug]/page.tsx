@@ -85,36 +85,61 @@ async function getWebsiteBySlug(slug: string): Promise<Website | null> {
   try {
     const { db } = await connectToDatabase()
     
+    console.log('[getWebsiteBySlug] Looking for slug:', slug)
+    
     // The slug format is: title-slug-last8charsOfId
-    // We need to extract the ID from the end
+    // Extract the last 8 characters which should be the website ID suffix
     const parts = slug.split('-')
     const websiteIdSuffix = parts[parts.length - 1]
     
-    // Find website where the URL contains this slug
-    const website = await db.collection('websites').findOne({
-      url: new RegExp(slug + '$'),
+    console.log('[getWebsiteBySlug] Extracted ID suffix:', websiteIdSuffix)
+    
+    // Strategy 1: Try to find by URL field (exact match)
+    let website = await db.collection('websites').findOne({
+      url: new RegExp(slug + '$', 'i'),
       status: 'published'
     })
     
-    if (!website) {
-      // Try finding by partial ID match
-      const allWebsites = await db.collection('websites').find({ status: 'published' }).toArray()
-      const matchedWebsite = allWebsites.find(w => {
-        const id = w._id.toString()
-        return id.endsWith(websiteIdSuffix) || 
-               (w.url && w.url.includes(slug))
-      })
-      
-      if (matchedWebsite) {
-        return matchedWebsite as unknown as Website
-      }
-      
-      return null
+    if (website) {
+      console.log('[getWebsiteBySlug] Found by URL match')
+      return website as unknown as Website
     }
     
-    return website as unknown as Website
+    // Strategy 2: Find all published websites and match by ID suffix
+    console.log('[getWebsiteBySlug] URL match failed, trying ID suffix match...')
+    const allWebsites = await db.collection('websites').find({ 
+      status: 'published' 
+    }).toArray()
+    
+    console.log('[getWebsiteBySlug] Found', allWebsites.length, 'published websites')
+    
+    const matchedWebsite = allWebsites.find(w => {
+      const id = w._id.toString()
+      const idLast8 = id.slice(-8)
+      const urlMatch = w.url && w.url.includes(slug)
+      const idMatch = idLast8.toLowerCase() === websiteIdSuffix.toLowerCase()
+      
+      console.log('[getWebsiteBySlug] Checking website:', {
+        id,
+        idLast8,
+        websiteIdSuffix,
+        idMatch,
+        url: w.url,
+        urlMatch
+      })
+      
+      return idMatch || urlMatch
+    })
+    
+    if (matchedWebsite) {
+      console.log('[getWebsiteBySlug] Found by ID/URL match')
+      return matchedWebsite as unknown as Website
+    }
+    
+    console.log('[getWebsiteBySlug] No website found for slug:', slug)
+    return null
   } catch (error) {
-    console.error('Error fetching website by slug:', error)
+    console.error('[getWebsiteBySlug] Error fetching website by slug:', error)
     return null
   }
 }
