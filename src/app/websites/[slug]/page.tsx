@@ -90,13 +90,9 @@ async function getWebsiteBySlug(slug: string): Promise<Website | null> {
     const parts = slug.split('-')
     const websiteIdSuffix = parts[parts.length - 1]
     
-    // Find website where the URL ends with this slug or the ID ends with the suffix
+    // Find website where the URL contains this slug
     const website = await db.collection('websites').findOne({
-      $or: [
-        { url: { $regex: slug + '$' } },
-        { url: { $regex: `/${slug}$` } },
-        { _id: { $regex: websiteIdSuffix + '$' } }
-      ],
+      url: new RegExp(slug + '$'),
       status: 'published'
     })
     
