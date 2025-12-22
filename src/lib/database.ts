@@ -186,7 +186,7 @@ export async function publishWebsite(websiteId: string, userId: string): Promise
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
     
-    const url = `https://affilify.eu/sites/${slug}-${websiteId.slice(-8)}`
+    const url = `https://affilify.eu/websites/${slug}-${websiteId.slice(-8)}`
     
     // CRITICAL FIX: Use ObjectId for userId comparison
     const userObjectId = new ObjectId(userId)

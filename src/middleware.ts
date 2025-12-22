@@ -116,8 +116,10 @@ function getNeededPlanForFeature(featurePath: string): PlanType {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Skip middleware for non-dashboard routes, API routes, and static assets
+  // Skip middleware for non-dashboard routes, API routes, static assets, and public website routes
   if (
+    pathname.startsWith('/websites') ||
+    pathname.startsWith('/sites') ||
     !pathname.startsWith('/dashboard') ||
     pathname.startsWith('/api') ||
     pathname.includes('/_next') ||
