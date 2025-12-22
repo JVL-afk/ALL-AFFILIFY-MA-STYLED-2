@@ -96,8 +96,8 @@ async function getWebsiteBySlug(slug: string): Promise<Website | null> {
     
     // Strategy 1: Try to find by URL field (exact match)
     let website = await db.collection('websites').findOne({
-      url: new RegExp(slug + '$', 'i'),
-      status: 'published'
+      url: new RegExp(slug + '$', 'i')
+      // Removed status filter to find ANY website regardless of status
     })
     
     if (website) {
@@ -105,13 +105,21 @@ async function getWebsiteBySlug(slug: string): Promise<Website | null> {
       return website as unknown as Website
     }
     
-    // Strategy 2: Find all published websites and match by ID suffix
+    // Strategy 2: Find all websites and match by ID suffix
     console.log('[getWebsiteBySlug] URL match failed, trying ID suffix match...')
-    const allWebsites = await db.collection('websites').find({ 
-      status: 'published' 
-    }).toArray()
+    const allWebsites = await db.collection('websites').find({}).toArray()
     
-    console.log('[getWebsiteBySlug] Found', allWebsites.length, 'published websites')
+    console.log('[getWebsiteBySlug] Found', allWebsites.length, 'total websites')
+    
+    // Log the first few websites to see what we have
+    if (allWebsites.length > 0) {
+      console.log('[getWebsiteBySlug] Sample websites:', allWebsites.slice(0, 3).map(w => ({
+        id: w._id.toString(),
+        title: w.title,
+        status: w.status,
+        url: w.url
+      })))
+    }
     
     const matchedWebsite = allWebsites.find(w => {
       const id = w._id.toString()
