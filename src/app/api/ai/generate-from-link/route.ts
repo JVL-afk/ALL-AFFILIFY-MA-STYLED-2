@@ -43,19 +43,37 @@ async function scrapeProductData(url: string) {
     const title = $("h1").first().text().trim();
     const description = $("meta[name=\"description\"]").attr("content") || $("p").first().text().trim();
     const price = $(".price").first().text().trim() || $(".product-price").first().text().trim();
-    // Extract images from img tags
+    // Extract images from img tags with filtering
     const images = Array.from($("img")).map(img => {
       const src = $(img).attr("src");
+      const alt = $(img).attr("alt") || "";
+      const className = $(img).attr("class") || "";
+      const id = $(img).attr("id") || "";
+      
       if (src) {
         try {
-          // Resolve relative URLs to absolute URLs
-          return new URL(src, url).href;
+          const fullUrl = new URL(src, url).href;
+          
+          // Filter out logos, icons, and small images
+          const isLogo = /logo|icon|favicon|sprite|badge|button/i.test(fullUrl + alt + className + id);
+          const isSvg = fullUrl.toLowerCase().endsWith('.svg');
+          const isSmall = $(img).attr('width') && parseInt($(img).attr('width')!) < 200;
+          
+          // Skip logos, SVGs (usually logos), and small images
+          if (isLogo || isSvg || isSmall) {
+            return null;
+          }
+          
+          return fullUrl;
         } catch (e) {
           return src;
         }
       }
       return null;
     }).filter((src): src is string => !!src && src.startsWith("http"));
+    
+    console.log('Total images found:', images.length);
+    console.log('Sample images:', images.slice(0, 3));
     
     // Extract video thumbnails and poster images from video tags
     const videoThumbnails = Array.from($("video")).map(video => {
