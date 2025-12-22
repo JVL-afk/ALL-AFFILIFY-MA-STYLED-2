@@ -8,6 +8,31 @@ import jwt from 'jsonwebtoken';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+// Validate if an image URL is accessible
+async function validateImageUrl(imageUrl: string): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    
+    const response = await fetch(imageUrl, {
+      method: 'HEAD',
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+    
+    clearTimeout(timeoutId);
+    
+    // Check if response is OK and content-type is an image
+    const contentType = response.headers.get('content-type');
+    return response.ok && (contentType?.startsWith('image/') || false);
+  } catch (error) {
+    console.log('Image validation failed for:', imageUrl, error);
+    return false;
+  }
+}
+
 async function scrapeProductData(url: string) {
   try {
     const response = await fetch(url);
@@ -57,6 +82,27 @@ async function scrapeProductData(url: string) {
     
     // Combine images and video thumbnails
     const allMedia = [...images, ...videoThumbnails];
+    
+    // Validate images in parallel (limit to first 20 to avoid too many requests)
+    console.log('Validating', Math.min(allMedia.length, 20), 'scraped images...');
+    const imagesToValidate = allMedia.slice(0, 20);
+    const validationResults = await Promise.all(
+      imagesToValidate.map(async (imgUrl) => ({
+        url: imgUrl,
+        valid: await validateImageUrl(imgUrl)
+      }))
+    );
+    
+    const validImages = validationResults
+      .filter(result => result.valid)
+      .map(result => result.url);
+    
+    console.log('Valid images:', validImages.length, '/', imagesToValidate.length);
+    
+    // If we have more than 20 images, add the rest without validation
+    const finalImages = allMedia.length > 20 
+      ? [...validImages, ...allMedia.slice(20)]
+      : validImages;
     const features = Array.from($("ul.features li")).map(li => $(li).text().trim());
     const specs: { [key: string]: string } = {};
     $("table.specs tr").each((i, row) => {
@@ -71,7 +117,7 @@ async function scrapeProductData(url: string) {
       title,
       description,
       price,
-      images: allMedia, // Use all available images and video thumbnails (no limit)
+      images: finalImages, // Use validated images and video thumbnails
       features,
       specs,
     };
@@ -281,6 +327,8 @@ async function generateWebsiteContent(productInfo: any, scrapedData: any, affili
   console.log('🖼️ [IMAGE] Scraped images available:', scrapedImages.length)
   if (scrapedImages.length > 0) {
     console.log('🖼️ [IMAGE] Sample scraped image:', scrapedImages[0])
+  } else {
+    console.log('🖼️ [IMAGE] ⚠️ No valid scraped images - will use Unsplash for all images')
   }
   
   // Use scraped images for hero, fallback to Unsplash
