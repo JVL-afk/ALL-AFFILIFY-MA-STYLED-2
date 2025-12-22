@@ -18,6 +18,7 @@ async function scrapeProductData(url: string) {
     const title = $("h1").first().text().trim();
     const description = $("meta[name=\"description\"]").attr("content") || $("p").first().text().trim();
     const price = $(".price").first().text().trim() || $(".product-price").first().text().trim();
+    // Extract images from img tags
     const images = Array.from($("img")).map(img => {
       const src = $(img).attr("src");
       if (src) {
@@ -30,6 +31,32 @@ async function scrapeProductData(url: string) {
       }
       return null;
     }).filter((src): src is string => !!src && src.startsWith("http"));
+    
+    // Extract video thumbnails and poster images from video tags
+    const videoThumbnails = Array.from($("video")).map(video => {
+      // Try to get poster attribute (thumbnail image)
+      const poster = $(video).attr("poster");
+      if (poster) {
+        try {
+          return new URL(poster, url).href;
+        } catch (e) {
+          return poster;
+        }
+      }
+      // Try to get first source element
+      const source = $(video).find("source").first().attr("src");
+      if (source) {
+        try {
+          return new URL(source, url).href;
+        } catch (e) {
+          return source;
+        }
+      }
+      return null;
+    }).filter((src): src is string => !!src && src.startsWith("http"));
+    
+    // Combine images and video thumbnails
+    const allMedia = [...images, ...videoThumbnails];
     const features = Array.from($("ul.features li")).map(li => $(li).text().trim());
     const specs: { [key: string]: string } = {};
     $("table.specs tr").each((i, row) => {
@@ -44,7 +71,7 @@ async function scrapeProductData(url: string) {
       title,
       description,
       price,
-      images: images.slice(0, 10), // Limit to 10 images
+      images: allMedia, // Use all available images and video thumbnails (no limit)
       features,
       specs,
     };
@@ -62,7 +89,7 @@ interface UserData {
 }
 
 // Get professional images from Unsplash API
-async function getUnsplashImages(query: string, count: number = 3) {
+async function getUnsplashImages(query: string, count: number = 10) {
   console.log('🖼️ [IMAGE] ========== STARTING UNSPLASH FETCH ==========')
   console.log('🖼️ [IMAGE] Query:', query)
   console.log('🖼️ [IMAGE] Count requested:', count)
@@ -267,8 +294,8 @@ async function generateWebsiteContent(productInfo: any, scrapedData: any, affili
   // Use scraped images for features, fallback to Unsplash
   console.log('🖼️ [IMAGE] ========== FETCHING FEATURE IMAGES ==========')
   const featureImages = scrapedImages.length > 1 
-    ? scrapedImages.slice(1, 3).map((url: string) => ({ url, alt: `${productInfo.title} feature image`, credit: 'Scraped from product page', download_url: null }))
-    : await getUnsplashImages(`${productInfo.title} benefits features`, 2);
+    ? scrapedImages.slice(1).map((url: string) => ({ url, alt: `${productInfo.title} feature image`, credit: 'Scraped from product page', download_url: null }))
+    : await getUnsplashImages(`${productInfo.title} benefits features`, 10);
   
   console.log('🖼️ [IMAGE] Feature image 1:', featureImages[0]?.url)
   console.log('🖼️ [IMAGE] Feature image 2:', featureImages[1]?.url)
