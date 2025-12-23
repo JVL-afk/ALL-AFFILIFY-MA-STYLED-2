@@ -681,12 +681,11 @@ export async function POST(request: NextRequest) {
       description: productInfo.description,
       productUrl,
       url: liveUrl,
-      html: websiteHTML,
       productInfo,
       netlifyDeployment,
       status: 'draft',
       template: 'modern',
-      content: {},
+      content: { html: websiteHTML }, // Save the full HTML inside the content object
       seo: {},
       affiliateLinks: [{ url: productUrl, title: productInfo.title }],
       createdAt: new Date(),
