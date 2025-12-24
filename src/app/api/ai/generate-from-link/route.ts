@@ -338,7 +338,7 @@ async function generateWebsiteContent(productInfo: any, scrapedData: any, affili
   console.log('🌐 [WEBSITE] Product title:', productInfo.title)
   console.log('🌐 [WEBSITE] Product URL:', productInfo.originalUrl)
   
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+  const model = genAI.getGenerativeModel({ model: "gemini-3.0-pro" });
   
   // Prioritize scraped images, fallback to Unsplash
   const scrapedImages = scrapedData?.images || [];
