@@ -377,9 +377,7 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* ============================================ */}
-      {/* HERO SECTION - EXPLOSIVE IMPACT */}
-      {/* ============================================ */}
+      {/* HERO SECTION */}
       <section className="relative z-10 container mx-auto px-4 pt-16 pb-24">
         <motion.div 
           className="text-center"
@@ -469,7 +467,7 @@ export default function HomePage() {
             </motion.div>
           </motion.div>
 
-          {/* Hero Visual - Platform Preview */}
+          {/* Hero Visual */}
           <motion.div 
             variants={fadeInUp}
             className="relative max-w-6xl mx-auto"
@@ -542,9 +540,7 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* ============================================ */}
-      {/* HOW IT WORKS - VISUAL PROCESS */}
-      {/* ============================================ */}
+      {/* HOW IT WORKS */}
       <section id="how-it-works" className="relative z-10 py-24 bg-gradient-to-b from-transparent via-slate-900/50 to-transparent">
         <div className="container mx-auto px-4">
           <motion.div
@@ -621,9 +617,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================ */}
-      {/* HORIZONTAL SCROLLING FEATURE SHOWCASE */}
-      {/* ============================================ */}
+      {/* HORIZONTAL SCROLLING FEATURES */}
       <section className="relative z-10 py-24 overflow-hidden">
         <div className="container mx-auto px-4">
           <motion.div
@@ -741,9 +735,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================ */}
-      {/* PROOF SECTION - WHY WE'RE SUPERIOR */}
-      {/* ============================================ */}
+      {/* PROOF SECTION */}
       <section className="relative z-10 py-24 bg-gradient-to-b from-transparent via-orange-950/20 to-transparent">
         <div className="container mx-auto px-4">
           <motion.div
@@ -838,9 +830,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================ */}
-      {/* TESTIMONIALS SECTION */}
-      {/* ============================================ */}
+      {/* TESTIMONIALS */}
       <section className="relative z-10 py-24 bg-gradient-to-b from-transparent via-slate-900/50 to-transparent">
         <div className="container mx-auto px-4">
           <motion.div
@@ -881,7 +871,7 @@ export default function HomePage() {
                   ))}
                 </div>
                 {/* Quote */}
-                <p className="text-white/80 text-lg leading-relaxed mb-6">"{testimonial.quote}"</p>
+                <p className="text-white/80 text-lg leading-relaxed mb-6">&quot;{testimonial.quote}&quot;</p>
                 {/* Author */}
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold">
@@ -898,9 +888,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================ */}
-      {/* PRICING SECTION */}
-      {/* ============================================ */}
+      {/* PRICING */}
       <section className="relative z-10 py-24">
         <div className="container mx-auto px-4">
           <motion.div
@@ -985,9 +973,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================ */}
       {/* STATS SECTION */}
-      {/* ============================================ */}
       <section className="relative z-10 py-20 bg-gradient-to-b from-transparent via-blue-950/20 to-transparent">
         <div className="container mx-auto px-4">
           <motion.div
@@ -1001,9 +987,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================ */}
-      {/* FAQ SECTION */}
-      {/* ============================================ */}
+      {/* FAQ */}
       <section className="relative z-10 py-24">
         <div className="container mx-auto px-4">
           <motion.div
@@ -1071,9 +1055,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================ */}
-      {/* SUPPORTED PLATFORMS SECTION */}
-      {/* ============================================ */}
+      {/* SUPPORTED PLATFORMS */}
       <section className="relative z-10 py-20 bg-gradient-to-b from-transparent via-slate-900/50 to-transparent">
         <div className="container mx-auto px-4">
           <motion.div
@@ -1105,9 +1087,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================ */}
       {/* MORE TESTIMONIALS */}
-      {/* ============================================ */}
       <section className="relative z-10 py-20">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
@@ -1125,7 +1105,7 @@ export default function HomePage() {
                     <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                   ))}
                 </div>
-                <p className="text-white/80 text-lg leading-relaxed mb-6">"{testimonial.quote}"</p>
+                <p className="text-white/80 text-lg leading-relaxed mb-6">&quot;{testimonial.quote}&quot;</p>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold">
                     {testimonial.avatar}
@@ -1141,9 +1121,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================ */}
-      {/* FINAL CTA SECTION */}
-      {/* ============================================ */}
+      {/* FINAL CTA */}
       <section className="relative z-10 py-24">
         <div className="container mx-auto px-4">
           <motion.div
@@ -1171,106 +1149,3 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Link 
-                  href="/signup" 
-                  className="inline-flex items-center gap-3 px-10 py-5 bg-white text-red-600 font-bold text-lg rounded-2xl shadow-2xl transition-all hover:bg-gray-100"
-                >
-                  <Crown className="w-6 h-6" />
-                  Claim Your Free Account
-                </Link>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Link 
-                  href="/proof" 
-                  className="inline-flex items-center gap-3 px-10 py-5 bg-transparent border-2 border-white/30 hover:border-white/50 text-white font-bold text-lg rounded-2xl transition-all"
-                >
-                  <Trophy className="w-6 h-6 text-yellow-400" />
-                  See The Proof First
-                </Link>
-              </motion.div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ============================================ */}
-      {/* FOOTER */}
-      {/* ============================================ */}
-      <footer className="relative z-10 bg-slate-900/80 border-t border-slate-800/50 pt-16 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
-            {/* Brand */}
-            <div className="col-span-2 md:col-span-1">
-              <Link href="/" className="flex items-center space-x-2 group mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-white text-xl font-bold">AFFILIFY</span>
-              </Link>
-              <p className="text-white/60 text-sm mb-4">AI-Powered Affiliate Marketing Platform</p>
-              <p className="text-white/40 text-xs">Built with ❤️ by a 13-year-old from Romania</p>
-            </div>
-            
-            {/* Product */}
-            <div>
-              <h4 className="text-lg font-semibold text-white mb-4">Product</h4>
-              <ul className="space-y-2 text-white/60 text-sm">
-                <li><Link href="/features" className="hover:text-orange-400 transition-colors">Features</Link></li>
-                <li><Link href="/pricing" className="hover:text-orange-400 transition-colors">Pricing</Link></li>
-                <li><Link href="/proof" className="hover:text-orange-400 transition-colors">Proof</Link></li>
-                <li><Link href="/docs" className="hover:text-orange-400 transition-colors">Documentation</Link></li>
-              </ul>
-            </div>
-            
-            {/* Features */}
-            <div>
-              <h4 className="text-lg font-semibold text-white mb-4">Features</h4>
-              <ul className="space-y-2 text-white/60 text-sm">
-                <li><Link href="/features/create-website" className="hover:text-orange-400 transition-colors">AI Builder</Link></li>
-                <li><Link href="/features/code-editor" className="hover:text-orange-400 transition-colors">Code Editor</Link></li>
-                <li><Link href="/features/advanced-analytics" className="hover:text-orange-400 transition-colors">Analytics</Link></li>
-                <li><Link href="/features/ab-testing" className="hover:text-orange-400 transition-colors">A/B Testing</Link></li>
-              </ul>
-            </div>
-            
-            {/* Company */}
-            <div>
-              <h4 className="text-lg font-semibold text-white mb-4">Company</h4>
-              <ul className="space-y-2 text-white/60 text-sm">
-                <li><Link href="/about-me" className="hover:text-orange-400 transition-colors">About Me</Link></li>
-                <li><Link href="/contact" className="hover:text-orange-400 transition-colors">Contact</Link></li>
-                <li><Link href="/privacy" className="hover:text-orange-400 transition-colors">Privacy</Link></li>
-                <li><Link href="/terms" className="hover:text-orange-400 transition-colors">Terms</Link></li>
-              </ul>
-            </div>
-            
-            {/* Get Started */}
-            <div>
-              <h4 className="text-lg font-semibold text-white mb-4">Get Started</h4>
-              <ul className="space-y-2 text-white/60 text-sm">
-                <li><Link href="/signup" className="hover:text-orange-400 transition-colors">Sign Up Free</Link></li>
-                <li><Link href="/login" className="hover:text-orange-400 transition-colors">Login</Link></li>
-                <li><Link href="/dashboard" className="hover:text-orange-400 transition-colors">Dashboard</Link></li>
-              </ul>
-            </div>
-          </div>
-          
-          {/* Bottom */}
-          <div className="border-t border-slate-800/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-white/40 text-sm">
-              © 2024 AFFILIFY. All rights reserved.
-            </p>
-            <div className="flex items-center gap-6">
-              <Link href="/privacy" className="text-white/40 hover:text-white/60 text-sm transition-colors">
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="text-white/40 hover:text-white/60 text-sm transition-colors">
-                Terms of Service
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
-  )
-}
