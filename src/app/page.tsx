@@ -51,15 +51,15 @@ export default function HomePage() {
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.6 }
   }
-  
+
   const staggerContainer = {
     animate: {
       transition: {
-          staggerChildren: 0.1
+        staggerChildren: 0.1
       }
     }
   }
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 overflow-hidden">
       {/* Animated Background Elements */}
@@ -233,6 +233,29 @@ export default function HomePage() {
               </Link>
             </motion.div>
           </motion.div>
+
+          {/* Social Proof Stats */}
+          <motion.div 
+            variants={fadeInUp}
+            className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto"
+          >
+            {[
+              { number: '10,000+', label: 'Websites Created', icon: Globe },
+              { number: '$2.5M+', label: 'Revenue Generated', icon: DollarSign },
+              { number: '99.5%', label: 'Uptime', icon: Zap },
+              { number: '4.9/5', label: 'User Rating', icon: Star },
+            ].map((stat, index) => (
+              <motion.div
+                key={index}
+                className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20"
+                whileHover={{ scale: 1.05, borderColor: 'rgba(251, 146, 60, 0.5)' }}
+              >
+                <stat.icon className="w-8 h-8 text-orange-400 mx-auto mb-2" />
+                <div className="text-3xl font-bold text-white mb-1">{stat.number}</div>
+                <div className="text-sm text-white/70">{stat.label}</div>
+              </motion.div>
+            ))}
+          </motion.div>
         </motion.div>
       </section>
 
@@ -259,77 +282,425 @@ export default function HomePage() {
           {/* Process Steps */}
           <div className="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
             {[
-              { icon: Wand2, title: "Paste Link", description: "Paste your affiliate link into our AI builder." },
-              { icon: Code2, title: "AI Builds Page", description: "Our AI instantly generates a high-converting landing page." },
-              { icon: Rocket, title: "1-Click Deploy", description: "Publish your new website to a custom domain in seconds." },
-              { icon: DollarSign, title: "Start Earning", description: "Watch the conversions roll in and start making money." },
-            ].map((step, index) => (
+              {
+                step: '1',
+                icon: Target,
+                title: 'Paste Your Link',
+                description: 'Drop any affiliate link from Amazon, ClickBank, or any network',
+                color: 'from-blue-500 to-cyan-500'
+              },
+              {
+                step: '2',
+                icon: Wand2,
+                title: 'AI Generates Website',
+                description: 'Our AI analyzes the product and creates professional content & design',
+                color: 'from-purple-500 to-pink-500'
+              },
+              {
+                step: '3',
+                icon: Rocket,
+                title: 'Deploy Instantly',
+                description: 'One-click deployment with hosting, SSL, and custom domain included',
+                color: 'from-orange-500 to-red-500'
+              },
+              {
+                step: '4',
+                icon: TrendingUp,
+                title: 'Track & Earn',
+                description: 'Monitor clicks, conversions, and revenue in real-time analytics',
+                color: 'from-green-500 to-emerald-500'
+              },
+            ].map((item, index) => (
               <motion.div
                 key={index}
-                variants={fadeInUp}
-                className="text-center p-6 bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-xl transition-all hover:shadow-2xl hover:border-orange-500/50"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.6 }}
+                whileHover={{ y: -10 }}
+                className="relative"
               >
-                <step.icon className="w-10 h-10 text-orange-400 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">{step.title}</h3>
-                <p className="text-white/70">{step.description}</p>
+                {/* Connector Line */}
+                {index < 3 && (
+                  <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-white/30 to-transparent -z-10" />
+                )}
+
+                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 h-full hover:border-orange-500/50 transition-all">
+                  {/* Step Number */}
+                  <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r ${item.color} text-white font-bold text-xl mb-4`}>
+                    {item.step}
+                  </div>
+
+                  {/* Icon */}
+                  <div className="mb-4">
+                    <item.icon className="w-12 h-12 text-orange-400" />
+                  </div>
+
+                  {/* Content */}
+                  <h3 className="text-xl font-bold text-white mb-3">{item.title}</h3>
+                  <p className="text-white/70 leading-relaxed">{item.description}</p>
+                </div>
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* Features Section */}
-      <section className="relative z-10 py-20 bg-slate-900/50">
-        <div className="container mx-auto px-4">
+          {/* Time Comparison */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
+            className="mt-16 max-w-4xl mx-auto bg-gradient-to-r from-orange-500/20 to-red-500/20 backdrop-blur-lg rounded-2xl p-8 border border-orange-500/30"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
-                Unmatched Features
-              </span>
-            </h2>
-            <p className="text-xl text-white/80 max-w-3xl mx-auto">
-              Everything you need to dominate affiliate marketing, powered by AI.
-            </p>
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <div className="text-red-400 font-bold mb-2">❌ Traditional Way</div>
+                <div className="text-white/60 mb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="w-4 h-4" />
+                    <span>2-4 weeks of work</span>
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <DollarSign className="w-4 h-4" />
+                    <span>$500-2000 in costs</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Code2 className="w-4 h-4" />
+                    <span>Coding & design skills required</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div className="text-green-400 font-bold mb-2">✅ AFFILIFY Way</div>
+                <div className="text-white mb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Zap className="w-4 h-4 text-yellow-400" />
+                    <span className="font-bold">60 seconds</span>
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <DollarSign className="w-4 h-4 text-green-400" />
+                    <span className="font-bold">$0 to start</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-purple-400" />
+                    <span className="font-bold">No skills needed</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </motion.div>
-
-          {/* Feature Grid */}
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { icon: TrendingUp, title: "High-Converting Templates", description: "AI-optimized designs proven to maximize click-through and conversion rates." },
-              { icon: Globe, title: "Global SEO Optimization", description: "Built-in tools for keyword research, meta tags, and fast loading speeds for top rankings." },
-              { icon: BarChart3, title: "Real-Time Analytics", description: "Track visitors, clicks, and conversions with a simple, powerful dashboard." },
-              { icon: Code2, title: "No-Code Editor", description: "Customize every element with a drag-and-drop interface, no coding required." },
-              { icon: Shield, title: "Secure & Reliable Hosting", description: "Fast, secure, and scalable hosting included with every plan." },
-              { icon: MessageSquare, title: "24/7 Priority Support", description: "Get help from our expert team whenever you need it, day or night." },
-            ].map((feature, index) => (
-              <motion.div
-                key={index}
-                variants={fadeInUp}
-                className="p-8 bg-slate-800/70 rounded-xl border border-slate-700/50 shadow-xl transition-all hover:shadow-2xl hover:border-red-500/50"
-              >
-                <feature.icon className="w-12 h-12 text-red-500 mb-4" />
-                <h3 className="text-2xl font-bold text-white mb-3">{feature.title}</h3>
-                <p className="text-white/70">{feature.description}</p>
-              </motion.div>
-            ))}
-          </div>
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Feature Showcases - Interactive */}
       <section className="relative z-10 py-20">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+                Powerful Features That Drive Revenue
+              </span>
+            </h2>
+            <p className="text-xl text-white/80 max-w-3xl mx-auto">
+              Everything you need to build, optimize, and scale your affiliate empire
+            </p>
+          </motion.div>
+
+          {/* Feature Tabs */}
+          <div className="max-w-6xl mx-auto mb-12">
+            <div className="flex flex-wrap justify-center gap-4 mb-8">
+              {[
+                { id: 0, icon: Wand2, label: 'AI Generation' },
+                { id: 1, icon: BarChart3, label: 'Analytics' },
+                { id: 2, icon: Code2, label: 'Code Editor' },
+              ].map((tab) => (
+                <motion.button
+                  key={tab.id}
+                  onClick={() => setActiveFeature(tab.id)}
+                  className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${
+                    activeFeature === tab.id
+                      ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg'
+                      : 'bg-white/10 text-white/70 hover:bg-white/20'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <tab.icon className="w-5 h-5" />
+                  {tab.label}
+                </motion.button>
+              ))}
+            </div>
+
+            {/* Feature Content */}
+            <motion.div
+              key={activeFeature}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20"
+            >
+              {activeFeature === 0 && (
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  <div>
+                    <div className="inline-flex items-center px-3 py-1 bg-purple-500/20 rounded-full mb-4">
+                      <Sparkles className="w-4 h-4 text-purple-400 mr-2" />
+                      <span className="text-purple-300 text-sm font-semibold">AI-Powered</span>
+                    </div>
+                    <h3 className="text-3xl font-bold text-white mb-4">
+                      AI Content Generation
+                    </h3>
+                    <p className="text-white/80 mb-6 leading-relaxed">
+                      Our advanced AI analyzes your affiliate product and automatically generates:
+                    </p>
+                    <ul className="space-y-3">
+                      {[
+                        'Compelling headlines that grab attention',
+                        'SEO-optimized product descriptions',
+                        'Persuasive call-to-actions',
+                        'Trust-building testimonials',
+                        'Conversion-focused copy'
+                      ].map((item, i) => (
+                        <li key={i} className="flex items-start gap-3 text-white/90">
+                          <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="bg-gradient-to-br from-purple-900/50 to-pink-900/50 rounded-xl p-6 border border-purple-500/30">
+                    <div className="bg-gray-900 rounded-lg p-4 mb-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Wand2 className="w-5 h-5 text-purple-400" />
+                        <span className="text-white font-semibold">AI Writing...</span>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-2 bg-purple-500/30 rounded animate-pulse" style={{width: '90%'}}></div>
+                        <div className="h-2 bg-purple-500/30 rounded animate-pulse" style={{width: '75%'}}></div>
+                        <div className="h-2 bg-purple-500/30 rounded animate-pulse" style={{width: '85%'}}></div>
+                      </div>
+                    </div>
+                    <div className="text-white/70 text-sm">
+                      <div className="font-mono bg-gray-900 rounded p-3">
+                        <span className="text-green-400">"</span>
+                        <span className="text-white">Transform your game with the Aston Martin DB12 Super GT Landing Page - engineered for champions who demand excellence...</span>
+                        <span className="text-green-400">"</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeFeature === 1 && (
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  <div>
+                    <div className="inline-flex items-center px-3 py-1 bg-blue-500/20 rounded-full mb-4">
+                      <BarChart3 className="w-4 h-4 text-blue-400 mr-2" />
+                      <span className="text-blue-300 text-sm font-semibold">Real-Time Data</span>
+                    </div>
+                    <h3 className="text-3xl font-bold text-white mb-4">
+                      Advanced Analytics Dashboard
+                    </h3>
+                    <p className="text-white/80 mb-6 leading-relaxed">
+                      Track every click, conversion, and dollar with our comprehensive analytics:
+                    </p>
+                    <ul className="space-y-3">
+                      {[
+                        'Real-time visitor tracking',
+                        'Conversion rate optimization',
+                        'Revenue attribution',
+                        'Geographic insights',
+                        'A/B testing results'
+                      ].map((item, i) => (
+                        <li key={i} className="flex items-start gap-3 text-white/90">
+                          <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="bg-gradient-to-br from-blue-900/50 to-cyan-900/50 rounded-xl p-6 border border-blue-500/30">
+                    <div className="bg-gray-900 rounded-lg p-4">
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="bg-green-500/20 rounded-lg p-3 border border-green-500/30">
+                          <div className="text-green-400 text-sm mb-1">Total Revenue</div>
+                          <div className="text-white text-2xl font-bold">$12,450</div>
+                          <div className="text-green-400 text-xs">↑ 23% this month</div>
+                        </div>
+                        <div className="bg-blue-500/20 rounded-lg p-3 border border-blue-500/30">
+                          <div className="text-blue-400 text-sm mb-1">Conversions</div>
+                          <div className="text-white text-2xl font-bold">847</div>
+                          <div className="text-blue-400 text-xs">↑ 15% this month</div>
+                        </div>
+                      </div>
+                      <div className="h-32 bg-gray-800 rounded-lg p-3 flex items-end gap-1">
+                        {[40, 65, 45, 80, 60, 90, 75, 95, 70, 85, 100, 90].map((height, i) => (
+                          <div 
+                            key={i} 
+                            className="flex-1 bg-gradient-to-t from-blue-600 to-cyan-400 rounded-t"
+                            style={{height: `${height}%`}}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeFeature === 2 && (
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  <div>
+                    <div className="inline-flex items-center px-3 py-1 bg-orange-500/20 rounded-full mb-4">
+                      <Crown className="w-4 h-4 text-orange-400 mr-2" />
+                      <span className="text-orange-300 text-sm font-semibold">Enterprise Only</span>
+                    </div>
+                    <h3 className="text-3xl font-bold text-white mb-4">
+                      Full Code Editor Access
+                    </h3>
+                    <p className="text-white/80 mb-6 leading-relaxed">
+                      Take complete control with our professional-grade code editor:
+                    </p>
+                    <ul className="space-y-3">
+                      {[
+                        'Edit any page in your dashboard',
+                        'Syntax highlighting & autocomplete',
+                        'Live preview as you code',
+                        'Version control & rollback',
+                        'One-click deployment'
+                      ].map((item, i) => (
+                        <li key={i} className="flex items-start gap-3 text-white/90">
+                          <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link href="/features/code-editor" className="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 font-semibold mt-4">
+                      Learn more about Code Editor
+                      <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                  <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-4 border border-orange-500/30">
+                    <div className="bg-gray-900 rounded-lg overflow-hidden">
+                      <div className="bg-gray-800 px-4 py-2 flex items-center gap-2 border-b border-gray-700">
+                        <Code2 className="w-4 h-4 text-orange-400" />
+                        <span className="text-white text-sm font-semibold">dashboard/page.tsx</span>
+                      </div>
+                      <div className="p-4 font-mono text-xs">
+                        <div className="text-gray-500">1</div>
+                        <div className="text-gray-500">2</div>
+                        <div className="text-gray-500">3</div>
+                        <div className="text-gray-500">4</div>
+                        <div className="text-gray-500">5</div>
+                        <div className="text-gray-500">6</div>
+                      </div>
+                      <div className="p-4 font-mono text-xs -mt-[120px] ml-8">
+                        <div><span className="text-purple-400">export</span> <span className="text-blue-400">default</span> <span className="text-yellow-400">function</span> <span className="text-green-400">Dashboard</span>() {'{'}</div>
+                        <div>  <span className="text-purple-400">return</span> (</div>
+                        <div>    {'<'}<span className="text-red-400">div</span> <span className="text-blue-400">className</span>=<span className="text-green-400">"container"</span>{'>'}</div>
+                        <div>      {'<'}<span className="text-red-400">h1</span>{'>'}<span className="text-white">My Dashboard</span>{'</'}<span className="text-red-400">h1</span>{'>'}</div>
+                        <div>    {'</'}<span className="text-red-400">div</span>{'>'}</div>
+                        <div>  )</div>
+                        <div>{'}'}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Real Success Story */}
+      <section className="relative z-10 py-20 bg-gradient-to-b from-transparent to-black/30">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="max-w-5xl mx-auto"
+          >
+            <div className="text-center mb-12">
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+                  See AFFILIFY in Action
+                </span>
+              </h2>
+              <p className="text-xl text-white/80">
+                Real website. Real results. Built in 60 seconds.
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-2">
+                    Aston Martin DB12 Super GT
+                  </h3>
+                  <p className="text-white/70">Professional affiliate marketing website</p>
+                </div>
+                <div className="bg-green-500/20 px-4 py-2 rounded-full border border-green-500/30">
+                  <span className="text-green-400 font-semibold flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    Live
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-gray-900 rounded-xl overflow-hidden mb-6 border border-white/10">
+                <div className="bg-gray-800 px-4 py-2 flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-300 text-sm font-mono">https://db12-super-gt-aston-martinplay-gcpm45.netlify.app/</span>
+                </div>
+                <div className="p-8 bg-gradient-to-br from-orange-50 to-red-50">
+                  <div className="text-center">
+                    <div className="text-gray-800 text-4xl font-bold mb-4">🏎️</div>
+                    <div className="text-gray-900 text-2xl font-bold mb-2">Aston Martin DB12 Super GT Landing Page</div>
+                    <div className="text-gray-700 mb-4">The ultimate landing page for the ultimate Super Tourer. Designed for luxury conversions.</div>
+                    <div className="inline-block bg-orange-600 text-white px-6 py-3 rounded-lg font-bold">
+                      View Product →
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                  <div className="text-white/60 text-sm mb-1">Time to Create</div>
+                  <div className="text-white text-2xl font-bold">60 sec</div>
+                </div>
+                <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                  <div className="text-white/60 text-sm mb-1">Cost</div>
+                  <div className="text-white text-2xl font-bold">$0</div>
+                </div>
+                <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                  <div className="text-white/60 text-sm mb-1">Coding Required</div>
+                  <div className="text-white text-2xl font-bold">None</div>
+                </div>
+              </div>
+
+              <Link 
+                href="https://db12-super-gt-aston-martinplay-gcpm45.netlify.app/" 
+                target="_blank"
+                className="block w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white text-center font-bold py-4 rounded-xl transition-all"
+              >
+                View Live Website →
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="relative z-10 py-20 bg-gradient-to-b from-black/30 to-transparent">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
@@ -338,42 +709,71 @@ export default function HomePage() {
               </span>
             </h2>
             <p className="text-xl text-white/80 max-w-3xl mx-auto">
-              Real results from real affiliate marketers.
+              Real stories from real affiliate marketers making real money
             </p>
           </motion.div>
 
-          {/* Testimonial Carousel */}
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {[
-              { quote: "AFFILIFY is a game-changer. I built a site in 5 minutes that converted better than my old one after 6 months of tweaking.", name: "Sarah J.", title: "Super Affiliate" },
-              { quote: "The AI is incredible. It understands the product and writes compelling copy that I couldn't have written myself.", name: "Mark T.", title: "Content Creator" },
-              { quote: "I went from zero to my first $1,000 in commissions in under a week. This platform is the real deal.", name: "Alex P.", title: "Newbie Marketer" },
+              {
+                name: 'Sarah Johnson',
+                role: 'Affiliate Marketer',
+                avatar: '👩‍💼',
+                rating: 5,
+                text: 'AFFILIFY transformed my affiliate business. I went from spending weeks building sites to creating professional websites in minutes. My revenue has tripled!'
+              },
+              {
+                name: 'Mike Chen',
+                role: 'Digital Entrepreneur',
+                avatar: '👨‍💻',
+                rating: 5,
+                text: 'The AI content generation is incredible. It creates better copy than I could write myself. The analytics help me optimize for maximum conversions.'
+              },
+              {
+                name: 'Emily Rodriguez',
+                role: 'Marketing Agency Owner',
+                avatar: '👩‍🎨',
+                rating: 5,
+                text: 'The Enterprise plan with code editor access is a game-changer. We can customize everything for our clients. Worth every penny!'
+              },
             ].map((testimonial, index) => (
               <motion.div
                 key={index}
-                variants={fadeInUp}
-                className="p-8 bg-slate-800/70 rounded-xl border border-slate-700/50 shadow-xl transition-all hover:shadow-2xl hover:border-orange-500/50 flex flex-col justify-between"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -5 }}
+                className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20"
               >
-                <Star className="w-6 h-6 text-yellow-400 mb-4" fill="currentColor" />
-                <p className="text-white text-lg italic mb-6">"{testimonial.quote}"</p>
-                <div>
-                  <p className="text-white font-bold">{testimonial.name}</p>
-                  <p className="text-orange-400 text-sm">{testimonial.title}</p>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="text-4xl">{testimonial.avatar}</div>
+                  <div>
+                    <div className="text-white font-bold">{testimonial.name}</div>
+                    <div className="text-white/60 text-sm">{testimonial.role}</div>
+                  </div>
                 </div>
+                <div className="flex gap-1 mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+                <p className="text-white/80 leading-relaxed">
+                  "{testimonial.text}"
+                </p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="relative z-10 py-20 bg-slate-900/50">
+      {/* Pricing Preview */}
+      <section className="relative z-10 py-20">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
@@ -382,145 +782,226 @@ export default function HomePage() {
               </span>
             </h2>
             <p className="text-xl text-white/80 max-w-3xl mx-auto">
-              Choose the plan that fits your ambition. Start free, scale when you're ready.
+              Start free, upgrade as you grow. No hidden fees, no surprises.
             </p>
           </motion.div>
 
-          {/* Pricing Cards */}
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {[
-              { 
-                name: "Starter", 
-                price: "Free", 
-                description: "Perfect for testing the waters and your first campaign.", 
-                features: ["1 AI-Generated Site", "Basic Analytics", "AFFILIFY Subdomain", "Community Support"],
-                cta: "Start Free",
-                highlight: false
-              },
-              { 
-                name: "Pro", 
-                price: "$49", 
-                period: "/month", 
-                description: "For serious marketers ready to scale their earnings.", 
-                features: ["Unlimited AI Sites", "Advanced Analytics", "Custom Domain Support", "Priority Support", "A/B Testing"],
-                cta: "Go Pro",
-                highlight: true
-              },
-              { 
-                name: "Enterprise", 
-                price: "Custom", 
-                description: "For agencies and high-volume affiliate businesses.", 
-                features: ["All Pro Features", "Dedicated Account Manager", "Custom Integrations", "White-Label Options", "Volume Discounts"],
-                cta: "Contact Sales",
-                highlight: false
-              },
-            ].map((plan, index) => (
-              <motion.div
-                key={index}
-                variants={fadeInUp}
-                className={`p-8 rounded-xl shadow-2xl flex flex-col ${plan.highlight ? 'bg-gradient-to-br from-orange-800 to-red-900 border-4 border-orange-500' : 'bg-slate-800/70 border border-slate-700/50'}`}
+            {/* Basic Plan */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0 }}
+              whileHover={{ y: -10 }}
+              className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <Zap className="w-6 h-6 text-blue-400" />
+                <h3 className="text-2xl font-bold text-white">Basic</h3>
+              </div>
+              <div className="mb-6">
+                <div className="text-5xl font-bold text-white mb-2">$0</div>
+                <div className="text-white/60">Forever free</div>
+              </div>
+              <ul className="space-y-3 mb-8">
+                {[
+                  '3 websites',
+                  'AI content generation',
+                  'Basic analytics',
+                  'Email support'
+                ].map((feature, i) => (
+                  <li key={i} className="flex items-center gap-2 text-white/90">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link 
+                href="/signup?plan=basic"
+                className="block w-full bg-white/10 hover:bg-white/20 text-white text-center font-bold py-3 rounded-lg transition-all border border-white/20"
               >
-                <h3 className={`text-2xl font-bold mb-2 ${plan.highlight ? 'text-white' : 'text-orange-400'}`}>{plan.name}</h3>
-                <p className="text-white/70 mb-4">{plan.description}</p>
-                <div className="flex items-baseline mb-6">
-                  <span className={`text-5xl font-extrabold ${plan.highlight ? 'text-white' : 'text-white'}`}>{plan.price}</span>
-                  {plan.period && <span className="text-xl font-medium text-white/70">{plan.period}</span>}
-                </div>
-                <ul className="space-y-3 mb-8 flex-grow">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-center text-white">
-                      <CheckCircle className={`w-5 h-5 mr-3 ${plan.highlight ? 'text-yellow-400' : 'text-green-400'}`} />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <Link 
-                  href={plan.cta === "Contact Sales" ? "/contact" : "/signup"} 
-                  className={`block text-center py-3 rounded-lg font-bold transition-all ${plan.highlight ? 'bg-white text-red-600 hover:bg-gray-200' : 'bg-orange-600 hover:bg-orange-700 text-white'}`}
-                >
-                  {plan.cta}
-                </Link>
-              </motion.div>
-            ))}
+                Start Free
+              </Link>
+            </motion.div>
+
+            {/* Pro Plan */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              whileHover={{ y: -10 }}
+              className="bg-gradient-to-br from-orange-600/20 to-red-600/20 backdrop-blur-lg rounded-2xl p-8 border-2 border-orange-500/50 relative"
+            >
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-orange-600 to-red-600 px-4 py-1 rounded-full">
+                <span className="text-white font-bold text-sm">MOST POPULAR</span>
+              </div>
+              <div className="flex items-center gap-2 mb-4">
+                <Crown className="w-6 h-6 text-orange-400" />
+                <h3 className="text-2xl font-bold text-white">Pro</h3>
+              </div>
+              <div className="mb-6">
+                <div className="text-5xl font-bold text-white mb-2">$29</div>
+                <div className="text-white/60">per month</div>
+              </div>
+              <ul className="space-y-3 mb-8">
+                {[
+                  '10 websites',
+                  'All templates',
+                  'Advanced analytics',
+                  'Custom domains',
+                  'Priority support'
+                ].map((feature, i) => (
+                  <li key={i} className="flex items-center gap-2 text-white/90">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link 
+                href="/signup?plan=pro"
+                className="block w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white text-center font-bold py-3 rounded-lg transition-all shadow-lg"
+              >
+                Start Pro Trial
+              </Link>
+            </motion.div>
+
+            {/* Enterprise Plan */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              whileHover={{ y: -10 }}
+              className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-6 h-6 text-purple-400" />
+                <h3 className="text-2xl font-bold text-white">Enterprise</h3>
+              </div>
+              <div className="mb-6">
+                <div className="text-5xl font-bold text-white mb-2">$99</div>
+                <div className="text-white/60">per month</div>
+              </div>
+              <ul className="space-y-3 mb-8">
+                {[
+                  'Unlimited websites',
+                  'Code editor access',
+                  'A/B testing',
+                  'API access',
+                  'White-label',
+                  'Dedicated support'
+                ].map((feature, i) => (
+                  <li key={i} className="flex items-center gap-2 text-white/90">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link 
+                href="/signup?plan=enterprise"
+                className="block w-full bg-white/10 hover:bg-white/20 text-white text-center font-bold py-3 rounded-lg transition-all border border-white/20"
+              >
+                Start Enterprise Trial
+              </Link>
+            </motion.div>
+          </div>
+
+          <div className="text-center mt-12">
+            <Link href="/pricing" className="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 font-semibold">
+              View detailed pricing comparison
+              <ChevronRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Final CTA Section */}
       <section className="relative z-10 py-20">
         <div className="container mx-auto px-4">
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center p-10 md:p-20 bg-gradient-to-r from-orange-600/30 to-red-600/30 backdrop-blur-lg rounded-3xl border border-orange-500/50 shadow-2xl"
+            className="max-w-4xl mx-auto bg-gradient-to-r from-orange-600/30 to-red-600/30 backdrop-blur-lg rounded-3xl p-12 border border-orange-500/50 text-center"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
-              Ready to Stop Leaving Money on the Table?
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              <span className="bg-gradient-to-r from-orange-300 to-red-400 bg-clip-text text-transparent">
+                Ready to Build Your Affiliate Empire?
+              </span>
             </h2>
-            <p className="text-xl text-white/80 max-w-3xl mx-auto mb-8">
-              Join thousands of affiliates who are building high-converting sites in minutes, not months.
+            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed">
+              Join thousands of affiliate marketers who are building profitable websites with AFFILIFY. 
+              Start for free, no credit card required.
             </p>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link 
-                href="/signup" 
-                className="inline-flex items-center gap-2 px-10 py-4 bg-white text-red-600 font-bold text-xl rounded-xl shadow-2xl transition-all hover:bg-gray-200"
-              >
-                <Crown className="w-6 h-6" />
-                Claim Your Free Account
-              </Link>
-            </motion.div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link 
+                  href="/signup" 
+                  className="group px-10 py-5 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-bold text-xl rounded-xl shadow-2xl transition-all flex items-center gap-2"
+                >
+                  <Rocket className="w-6 h-6" />
+                  Start Building Free
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </motion.div>
+            </div>
+            <div className="flex flex-wrap justify-center gap-6 text-white/70 text-sm">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-400" />
+                <span>No credit card required</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-400" />
+                <span>Free forever plan</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-400" />
+                <span>Cancel anytime</span>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 bg-slate-900/80 border-t border-slate-800/50 pt-12 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
-            <div className="col-span-2 md:col-span-1">
-              <Link href="/" className="flex items-center space-x-2 group mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center shadow-lg">
+      <footer className="relative z-10 bg-black/50 backdrop-blur-lg border-t border-white/10 mt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
                   <Zap className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-white text-xl font-bold">AFFILIFY</span>
-              </Link>
-              <p className="text-white/60 text-sm">AI-Powered Affiliate Marketing.</p>
+              </div>
+              <p className="text-white/60 text-sm">
+                AI-powered affiliate marketing platform. Build profitable websites in 60 seconds.
+              </p>
             </div>
             <div>
-              <h4 className="text-lg font-semibold text-white mb-4">Product</h4>
-              <ul className="space-y-2 text-white/70 text-sm">
-                <li><Link href="/features" className="hover:text-orange-400 transition-colors">Features</Link></li>
-                <li><Link href="/pricing" className="hover:text-orange-400 transition-colors">Pricing</Link></li>
-                <li><Link href="/templates" className="hover:text-orange-400 transition-colors">Templates</Link></li>
-                <li><Link href="/roadmap" className="hover:text-orange-400 transition-colors">Roadmap</Link></li>
+              <h4 className="text-white font-bold mb-4">Product</h4>
+              <ul className="space-y-2 text-white/60 text-sm">
+                <li><Link href="/features" className="hover:text-white transition-colors">Features</Link></li>
+                <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link href="/docs" className="hover:text-white transition-colors">Documentation</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-lg font-semibold text-white mb-4">Company</h4>
-              <ul className="space-y-2 text-white/70 text-sm">
-                <li><Link href="/about-me" className="hover:text-orange-400 transition-colors">About Me</Link></li>
-                <li><Link href="/contact" className="hover:text-orange-400 transition-colors">Contact</Link></li>
-                <li><Link href="/careers" className="hover:text-orange-400 transition-colors">Careers</Link></li>
-                <li><Link href="/blog" className="hover:text-orange-400 transition-colors">Blog</Link></li>
+              <h4 className="text-white font-bold mb-4">Company</h4>
+              <ul className="space-y-2 text-white/60 text-sm">
+                <li><Link href="/about-me" className="hover:text-white transition-colors">About</Link></li>
+                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition-colors">Terms</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-lg font-semibold text-white mb-4">Resources</h4>
-              <ul className="space-y-2 text-white/70 text-sm">
-                <li><Link href="/docs" className="hover:text-orange-400 transition-colors">Documentation</Link></li>
-                <li><Link href="/support" className="hover:text-orange-400 transition-colors">Support</Link></li>
-                <li><Link href="/terms" className="hover:text-orange-400 transition-colors">Terms of Service</Link></li>
-                <li><Link href="/privacy" className="hover:text-orange-400 transition-colors">Privacy Policy</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold text-white mb-4">Connect</h4>
-              <ul className="space-y-2 text-white/70 text-sm">
-                <li><a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-orange-400 transition-colors">Twitter</a></li>
-                <li><a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-orange-400 transition-colors">Facebook</a></li>
-                <li><a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-orange-400 transition-colors">LinkedIn</a></li>
+              <h4 className="text-white font-bold mb-4">Support</h4>
+              <ul className="space-y-2 text-white/60 text-sm">
+                <li><Link href="/docs" className="hover:text-white transition-colors">Help Center</Link></li>
+                <li><Link href="/login" className="hover:text-white transition-colors">Login</Link></li>
+                <li><Link href="/signup" className="hover:text-white transition-colors">Sign Up</Link></li>
               </ul>
             </div>
           </div>
