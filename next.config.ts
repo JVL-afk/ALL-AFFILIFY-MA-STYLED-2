@@ -9,7 +9,6 @@ const nextConfig: NextConfig = {
   // Turbopack is now the default and doesn't need configuration
 
   images: {
-    domains: ['localhost'],
     remotePatterns: [
       {
         protocol: 'https',

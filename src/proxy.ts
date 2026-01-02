@@ -113,7 +113,7 @@ function getNeededPlanForFeature(featurePath: string): PlanType {
   return 'basic';
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Skip middleware for non-dashboard routes, API routes, static assets, and public website routes
