@@ -1,0 +1,164 @@
+
+> affilify-platform@0.1.0 build
+> next build
+
+   ▲ Next.js 16.0.10 (Turbopack)
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 20.8s
+   Running TypeScript ...
+   Collecting page data using 5 workers ...
+MongoDB URI format: mongodb://atlasAdmin:****@scram.mongodb.net:27017/affilify?authSource=admin
+Initializing MongoDB client in production mode
+Creating new MongoDB client...
+MongoDB URI format: mongodb://atlasAdmin:****@scram.mongodb.net:27017/affilify?authSource=admin
+Initializing MongoDB client in production mode
+Creating new MongoDB client...
+MongoDB URI format: mongodb://atlasAdmin:****@scram.mongodb.net:27017/affilify?authSource=admin
+Initializing MongoDB client in production mode
+Creating new MongoDB client...
+MongoDB URI format: mongodb://atlasAdmin:****@scram.mongodb.net:27017/affilify?authSource=admin
+Initializing MongoDB client in production mode
+Creating new MongoDB client...
+Google Analytics credentials not configured, using mock data
+MongoDB URI format: mongodb://atlasAdmin:****@scram.mongodb.net:27017/affilify?authSource=admin
+Initializing MongoDB client in production mode
+Creating new MongoDB client...
+Google Analytics credentials not configured, using mock data
+Google Analytics credentials not configured, using mock data
+Google Analytics credentials not configured, using mock data
+Google Analytics credentials not configured, using mock data
+MongoDB URI format: mongodb://atlasAdmin:****@scram.mongodb.net:27017/affilify?authSource=admin
+Initializing MongoDB client in production mode
+Creating new MongoDB client...
+   Generating static pages using 5 workers (0/98) ...
+MongoDB URI format: mongodb://atlasAdmin:****@scram.mongodb.net:27017/affilify?authSource=admin
+Initializing MongoDB client in production mode
+Creating new MongoDB client...
+MongoDB URI format: mongodb://atlasAdmin:****@scram.mongodb.net:27017/affilify?authSource=admin
+Initializing MongoDB client in production mode
+Creating new MongoDB client...
+MongoDB URI format: mongodb://atlasAdmin:****@scram.mongodb.net:27017/affilify?authSource=admin
+Initializing MongoDB client in production mode
+Creating new MongoDB client...
+Google Analytics credentials not configured, using mock data
+   Generating static pages using 5 workers (24/98) 
+   Generating static pages using 5 workers (48/98) 
+Google Analytics credentials not configured, using mock data
+   Generating static pages using 5 workers (73/98) 
+MongoDB URI format: mongodb://atlasAdmin:****@scram.mongodb.net:27017/affilify?authSource=admin
+Initializing MongoDB client in production mode
+Creating new MongoDB client...
+ ✓ Generating static pages using 5 workers (98/98) in 999.5ms
+   Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /about-me
+├ ƒ /api/ab-testing
+├ ƒ /api/ab-testing/setup
+├ ƒ /api/ab-tests
+├ ƒ /api/ab-tests/stats
+├ ƒ /api/admin/users
+├ ƒ /api/ai/generate-from-link
+├ ƒ /api/analytics/conversions
+├ ƒ /api/analytics/demographics
+├ ƒ /api/analytics/realtime
+├ ƒ /api/analytics/top-pages
+├ ƒ /api/analytics/traffic
+├ ƒ /api/analyze
+├ ƒ /api/auth/login
+├ ƒ /api/auth/logout
+├ ƒ /api/auth/me
+├ ƒ /api/auth/signup
+├ ƒ /api/chatbot/chat
+├ ƒ /api/chatbot/messages
+├ ƒ /api/chatbot/sessions
+├ ƒ /api/code-editor/ai-assist
+├ ƒ /api/code-editor/deploy
+├ ƒ /api/code-editor/files
+├ ƒ /api/code-editor/rollback
+├ ƒ /api/dashboard/stats
+├ ƒ /api/dns-test
+├ ƒ /api/email/campaigns
+├ ƒ /api/email/lists
+├ ƒ /api/email/send
+├ ƒ /api/health/database
+├ ƒ /api/integrations/api-keys
+├ ƒ /api/integrations/test
+├ ƒ /api/integrations/webhooks
+├ ƒ /api/raw-db-test
+├ ƒ /api/reporting
+├ ƒ /api/reporting/custom
+├ ƒ /api/reviews
+├ ƒ /api/reviews/stats
+├ ƒ /api/stripe/create-checkout
+├ ƒ /api/stripe/webhook
+├ ƒ /api/team
+├ ƒ /api/team/members
+├ ƒ /api/test-db-connection
+├ ƒ /api/user/data
+├ ƒ /api/websites
+├ ƒ /api/websites/[id]
+├ ƒ /api/websites/[id]/deploy
+├ ƒ /api/websites/[id]/publish
+├ ƒ /api/websites/create
+├ ƒ /api/websites/stats
+├ ƒ /dashboard
+├ ○ /dashboard/ab-testing
+├ ○ /dashboard/advanced-analytics
+├ ○ /dashboard/advanced-reporting
+├ ○ /dashboard/ai-chatbot
+├ ○ /dashboard/analyze-website
+├ ○ /dashboard/api-management
+├ ○ /dashboard/basic
+├ ○ /dashboard/billing
+├ ○ /dashboard/code-editor
+├ ○ /dashboard/create-website
+├ ○ /dashboard/create-website/basic
+├ ○ /dashboard/create-website/enterprise
+├ ○ /dashboard/create-website/pro
+├ ○ /dashboard/custom-integrations
+├ ○ /dashboard/email-marketing
+├ ○ /dashboard/enterprise
+├ ○ /dashboard/help
+├ ○ /dashboard/my-websites
+├ ○ /dashboard/pro
+├ ○ /dashboard/reviews
+├ ○ /dashboard/settings
+├ ○ /dashboard/team-collaboration
+├ ○ /docs
+├ ○ /docs/getting-started/quick-start
+├ ○ /features
+├ ○ /features/ab-testing
+├ ○ /features/advanced-analytics
+├ ○ /features/advanced-reporting
+├ ○ /features/ai-chatbot
+├ ○ /features/analyze-website
+├ ○ /features/api-management
+├ ○ /features/code-editor
+├ ○ /features/create-website
+├ ○ /features/custom-integrations
+├ ○ /features/email-marketing
+├ ○ /features/my-websites
+├ ○ /features/team-collaboration
+├ ○ /legal
+├ ○ /legal/cookies
+├ ○ /legal/disclaimer
+├ ○ /login
+├ ○ /pricing
+├ ○ /privacy
+├ ○ /proof
+├ ○ /signup
+├ ƒ /sites/[slug]
+├ ○ /terms
+└ ƒ /websites/[slug]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
