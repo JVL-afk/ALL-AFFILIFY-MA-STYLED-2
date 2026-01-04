@@ -34,7 +34,7 @@ export default function ProofPage() {
             Which will make the best affiliate website?
           </p>
           <p className="text-white/70 text-lg max-w-3xl mx-auto mb-8">
-            We gave the same product link to Base44, Lovable, and AFFILIFY. Here's what happened when each platform created an affiliate website for the 2026 KTM 450 SX-F Factory Edition.
+            We gave the same product link to Base44, Lovable, and AFFILIFY. Here's what happened when each platform created an affiliate website for the 2026 KTM 450 SX-F.
           </p>
         </motion.div>
 
@@ -846,7 +846,7 @@ export default function ProofPage() {
                   <thead>
                     <tr className="border-b border-white/20">
                       <th className="text-left text-white/90 py-3 px-4">FEATURE</th>
-                      <th className="text-center text-orange-400 py-3 px-4 border-l-2 border-orange-500">KTM 450 SX-F FE</th>
+                      <th className="text-center text-orange-400 py-3 px-4 border-l-2 border-orange-500">2026 KTM 450 SX-F</th>
                       <th className="text-center text-white/70 py-3 px-4">HONDA CRF450RWE</th>
                       <th className="text-center text-white/70 py-3 px-4">YAMAHA YZ450F</th>
                       <th className="text-center text-white/70 py-3 px-4">KAWASAKI KX450SR</th>
@@ -1050,7 +1050,7 @@ export default function ProofPage() {
         >
           <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 max-w-3xl mx-auto">
             <p className="text-white/60 text-sm">
-              <strong className="text-white/80">Note:</strong> All three websites compared in this analysis were created using the free plan on each respective platform. The KTM 450 SX-F Factory Edition was used as the test product for all three platforms to ensure a fair comparison.
+              <strong className="text-white/80">Note:</strong> All three websites compared in this analysis were created using the free plan on each respective platform. The 2026 KTM 450 SX-F was used as the test product for all three platforms to ensure a fair comparison.
             </p>
           </div>
         </motion.section>
