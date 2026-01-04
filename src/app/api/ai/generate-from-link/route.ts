@@ -397,8 +397,9 @@ Feature Image 2: ${featureImages[1]?.url || 'NO_FEATURE_IMAGE_2'}
 Testimonial Image: ${testimonialImages[0]?.url || 'NO_TESTIMONIAL_IMAGE'}
 
 CRITICAL: The affiliate link is: ${productInfo.originalUrl}
-ALL call-to-action (CTA) buttons MUST use this exact URL: ${productInfo.originalUrl}
-Do NOT use placeholder links like "#" or relative links. Every CTA button must have href="${productInfo.originalUrl}"
+${affiliateId ? `AFFILIATE INTEGRATION: The user has provided an affiliate ID: ${affiliateId}. If the product link is from a known platform (like Amazon, eBay, etc.), you MUST append this affiliate ID to the URL using the correct parameter (e.g., ?tag=${affiliateId} for Amazon). If the platform is unknown, ensure the affiliate ID is integrated into the CTA links or mentioned appropriately in the conversion-focused content to ensure the user gets credit for the sale.` : ''}
+ALL call-to-action (CTA) buttons MUST use the affiliate-integrated URL.
+Do NOT use placeholder links like "#" or relative links. Every CTA button must have a valid href.
 
 Now, create a unique, creative, conversion-optimized website with over 1000 lines of code. Do not use a restrictive output structure. Be creative. Include a competitor comparison section. Use niche-specific language. Include unique sections that competitors don't have. The primary call-to-action (CTA) should be a prominent button with the affiliate link. Do NOT insert any prices if you don't know the price exactly. Make each website unique (DON'T USE the same colors, if the scraped data and the website in general has a specific color that's recognizable, make that color the color of the writing)! Compare with REAL COMPETITORS of the product and specify the competitors names. Also don't only get your info from the scraped data, research blogs, reviews, articles everything on this internet about the product, make ONLY THE BEST WEBSITE that promotes the specific product! Make ABSOLUTELY SURE that the website can't be interpratated in any kind of way as a copy of the original website (the one fro  where you have the affiliate link). Make each WEBSITE UNIQUE, DO NOT use any generic templates. MAKE SURE each single word or piece of info in the website is REAL and verifiable! Before you even think about creating the website please find at least 1 (max 3) youtube videos to put into the website at the proof (don't use the word proof everytime, use some synonimes if possible) section (make sure the link and thumbnail is visible)!!!!! Insert ONLY real, VERIFIABLE reviews in testimonials page!!!! Respond ONLY with the full code! Here is the affiliate information: affiliateId: ${affiliateId}, affiliateType: ${affiliateType};.`;
 
@@ -423,7 +424,7 @@ Now, create a unique, creative, conversion-optimized website with over 1000 line
         console.log('✅ [AI] Extracted HTML successfully')
       } else {
         console.log('❌ [AI] Could not extract, using fallback template')
-        websiteHTML = generateProfessionalTemplate(productInfo, heroImages, featureImages, testimonialImages);
+        websiteHTML = generateProfessionalTemplate(productInfo, heroImages, featureImages, testimonialImages, affiliateId);
       }
     }
     
@@ -433,12 +434,12 @@ Now, create a unique, creative, conversion-optimized website with over 1000 line
   } catch (error) {
     console.error('❌ [AI] Gemini error:', error);
     console.log('⚠️ [AI] Using fallback template')
-    return generateProfessionalTemplate(productInfo, heroImages, featureImages, testimonialImages);
+    return generateProfessionalTemplate(productInfo, heroImages, featureImages, testimonialImages, affiliateId);
   }
 }
 
 // Professional fallback template with Unsplash images
-function generateProfessionalTemplate(productInfo: any, heroImages: any[], featureImages: any[], testimonialImages: any[]) {
+function generateProfessionalTemplate(productInfo: any, heroImages: any[], featureImages: any[], testimonialImages: any[], affiliateId?: string) {
   console.log('🎨 [TEMPLATE] Generating fallback template')
   return `<!DOCTYPE html>
 <html lang="en">
@@ -469,7 +470,7 @@ function generateProfessionalTemplate(productInfo: any, heroImages: any[], featu
         <div class="container">
             <h1>${productInfo.title}</h1>
             <p>${productInfo.description}</p>
-            <a href="${productInfo.originalUrl}" class="cta-button">Get ${productInfo.title} Now - ${productInfo.price}</a>
+            <a href="${productInfo.originalUrl}${affiliateId ? (productInfo.originalUrl.includes('?') ? '&' : '?') + 'tag=' + affiliateId : ''}" class="cta-button">Get ${productInfo.title} Now - ${productInfo.price}</a>
         </div>
     </section>
     
@@ -500,7 +501,7 @@ function generateProfessionalTemplate(productInfo: any, heroImages: any[], featu
                 <strong>- Sarah Johnson, Verified Customer</strong>
             </div>
             <div style="text-align: center; margin-top: 40px;">
-                <a href="${productInfo.originalUrl}" class="cta-button">Order ${productInfo.title} Today - ${productInfo.price}</a>
+                <a href="${productInfo.originalUrl}${affiliateId ? (productInfo.originalUrl.includes('?') ? '&' : '?') + 'tag=' + affiliateId : ''}" class="cta-button">Order ${productInfo.title} Today - ${productInfo.price}</a>
             </div>
         </div>
     </section>

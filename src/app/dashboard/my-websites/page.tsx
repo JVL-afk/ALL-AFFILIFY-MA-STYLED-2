@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -86,6 +87,7 @@ export default function MyWebsitesPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
     loadWebsites()
@@ -238,7 +240,7 @@ export default function MyWebsitesPage() {
             </div>
 
             <Button 
-              onClick={() => setShowCreateModal(true)}
+              onClick={() => router.push('/dashboard/create-website')}
               className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg shadow-cyan-500/30"
             >
               <Plus className="w-4 h-4 mr-2" />
