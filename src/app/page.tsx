@@ -715,13 +715,8 @@ export default function HomePage() {
                         <div className="w-2 h-2 rounded-full bg-yellow-500" />
                         <div className="w-2 h-2 rounded-full bg-green-500" />
                       </div>
-                      <div className="h-40 bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg flex items-center justify-center overflow-hidden relative group-hover:scale-[1.02] transition-transform">
-                        <img 
-                          src={feature.screenshot} 
-                          alt={feature.title}
-                          className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent" />
+                      <div className="h-40 bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg flex items-center justify-center">
+                        <feature.icon className="w-16 h-16 text-white/20" />
                       </div>
                     </div>
                   </div>
