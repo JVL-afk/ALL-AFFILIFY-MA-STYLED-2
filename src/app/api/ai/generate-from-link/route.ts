@@ -33,6 +33,82 @@ async function validateImageUrl(imageUrl: string): Promise<boolean> {
   }
 }
 
+// Verify if a YouTube video is available and embeddable
+async function verifyYouTubeVideo(videoId: string): Promise<{valid: boolean, title?: string, thumbnail?: string}> {
+  try {
+    const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+    if (response.ok) {
+      const data = await response.json();
+      return {
+        valid: true,
+        title: data.title,
+        thumbnail: data.thumbnail_url
+      };
+    }
+    return { valid: false };
+  } catch (error) {
+    console.error('YouTube verification failed for:', videoId, error);
+    return { valid: false };
+  }
+}
+
+// Search for YouTube videos related to the product
+async function getYouTubeVideos(query: string, count: number = 3) {
+  console.log('🎥 [VIDEO] ========== STARTING YOUTUBE SEARCH ==========');
+  console.log('🎥 [VIDEO] Query:', query);
+  
+  try {
+    // Use a search engine to find YouTube videos (DuckDuckGo is relatively easy to scrape)
+    const searchUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(query + ' site:youtube.com/watch')}`;
+    const response = await fetch(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Search engine error: ${response.status}`);
+    }
+    
+    const html = await response.text();
+    const $ = cheerio.load(html);
+    const videoIds: string[] = [];
+    
+    $('.result__url').each((i, el) => {
+      const text = $(el).text();
+      const match = text.match(/v=([a-zA-Z0-9_-]{11})/);
+      if (match && match[1] && !videoIds.includes(match[1])) {
+        videoIds.push(match[1]);
+      }
+    });
+    
+    console.log('🎥 [VIDEO] Found potential video IDs:', videoIds.length);
+    
+    const verifiedVideos = [];
+    for (const id of videoIds.slice(0, 10)) { // Check up to 10 candidates
+      if (verifiedVideos.length >= count) break;
+      
+      const verification = await verifyYouTubeVideo(id);
+      if (verification.valid) {
+        verifiedVideos.push({
+          id,
+          url: `https://www.youtube.com/watch?v=${id}`,
+          embedUrl: `https://www.youtube.com/embed/${id}`,
+          title: verification.title,
+          thumbnail: verification.thumbnail
+        });
+        console.log('🎥 [VIDEO] ✅ Verified:', id, '-', verification.title);
+      }
+    }
+    
+    console.log('🎥 [VIDEO] ✅ Successfully verified', verifiedVideos.length, 'videos');
+    return verifiedVideos;
+  } catch (error) {
+    console.error('🎥 [VIDEO] ❌ Error searching YouTube:', error);
+    return [];
+  }
+}
+
 async function scrapeProductData(url: string) {
   try {
     const response = await fetch(url, {
@@ -386,6 +462,14 @@ async function generateWebsiteContent(productInfo: any, scrapedData: any, affili
   console.log('🖼️ [IMAGE] Feature 2:', featureImages[1]?.url ? '✅ VALID' : '❌ MISSING')
   console.log('🖼️ [IMAGE] Testimonial:', testimonialImages[0]?.url ? '✅ VALID' : '❌ MISSING')
   
+  // Fetch verified YouTube videos
+  console.log('🎥 [VIDEO] ========== FETCHING VERIFIED VIDEOS ==========')
+  const youtubeVideos = await getYouTubeVideos(`${productInfo.title} review`, 3);
+  const videoDataString = youtubeVideos.length > 0 
+    ? youtubeVideos.map((v, i) => `Video ${i+1}: Title: ${v.title}, Embed URL: ${v.embedUrl}, Thumbnail: ${v.thumbnail}`).join('\n')
+    : 'NO_VERIFIED_VIDEOS_FOUND';
+  console.log('🎥 [VIDEO] Verified videos for prompt:', youtubeVideos.length)
+
   const prompt = `You are the world's most elite product marketing expert and conversion optimization copywriter. Your mission is to create a highly compelling, conversion-optimized website to promote and sell the specific product described in the data. The website MUST be focused entirely on the product's features, benefits, and value proposition to the end consumer. DO NOT mention affiliate marketing, making money, or any business opportunity. Your goal is to drive the user to click the affiliate link to purchase the product.
 
 Here is the product data you have to work with: ${JSON.stringify(scrapedData)}.
@@ -401,7 +485,16 @@ ${affiliateId ? `AFFILIATE INTEGRATION: The user has provided an affiliate ID: $
 ALL call-to-action (CTA) buttons MUST use the affiliate-integrated URL.
 Do NOT use placeholder links like "#" or relative links. Every CTA button must have a valid href.
 
-Now, create a unique, creative, conversion-optimized website with over 1000 lines of code. Do not use a restrictive output structure. Be creative. Include a competitor comparison section. Use niche-specific language. Include unique sections that competitors don't have. The primary call-to-action (CTA) should be a prominent button with the affiliate link. Do NOT insert any prices if you don't know the price exactly. Make each website unique (DON'T USE the same colors, if the scraped data and the website in general has a specific color that's recognizable, make that color the color of the writing)! Compare with REAL COMPETITORS of the product and specify the competitors names. Also don't only get your info from the scraped data, research blogs, reviews, articles everything on this internet about the product, make ONLY THE BEST WEBSITE that promotes the specific product! Make ABSOLUTELY SURE that the website can't be interpratated in any kind of way as a copy of the original website (the one fro  where you have the affiliate link). Make each WEBSITE UNIQUE, DO NOT use any generic templates. MAKE SURE each single word or piece of info in the website is REAL and verifiable! Before you even think about creating the website please find at least 1 (max 3) youtube videos to put into the website at the proof (don't use the word proof everytime, use some synonimes if possible) section (make sure the link and thumbnail is visible)!!!!! Insert ONLY real, VERIFIABLE reviews in testimonials page!!!! Make sure to put different backgrounds in the different sections of the website but just make sure the contrast isn't too powerful!!! Respond ONLY with the full code! Here is the affiliate information: affiliateId: ${affiliateId}, affiliateType: ${affiliateType};.`;
+VERIFIED YOUTUBE VIDEOS:
+You MUST use the following REAL and VERIFIED YouTube videos in your "Proof" or "Video Review" section. 
+DO NOT hallucinate or use any other YouTube links. Use these specific embed URLs:
+${videoDataString}
+
+Now, create a unique, creative, conversion-optimized website with over 1000 lines of code. Do not use a restrictive output structure. Be creative. Include a competitor comparison section. Use niche-specific language. Include unique sections that competitors don't have. The primary call-to-action (CTA) should be a prominent button with the affiliate link. Do NOT insert any prices if you don't know the price exactly. Make each website unique (DON'T USE the same colors, if the scraped data and the website in general has a specific color that's recognizable, make that color the color of the writing)! Compare with REAL COMPETITORS of the product and specify the competitors names. Also don't only get your info from the scraped data, research blogs, reviews, articles everything on this internet about the product, make ONLY THE BEST WEBSITE that promotes the specific product! Make ABSOLUTELY SURE that the website can't be interpratated in any kind of way as a copy of the original website (the one fro  where you have the affiliate link). Make each WEBSITE UNIQUE, DO NOT use any generic templates. MAKE SURE each single word or piece of info in the website is REAL and verifiable! 
+
+In the "Proof" (or synonyms like "Real-World Performance", "Expert Reviews") section, you MUST embed the YouTube videos provided above using <iframe> tags. Ensure the layout is professional and the videos are clearly visible.
+
+Insert ONLY real, VERIFIABLE reviews in testimonials page!!!! Make sure to put different backgrounds in the different sections of the website but just make sure the contrast isn't too powerful!!! Respond ONLY with the full code! Here is the affiliate information: affiliateId: ${affiliateId}, affiliateType: ${affiliateType};.`;
 
   console.log('🤖 [AI] Sending to Gemini, prompt length:', prompt.length, 'chars')
 
