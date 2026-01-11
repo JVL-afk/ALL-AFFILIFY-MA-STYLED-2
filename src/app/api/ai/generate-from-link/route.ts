@@ -513,34 +513,43 @@ async function generateWebsiteContent(productInfo: any, scrapedData: any, affili
   const researchData = await researchProduct(productInfo.title);
   console.log("🔍 [RESEARCH] Research data collected.");
 
-  const prompt = `You are the world's most elite product marketing expert and conversion optimization copywriter. Your mission is to create a highly compelling, conversion-optimized website to promote and sell the specific product described in the data. The website MUST be focused entirely on the product's features, benefits, and value proposition to the end consumer. DO NOT mention affiliate marketing, making money, or any business opportunity. Your goal is to drive the user to click the affiliate link to purchase the product.
+  const prompt = `You are the world\'s foremost expert in **neuromarketing, evolutionary psychology, and hypnotic persuasion**, combined with elite product marketing and conversion optimization copywriting skills. Your ultimate mission is to create a website so profoundly compelling that it **hypnotizes any visitor into buying the promoted product.**
 
-Here is the product data you have to work with: ${JSON.stringify(scrapedData)}.
+Your understanding of human nature, biology, and psychology goes to the core. You know how to tap into primal desires, leverage cognitive biases, and craft narratives that bypass logical resistance to trigger immediate action. You are a master of persuasive language and subliminal influence.
 
-Here is the additional real-world research data about the product:
+**Product Data (Scraped):**
+${JSON.stringify(scrapedData)}.
+
+**Real-World Research Data (Crucial for Persuasion):**
 ${researchData}
 
-Here are the high-quality image URLs you MUST use in the generated HTML for the hero section and features:
+**High-Quality Image URLs (MUST USE):**
 Hero Image: ${heroImages[0]?.url || 'NO_HERO_IMAGE'}
 Feature Image 1: ${featureImages[0]?.url || 'NO_FEATURE_IMAGE_1'}
 Feature Image 2: ${featureImages[1]?.url || 'NO_FEATURE_IMAGE_2'}
 Testimonial Image: ${testimonialImages[0]?.url || 'NO_TESTIMONIAL_IMAGE'}
 
-CRITICAL: The affiliate link is: ${productInfo.originalUrl}
+**CRITICAL: Affiliate Link (MUST INTEGRATE INTO ALL CTAs):** ${productInfo.originalUrl}
 ${affiliateId ? `AFFILIATE INTEGRATION: The user has provided an affiliate ID: ${affiliateId}. If the product link is from a known platform (like Amazon, eBay, etc.), you MUST append this affiliate ID to the URL using the correct parameter (e.g., ?tag=${affiliateId} for Amazon). If the platform is unknown, ensure the affiliate ID is integrated into the CTA links or mentioned appropriately in the conversion-focused content to ensure the user gets credit for the sale.` : ''}
-ALL call-to-action (CTA) buttons MUST use the affiliate-integrated URL.
-Do NOT use placeholder links like "#" or relative links. Every CTA button must have a valid href.
+ALL call-to-action (CTA) buttons MUST use the affiliate-integrated URL. Do NOT use placeholder links like "#" or relative links. Every CTA button must have a valid href.
 
-VERIFIED YOUTUBE VIDEOS:
-You MUST use the following REAL and VERIFIED YouTube videos in your "Proof" or "Video Review" section. 
-DO NOT hallucinate or use any other YouTube links. Use these specific embed URLs:
+**VERIFIED YOUTUBE VIDEOS (MUST EMBED):**
+Use the following REAL and VERIFIED YouTube videos in your "Proof" or "Video Review" section. DO NOT hallucinate or use any other YouTube links. Use these specific embed URLs:
 ${videoDataString}
 
-Now, create a unique, creative, conversion-optimized website with over 1000 lines of code. Do not use a restrictive output structure. Be creative. Include a competitor comparison section. Use niche-specific language. Include unique sections that competitors don't have. The primary call-to-action (CTA) should be a prominent button with the affiliate link. Do NOT insert any prices if you don't know the price exactly. Make each website unique (DON'T USE the same colors, if the scraped data and the website in general has a specific color that's recognizable, make that color the color of the writing)! Compare with REAL COMPETITORS of the product and specify the competitors names. Also don't only get your info from the scraped data, research blogs, reviews, articles everything on this internet about the product, make ONLY THE BEST WEBSITE that promotes the specific product! Make ABSOLUTELY SURE that the website can't be interpratated in any kind of way as a copy of the original website (the one fro  where you have the affiliate link). Make each WEBSITE UNIQUE, DO NOT use any generic templates. MAKE SURE each single word or piece of info in the website is REAL and verifiable! 
+**Your Website Generation Directives (Follow these meticulously to achieve hypnotic persuasion):**
 
-In the "Proof" (or synonyms like "Real-World Performance", "Expert Reviews") section, you MUST embed the YouTube videos provided above using <iframe> tags. Ensure the layout is professional and the videos are clearly visible.
+1. PRIMAL DESIRE ACTIVATION: Identify the core, often subconscious, desires this product fulfills (e.g., status, security, belonging, freedom, comfort, pleasure, pain avoidance). Frame all benefits around these primal motivators. Speak directly to the visitor's lizard brain (amygdala) to trigger immediate, emotional responses.
+2. COGNITIVE BIAS EXPLOITATION: Strategically employ: (a) Scarcity/Urgency - Create a sense of limited availability or time-sensitive offers. (b) Social Proof - Integrate testimonials, user counts, expert endorsements, and review snippets to demonstrate widespread acceptance and trust. (c) Authority - Position the product as the leading solution, backed by expert opinions and data from research. (d) Anchoring - Present higher-priced alternatives or the product's original value before revealing the current offer. (e) Loss Aversion - Emphasize what the visitor stands to lose by not acquiring the product. (f) Commitment & Consistency - Encourage micro-commitments (e.g., signing up for a newsletter) that lead to larger commitments.
+3. HYPNOTIC NARRATIVE & LANGUAGE: Weave a compelling story where the visitor is the hero, and the product is the magical elixir that solves their deepest problems and fulfills their aspirations. Use: (a) Sensory-Rich Language - Describe the product experience using vivid details that engage all five senses, creating a mental movie in the visitor's mind. (b) Embedded Commands - Subtly instruct the reader to take action (e.g., feel the power, imagine yourself owning this). (c) Presuppositions - Frame sentences to assume the purchase (e.g., When you experience the Jaguar XF's unparalleled luxury...). (d) Future Pacing - Guide the reader to envision their improved life after purchasing the product. (e) Power Words & Active Verbs - Utilize language that evokes strong emotions and drives action.
+4. VISUAL PERSUASION: Ensure images and videos are not just aesthetically pleasing but also strategically chosen to reinforce psychological triggers. Show aspirational lifestyles, happy users, and the product in action. Use color psychology to evoke desired emotions (e.g., trust, excitement, luxury). Ensure video content showcases real benefits and builds trust.
+5. CLEAR CALL-TO-ACTION (CTA) DOMINANCE: The primary CTA button MUST be impossible to ignore. It should be visually prominent, use urgent and benefit-driven language, and be strategically placed throughout the page. Reinforce the affiliate link with clear, concise messaging.
+6. UNIQUE & NICHE-SPECIFIC CONTENT: Avoid generic templates. The website must feel bespoke, speaking directly to the target audience with niche-specific language and addressing their unique pain points and desires.
+7. COMPETITOR COMPARISON (STRATEGIC): Frame comparisons to highlight the promoted product's unique advantages, making competitors seem inferior without explicitly denigrating them. Focus on the value gap the promoted product fills.
+8. REAL & VERIFIABLE INFORMATION: Every claim, review, and piece of information MUST be real and verifiable. Authenticity builds trust, which is paramount for hypnotic persuasion. Use scraped data and research data as your factual anchors.
+9. AESTHETIC & FLOW: Maintain a Rolex-quality UI. The design should be elegant, intuitive, and guide the visitor effortlessly towards the purchase decision. Use contrasting backgrounds strategically to delineate sections without overwhelming the user.
 
-Insert ONLY real, VERIFIABLE reviews in testimonials page!!!! Make sure to put different backgrounds in the different sections of the website but just make sure the contrast isn't too powerful!!! Respond ONLY with the full code! Here is the affiliate information: affiliateId: ${affiliateId}, affiliateType: ${affiliateType};.`;
+Now, create a unique, creative, conversion-optimized website with over 1000 lines of code. Respond ONLY with the full HTML code! Here is the affiliate information: affiliateId: ${affiliateId}, affiliateType: ${affiliateType};.`;
 
   console.log('🤖 [AI] Sending to Gemini, prompt length:', prompt.length, 'chars')
 
