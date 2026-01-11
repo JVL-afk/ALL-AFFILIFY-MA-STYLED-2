@@ -109,6 +109,45 @@ async function getYouTubeVideos(query: string, count: number = 3) {
   }
 }
 
+// Perform real-world research on the product
+async function researchProduct(productTitle: string) {
+  console.log('🔍 [RESEARCH] ========== STARTING PRODUCT RESEARCH ==========');
+  console.log('🔍 [RESEARCH] Product:', productTitle);
+  
+  try {
+    // Search for reviews, comparisons, and expert opinions
+    const searchQuery = `${productTitle} expert review comparison pros cons 2026`;
+    const searchUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(searchQuery)}`;
+    
+    const response = await fetch(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Search engine error: ${response.status}`);
+    }
+    
+    const html = await response.text();
+    const $ = cheerio.load(html);
+    
+    const researchFindings: string[] = [];
+    
+    $('.result__snippet').each((i, el) => {
+      if (i < 8) { // Get top 8 snippets
+        researchFindings.push($(el).text().trim());
+      }
+    });
+    
+    console.log('🔍 [RESEARCH] Found', researchFindings.length, 'research snippets');
+    return researchFindings.join('\n\n');
+  } catch (error) {
+    console.error('🔍 [RESEARCH] ❌ Error researching product:', error);
+    return "No additional research data available.";
+  }
+}
+
 async function scrapeProductData(url: string) {
   try {
     const response = await fetch(url, {
@@ -466,13 +505,20 @@ async function generateWebsiteContent(productInfo: any, scrapedData: any, affili
   console.log('🎥 [VIDEO] ========== FETCHING VERIFIED VIDEOS ==========')
   const youtubeVideos = await getYouTubeVideos(`${productInfo.title} review`, 3);
   const videoDataString = youtubeVideos.length > 0 
-    ? youtubeVideos.map((v, i) => `Video ${i+1}: Title: ${v.title}, Embed URL: ${v.embedUrl}, Thumbnail: ${v.thumbnail}`).join('\n')
+    ? youtubeVideos.map((v, i) => `Video ${i+1}: Title: ${v.title}, Embed URL: ${v.embedUrl}, Thumbnail: ${v.thumbnail}`).join("\n")
     : 'NO_VERIFIED_VIDEOS_FOUND';
-  console.log('🎥 [VIDEO] Verified videos for prompt:', youtubeVideos.length)
+  console.log("🎥 [VIDEO] Verified videos for prompt:", youtubeVideos.length)
+
+  // Perform real-world research
+  const researchData = await researchProduct(productInfo.title);
+  console.log("🔍 [RESEARCH] Research data collected.");
 
   const prompt = `You are the world's most elite product marketing expert and conversion optimization copywriter. Your mission is to create a highly compelling, conversion-optimized website to promote and sell the specific product described in the data. The website MUST be focused entirely on the product's features, benefits, and value proposition to the end consumer. DO NOT mention affiliate marketing, making money, or any business opportunity. Your goal is to drive the user to click the affiliate link to purchase the product.
 
 Here is the product data you have to work with: ${JSON.stringify(scrapedData)}.
+
+Here is the additional real-world research data about the product:
+${researchData}
 
 Here are the high-quality image URLs you MUST use in the generated HTML for the hero section and features:
 Hero Image: ${heroImages[0]?.url || 'NO_HERO_IMAGE'}
