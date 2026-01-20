@@ -115,6 +115,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       requiredPlan: 'basic' as PlanType
     },
     {
+      name: 'Client Management',
+      href: '/dashboard/client-management',
+      icon: Users,
+      current: pathname?.includes('/dashboard/client-management'),
+      requiredPlan: 'basic' as PlanType
+    },
+    {
       name: 'A/B Testing',
       href: '/dashboard/ab-testing',
       icon: TestTube,
