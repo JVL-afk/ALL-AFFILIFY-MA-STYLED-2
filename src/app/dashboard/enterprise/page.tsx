@@ -20,7 +20,10 @@ import {
   Shield,
   Infinity,
   Target,
-  Briefcase
+  Briefcase,
+  Feather, // New: Content Studio Icon
+  Search, // New: SEO Auditor Icon
+  Brain // New: Ideation Lab Icon
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -233,6 +236,38 @@ export default function EnterpriseDashboard() {
                 <Link href="/dashboard/advanced-reporting">
                   <Briefcase className="w-4 h-4 mr-2" />
                   Custom Reports
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Content Brain Features */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
+            <CardHeader>
+              <CardTitle className="text-gray-900">Affiliate Content Brain</CardTitle>
+              <CardDescription className="text-gray-700">
+                Ghostwriter OS integrated for content mastery.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button asChild className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-gray-900">
+                <Link href="/dashboard/content-studio">
+                  <Feather className="w-4 h-4 mr-2" />
+                  Content Studio
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20">
+                <Link href="/dashboard/seo-auditor">
+                  <Search className="w-4 h-4 mr-2" />
+                  SEO Auditor & Lab
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20">
+                <Link href="/dashboard/ideation-lab">
+                  <Brain className="w-4 h-4 mr-2" />
+                  Campaign Ideation Lab
                 </Link>
               </Button>
             </CardContent>
