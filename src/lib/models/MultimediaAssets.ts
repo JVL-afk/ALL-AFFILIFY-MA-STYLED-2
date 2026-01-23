@@ -1,5 +1,7 @@
+// This file is server-only and should only be imported in API routes
+// Do not import this in client components
+
 import { Schema, model, models } from 'mongoose';
-import { ObjectId } from 'mongodb';
 
 /**
  * VideoAsset Schema - Stores all generated video assets

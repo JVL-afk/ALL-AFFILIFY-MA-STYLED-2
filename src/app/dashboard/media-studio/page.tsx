@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { DashboardLayout } from '@/components/DashboardLayout';
-import { MediaStudio } from '@/components/MediaStudio';
+import DashboardLayout from '@/components/DashboardLayout';
+import MediaStudio from '@/components/MediaStudio';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';

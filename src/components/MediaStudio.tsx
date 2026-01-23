@@ -17,7 +17,7 @@ interface MediaStudioProps {
   onSave?: (script: any) => void;
 }
 
-export const MediaStudio: React.FC<MediaStudioProps> = ({
+const MediaStudio: React.FC<MediaStudioProps> = ({
   websiteId,
   initialScript,
   onSave,
@@ -345,3 +345,5 @@ export const MediaStudio: React.FC<MediaStudioProps> = ({
     </div>
   );
 };
+
+export default MediaStudio;
