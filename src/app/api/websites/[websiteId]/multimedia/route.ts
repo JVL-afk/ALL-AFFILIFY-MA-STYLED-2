@@ -9,9 +9,10 @@ import jwt from 'jsonwebtoken';
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { websiteId: string } }
+  { params }: { params: Promise<{ websiteId: string }> }
 ) {
   try {
+    const { websiteId } = await params;
     // Verify authentication
     const token = request.cookies.get('token')?.value;
     if (!token) {
@@ -31,7 +32,7 @@ export async function PUT(
     // Update website with multimedia data
     const result = await db.collection('websites').findOneAndUpdate(
       {
-        _id: new ObjectId(params.websiteId),
+        _id: new ObjectId(websiteId),
         userId: new ObjectId(userId),
       },
       {
@@ -45,13 +46,13 @@ export async function PUT(
       { returnDocument: 'after' }
     );
 
-    if (!result.value) {
+    if (!result) {
       return NextResponse.json({ error: 'Website not found' }, { status: 404 });
     }
 
     return NextResponse.json({
       success: true,
-      website: result.value,
+      website: result,
     });
   } catch (error) {
     console.error('Error updating multimedia:', error);
@@ -70,9 +71,10 @@ export async function PUT(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { websiteId: string } }
+  { params }: { params: Promise<{ websiteId: string }> }
 ) {
   try {
+    const { websiteId } = await params;
     // Verify authentication
     const token = request.cookies.get('token')?.value;
     if (!token) {
@@ -87,7 +89,7 @@ export async function GET(
 
     // Fetch website multimedia data
     const website = await db.collection('websites').findOne({
-      _id: new ObjectId(params.websiteId),
+      _id: new ObjectId(websiteId),
       userId: new ObjectId(userId),
     });
 
