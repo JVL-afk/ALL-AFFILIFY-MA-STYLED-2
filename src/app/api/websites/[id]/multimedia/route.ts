@@ -9,10 +9,10 @@ import jwt from 'jsonwebtoken';
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ websiteId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { websiteId } = await params;
+    const { id: websiteId } = await params;
     // Verify authentication
     const token = request.cookies.get('token')?.value;
     if (!token) {
@@ -71,10 +71,10 @@ export async function PUT(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ websiteId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { websiteId } = await params;
+    const { id: websiteId } = await params;
     // Verify authentication
     const token = request.cookies.get('token')?.value;
     if (!token) {
