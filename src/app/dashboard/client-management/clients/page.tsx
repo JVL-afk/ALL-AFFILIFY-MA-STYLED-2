@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, Trash2, Edit2, Copy, Eye, Mail, Users } from 'lucide-react';
-import DashboardLayout from '@/components/DashboardLayout';
+
 import { X } from 'lucide-react';
 
 export default function ClientsPage() {
@@ -116,7 +116,7 @@ export default function ClientsPage() {
   ];
 
   return (
-    <DashboardLayout>
+    <>
       <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -313,6 +313,6 @@ export default function ClientsPage() {
           </div>
         </div>
       )}
-    </DashboardLayout>
+    </>
   );
 }

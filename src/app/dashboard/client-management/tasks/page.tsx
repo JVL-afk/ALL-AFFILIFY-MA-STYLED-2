@@ -6,7 +6,7 @@ import TaskCard from '@/components/crm/TaskCard';
 import TaskModal from '@/components/crm/TaskModal';
 import { Button } from '@/components/ui/button';
 import { Plus, Clock, CheckCircle, AlertCircle, ListTodo } from 'lucide-react';
-import DashboardLayout from '@/components/DashboardLayout';
+
 
 const TASK_STATUSES = ['To Do', 'In Progress', 'Review', 'Complete'] as const;
 
@@ -111,7 +111,7 @@ export default function TasksPage() {
   ];
 
   return (
-    <DashboardLayout>
+    <>
       <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -261,6 +261,6 @@ export default function TasksPage() {
         }}
         onSave={handleSaveTask}
       />
-    </DashboardLayout>
+    </>
   );
 }

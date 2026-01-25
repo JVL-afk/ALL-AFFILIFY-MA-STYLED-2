@@ -6,7 +6,7 @@ import LeadCard from '@/components/crm/LeadCard';
 import LeadModal from '@/components/crm/LeadModal';
 import { Button } from '@/components/ui/button';
 import { Plus, TrendingUp, Users, Target, CheckCircle } from 'lucide-react';
-import DashboardLayout from '@/components/DashboardLayout';
+
 
 const STATUSES = ['New', 'Contacted', 'Proposal Sent', 'Won', 'Lost'] as const;
 
@@ -105,7 +105,7 @@ export default function LeadsPage() {
   ];
 
   return (
-    <DashboardLayout>
+    <>
       <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -212,6 +212,6 @@ export default function LeadsPage() {
         }}
         onSave={handleSaveLead}
       />
-    </DashboardLayout>
+    </>
   );
 }

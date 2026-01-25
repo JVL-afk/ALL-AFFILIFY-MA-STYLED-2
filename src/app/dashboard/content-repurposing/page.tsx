@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import DashboardLayout from '@/components/DashboardLayout';
+
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -173,7 +173,7 @@ export default function ContentRepurposingPage() {
   };
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6">
         {/* Header */}
         <div className="mb-8">
@@ -323,6 +323,6 @@ export default function ContentRepurposingPage() {
           </div>
         </Card>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

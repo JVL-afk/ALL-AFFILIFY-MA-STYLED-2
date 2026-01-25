@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Edit2, Eye, DollarSign, FileText, Send } from 'lucide-react';
-import DashboardLayout from '@/components/DashboardLayout';
+
 import { formatDistanceToNow } from 'date-fns';
 
 export default function ProposalsPage() {
@@ -143,7 +143,7 @@ export default function ProposalsPage() {
   ];
 
   return (
-    <DashboardLayout>
+    <>
       <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -284,6 +284,6 @@ export default function ProposalsPage() {
         onSave={handleSaveProposal}
         onSend={handleSendProposal}
       />
-    </DashboardLayout>
+    </>
   );
 }

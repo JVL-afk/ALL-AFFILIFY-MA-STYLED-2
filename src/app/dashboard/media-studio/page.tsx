@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import DashboardLayout from '@/components/DashboardLayout';
+
 import MediaStudio from '@/components/MediaStudio';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -85,7 +85,7 @@ export default function MediaStudioPage() {
 
   if (!websiteId) {
     return (
-      <DashboardLayout>
+      <>
         <div className="space-y-6">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">Media Studio</h1>
@@ -109,13 +109,13 @@ export default function MediaStudioPage() {
             </div>
           </Card>
         </div>
-      </DashboardLayout>
+      </>
     );
   }
 
   if (isLoading) {
     return (
-      <DashboardLayout>
+      <>
         <div className="space-y-6">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">Media Studio</h1>
@@ -125,13 +125,13 @@ export default function MediaStudioPage() {
             <div className="animate-pulse text-slate-400">Loading website data...</div>
           </Card>
         </div>
-      </DashboardLayout>
+      </>
     );
   }
 
   if (!website) {
     return (
-      <DashboardLayout>
+      <>
         <div className="space-y-6">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">Media Studio</h1>
@@ -148,12 +148,12 @@ export default function MediaStudioPage() {
             </div>
           </Card>
         </div>
-      </DashboardLayout>
+      </>
     );
   }
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6">
         {/* Header */}
         <div className="mb-8">
@@ -224,6 +224,6 @@ export default function MediaStudioPage() {
           </div>
         </Card>
       </div>
-    </DashboardLayout>
+    </>
   );
 }
