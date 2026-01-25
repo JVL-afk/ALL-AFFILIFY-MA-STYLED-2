@@ -11,6 +11,49 @@ import { Plus, Trash2, Edit2, Copy, Eye, Mail, Users } from 'lucide-react';
 
 import { X } from 'lucide-react';
 
+// Helper function to get auth token from cookies or localStorage
+const getAuthToken = (): string | null => {
+  if (typeof document === 'undefined') return null;
+  
+  // Try to get from cookies first
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === 'token' || name === 'auth-token' || name === 'authToken') {
+      return decodeURIComponent(value);
+    }
+  }
+  
+  // Fallback to localStorage
+  if (typeof localStorage !== 'undefined') {
+    return localStorage.getItem('token') || localStorage.getItem('authToken') || null;
+  }
+  
+  return null;
+};
+
+// Helper function to make authenticated API calls
+const makeAuthenticatedRequest = async (
+  url: string,
+  options: RequestInit = {}
+) => {
+  const token = getAuthToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  } as Record<string, string>;
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  return fetch(url, {
+    ...options,
+    headers,
+    credentials: 'include', // Include cookies in the request
+  });
+};
+
 export default function ClientsPage() {
   const [clients, setClients] = useState<IClient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,8 +71,11 @@ export default function ClientsPage() {
   const fetchClients = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/crm/clients');
-      if (!response.ok) throw new Error('Failed to fetch clients');
+      const response = await makeAuthenticatedRequest('/api/crm/clients');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to fetch clients (${response.status})`);
+      }
       const data = await response.json();
       setClients(data);
       setError(null);
@@ -56,7 +102,7 @@ export default function ClientsPage() {
   const handleDeleteClient = async (clientId: string) => {
     if (!confirm('Are you sure you want to delete this client?')) return;
     try {
-      const response = await fetch(`/api/crm/clients?id=${clientId}`, {
+      const response = await makeAuthenticatedRequest(`/api/crm/clients?id=${clientId}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete client');
@@ -73,9 +119,8 @@ export default function ClientsPage() {
     try {
       if (selectedClient && selectedClient._id) {
         // Update existing client
-        const response = await fetch('/api/crm/clients', {
+        const response = await makeAuthenticatedRequest('/api/crm/clients', {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...formData, _id: selectedClient._id }),
         });
         if (!response.ok) throw new Error('Failed to update client');
@@ -83,9 +128,8 @@ export default function ClientsPage() {
         setClients(clients.map(c => (c._id?.toString() === selectedClient._id?.toString() ? updatedClient : c)));
       } else {
         // Create new client
-        const response = await fetch('/api/crm/clients', {
+        const response = await makeAuthenticatedRequest('/api/crm/clients', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData),
         });
         if (!response.ok) throw new Error('Failed to create client');

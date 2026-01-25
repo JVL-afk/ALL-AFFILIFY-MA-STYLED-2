@@ -10,6 +10,49 @@ import { Plus, Clock, CheckCircle, AlertCircle, ListTodo } from 'lucide-react';
 
 const TASK_STATUSES = ['To Do', 'In Progress', 'Review', 'Complete'] as const;
 
+// Helper function to get auth token from cookies or localStorage
+const getAuthToken = (): string | null => {
+  if (typeof document === 'undefined') return null;
+  
+  // Try to get from cookies first
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === 'token' || name === 'auth-token' || name === 'authToken') {
+      return decodeURIComponent(value);
+    }
+  }
+  
+  // Fallback to localStorage
+  if (typeof localStorage !== 'undefined') {
+    return localStorage.getItem('token') || localStorage.getItem('authToken') || null;
+  }
+  
+  return null;
+};
+
+// Helper function to make authenticated API calls
+const makeAuthenticatedRequest = async (
+  url: string,
+  options: RequestInit = {}
+) => {
+  const token = getAuthToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  } as Record<string, string>;
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  return fetch(url, {
+    ...options,
+    headers,
+    credentials: 'include', // Include cookies in the request
+  });
+};
+
 export default function TasksPage() {
   const [tasks, setTasks] = useState<ITask[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,8 +69,11 @@ export default function TasksPage() {
   const fetchTasks = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/crm/tasks');
-      if (!response.ok) throw new Error('Failed to fetch tasks');
+      const response = await makeAuthenticatedRequest('/api/crm/tasks');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to fetch tasks (${response.status})`);
+      }
       const data = await response.json();
       setTasks(data);
       setError(null);
@@ -52,7 +98,7 @@ export default function TasksPage() {
   const handleDeleteTask = async (taskId: string) => {
     if (!confirm('Are you sure you want to delete this task?')) return;
     try {
-      const response = await fetch(`/api/crm/tasks?id=${taskId}`, {
+      const response = await makeAuthenticatedRequest(`/api/crm/tasks?id=${taskId}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete task');
@@ -68,9 +114,8 @@ export default function TasksPage() {
     try {
       if (selectedTask && selectedTask._id) {
         // Update existing task
-        const response = await fetch('/api/crm/tasks', {
+        const response = await makeAuthenticatedRequest('/api/crm/tasks', {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...taskData, _id: selectedTask._id }),
         });
         if (!response.ok) throw new Error('Failed to update task');
@@ -78,9 +123,8 @@ export default function TasksPage() {
         setTasks(tasks.map(t => (t._id?.toString() === selectedTask._id?.toString() ? updatedTask : t)));
       } else {
         // Create new task
-        const response = await fetch('/api/crm/tasks', {
+        const response = await makeAuthenticatedRequest('/api/crm/tasks', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(taskData),
         });
         if (!response.ok) throw new Error('Failed to create task');

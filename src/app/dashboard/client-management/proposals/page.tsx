@@ -10,6 +10,49 @@ import { Plus, Trash2, Edit2, Eye, DollarSign, FileText, Send } from 'lucide-rea
 
 import { formatDistanceToNow } from 'date-fns';
 
+// Helper function to get auth token from cookies or localStorage
+const getAuthToken = (): string | null => {
+  if (typeof document === 'undefined') return null;
+  
+  // Try to get from cookies first
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === 'token' || name === 'auth-token' || name === 'authToken') {
+      return decodeURIComponent(value);
+    }
+  }
+  
+  // Fallback to localStorage
+  if (typeof localStorage !== 'undefined') {
+    return localStorage.getItem('token') || localStorage.getItem('authToken') || null;
+  }
+  
+  return null;
+};
+
+// Helper function to make authenticated API calls
+const makeAuthenticatedRequest = async (
+  url: string,
+  options: RequestInit = {}
+) => {
+  const token = getAuthToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  } as Record<string, string>;
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  return fetch(url, {
+    ...options,
+    headers,
+    credentials: 'include', // Include cookies in the request
+  });
+};
+
 export default function ProposalsPage() {
   const [proposals, setProposals] = useState<IProposal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,8 +69,11 @@ export default function ProposalsPage() {
   const fetchProposals = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/crm/proposals');
-      if (!response.ok) throw new Error('Failed to fetch proposals');
+      const response = await makeAuthenticatedRequest('/api/crm/proposals');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to fetch proposals (${response.status})`);
+      }
       const data = await response.json();
       setProposals(data);
       setError(null);
@@ -52,7 +98,7 @@ export default function ProposalsPage() {
   const handleDeleteProposal = async (proposalId: string) => {
     if (!confirm('Are you sure you want to delete this proposal?')) return;
     try {
-      const response = await fetch(`/api/crm/proposals?id=${proposalId}`, {
+      const response = await makeAuthenticatedRequest(`/api/crm/proposals?id=${proposalId}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete proposal');
@@ -68,9 +114,8 @@ export default function ProposalsPage() {
     try {
       if (selectedProposal && selectedProposal._id) {
         // Update existing proposal
-        const response = await fetch('/api/crm/proposals', {
+        const response = await makeAuthenticatedRequest('/api/crm/proposals', {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...proposalData, _id: selectedProposal._id }),
         });
         if (!response.ok) throw new Error('Failed to update proposal');
@@ -78,9 +123,8 @@ export default function ProposalsPage() {
         setProposals(proposals.map(p => (p._id?.toString() === selectedProposal._id?.toString() ? updatedProposal : p)));
       } else {
         // Create new proposal
-        const response = await fetch('/api/crm/proposals', {
+        const response = await makeAuthenticatedRequest('/api/crm/proposals', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(proposalData),
         });
         if (!response.ok) throw new Error('Failed to create proposal');
@@ -98,9 +142,8 @@ export default function ProposalsPage() {
 
   const handleSendProposal = async (proposal: IProposal) => {
     try {
-      const response = await fetch('/api/crm/proposals', {
+      const response = await makeAuthenticatedRequest('/api/crm/proposals', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...proposal, _id: proposal._id, status: 'Sent' }),
       });
       if (!response.ok) throw new Error('Failed to send proposal');

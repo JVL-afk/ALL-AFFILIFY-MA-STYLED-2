@@ -10,6 +10,49 @@ import { Plus, TrendingUp, Users, Target, CheckCircle } from 'lucide-react';
 
 const STATUSES = ['New', 'Contacted', 'Proposal Sent', 'Won', 'Lost'] as const;
 
+// Helper function to get auth token from cookies or localStorage
+const getAuthToken = (): string | null => {
+  if (typeof document === 'undefined') return null;
+  
+  // Try to get from cookies first
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === 'token' || name === 'auth-token' || name === 'authToken') {
+      return decodeURIComponent(value);
+    }
+  }
+  
+  // Fallback to localStorage
+  if (typeof localStorage !== 'undefined') {
+    return localStorage.getItem('token') || localStorage.getItem('authToken') || null;
+  }
+  
+  return null;
+};
+
+// Helper function to make authenticated API calls
+const makeAuthenticatedRequest = async (
+  url: string,
+  options: RequestInit = {}
+) => {
+  const token = getAuthToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  } as Record<string, string>;
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  return fetch(url, {
+    ...options,
+    headers,
+    credentials: 'include', // Include cookies in the request
+  });
+};
+
 export default function LeadsPage() {
   const [leads, setLeads] = useState<ILead[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,8 +68,11 @@ export default function LeadsPage() {
   const fetchLeads = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/crm/leads');
-      if (!response.ok) throw new Error('Failed to fetch leads');
+      const response = await makeAuthenticatedRequest('/api/crm/leads');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to fetch leads (${response.status})`);
+      }
       const data = await response.json();
       setLeads(data);
       setError(null);
@@ -51,7 +97,7 @@ export default function LeadsPage() {
   const handleDeleteLead = async (leadId: string) => {
     if (!confirm('Are you sure you want to delete this lead?')) return;
     try {
-      const response = await fetch(`/api/crm/leads?id=${leadId}`, {
+      const response = await makeAuthenticatedRequest(`/api/crm/leads?id=${leadId}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete lead');
@@ -67,9 +113,8 @@ export default function LeadsPage() {
     try {
       if (selectedLead && selectedLead._id) {
         // Update existing lead
-        const response = await fetch('/api/crm/leads', {
+        const response = await makeAuthenticatedRequest('/api/crm/leads', {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...leadData, _id: selectedLead._id }),
         });
         if (!response.ok) throw new Error('Failed to update lead');
@@ -77,9 +122,8 @@ export default function LeadsPage() {
         setLeads(leads.map(l => (l._id?.toString() === selectedLead._id?.toString() ? updatedLead : l)));
       } else {
         // Create new lead
-        const response = await fetch('/api/crm/leads', {
+        const response = await makeAuthenticatedRequest('/api/crm/leads', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(leadData),
         });
         if (!response.ok) throw new Error('Failed to create lead');
