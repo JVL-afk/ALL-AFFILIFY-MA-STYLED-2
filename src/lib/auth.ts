@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 import { NextRequest, NextResponse } from 'next/server'
 import { ObjectId } from 'mongodb'
 import { connectToDatabase } from './mongodb'
+import { logger } from './debug-logger'
 
 export interface User {
   _id: ObjectId
@@ -240,24 +241,106 @@ const checkPlan = (requiredPlan: 'premium' | 'enterprise') => (handler: Authenti
 export const requirePremium = checkPlan('premium')
 export const requireEnterprise = checkPlan('enterprise')
 
+/**
+ * REVOLUTIONARY FIX: Enhanced verifyAuth with comprehensive logging
+ * Now checks BOTH Authorization header AND cookies for the JWT token
+ * Provides hyper-detailed logging at every step
+ */
 export async function verifyAuth(request: NextRequest) {
+  const requestId = Math.random().toString(36).substring(7);
+  
   try {
-    const token = request.cookies.get('token')?.value
-    if (!token) {
-      return { success: false, error: 'No token provided' }
+    logger.debug('AUTH', 'verifyAuth_START', { requestId, url: request.url });
+
+    // STEP 1: Extract token from multiple sources
+    let token: string | null = null;
+    let tokenSource = 'UNKNOWN';
+
+    // Check Authorization header (Bearer token) - PRIMARY SOURCE
+    const authHeader = request.headers.get('Authorization');
+    logger.debug('AUTH', 'CHECK_AUTH_HEADER', { requestId, authHeader: authHeader ? 'Present' : 'Missing' });
+    
+    if (authHeader?.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
+      tokenSource = 'AUTHORIZATION_HEADER';
+      logger.debug('AUTH', 'TOKEN_FOUND_IN_HEADER', { requestId, tokenLength: token.length });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
-    const { db } = await connectToDatabase()
-    const user = await db.collection('users').findOne({ _id: new ObjectId(decoded.userId) })
+    // Check cookies (multiple possible names) - FALLBACK SOURCES
+    if (!token) {
+      logger.debug('AUTH', 'CHECKING_COOKIES', { requestId });
+      
+      const cookieNames = ['token', 'auth-token', 'authToken', 'jwt'];
+      for (const cookieName of cookieNames) {
+        const cookieValue = request.cookies.get(cookieName)?.value;
+        if (cookieValue) {
+          token = cookieValue;
+          tokenSource = `COOKIE_${cookieName.toUpperCase()}`;
+          logger.debug('AUTH', `TOKEN_FOUND_IN_COOKIE_${cookieName.toUpperCase()}`, { requestId, tokenLength: token.length });
+          break;
+        }
+      }
+    }
+
+    // STEP 2: Validate token existence
+    if (!token) {
+      logger.warn('AUTH', 'NO_TOKEN_FOUND', { requestId, authHeader: !!authHeader, cookies: request.cookies.getAll().map(c => c.name) });
+      return { success: false, error: 'No token provided', details: { requestId, tokenSource } };
+    }
+
+    logger.debug('AUTH', 'TOKEN_EXTRACTED', { requestId, tokenSource, tokenLength: token.length });
+
+    // STEP 3: Verify JWT signature
+    logger.debug('AUTH', 'VERIFYING_JWT_SIGNATURE', { requestId, tokenLength: token.length });
+    
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+      logger.debug('AUTH', 'JWT_SIGNATURE_VALID', { requestId, userId: decoded.userId });
+    } catch (jwtError: any) {
+      logger.error('AUTH', 'JWT_SIGNATURE_INVALID', { requestId, error: jwtError.message }, jwtError);
+      return { success: false, error: 'Invalid token', details: { requestId, tokenSource, jwtError: jwtError.message } };
+    }
+
+    // STEP 4: Extract userId from decoded token
+    const userId = decoded.userId;
+    if (!userId) {
+      logger.error('AUTH', 'NO_USER_ID_IN_TOKEN', { requestId, decodedKeys: Object.keys(decoded) });
+      return { success: false, error: 'Invalid token structure', details: { requestId, tokenSource } };
+    }
+
+    logger.debug('AUTH', 'USER_ID_EXTRACTED', { requestId, userId });
+
+    // STEP 5: Fetch user from database
+    logger.debug('AUTH', 'FETCHING_USER_FROM_DB', { requestId, userId });
+    
+    const { db } = await connectToDatabase();
+    logger.debug('AUTH', 'MONGODB_CONNECTED', { requestId });
+
+    const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
     
     if (!user) {
-      return { success: false, error: 'User not found' }
+      logger.warn('AUTH', 'USER_NOT_FOUND_IN_DB', { requestId, userId });
+      return { success: false, error: 'User not found', details: { requestId, tokenSource, userId } };
     }
 
-    return { success: true, user }
-  } catch (error) {
-    return { success: false, error: 'Invalid token' }
+    logger.debug('AUTH', 'USER_FOUND_IN_DB', { requestId, userId, userEmail: user.email, userPlan: user.plan });
+
+    // STEP 6: Return authenticated user
+    logger.info('AUTH', 'AUTHENTICATION_SUCCESS', { requestId, userId, userEmail: user.email, tokenSource });
+    
+    return { 
+      success: true, 
+      user,
+      details: { requestId, tokenSource, userId }
+    };
+
+  } catch (error: any) {
+    logger.error('AUTH', 'AUTHENTICATION_FAILED', { requestId, error: error.message }, error);
+    return { 
+      success: false, 
+      error: 'Authentication failed',
+      details: { requestId, errorMessage: error.message }
+    };
   }
 }
-

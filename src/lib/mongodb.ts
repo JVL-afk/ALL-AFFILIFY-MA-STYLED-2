@@ -1,4 +1,5 @@
 import { MongoClient, Db, MongoClientOptions } from 'mongodb'
+import { logger } from './debug-logger'
 
 // Check for MongoDB URI
 if (!process.env.MONGODB_URI) {
@@ -32,10 +33,12 @@ const createClient = () => {
   return newClient.connect()
     .then(client => {
       console.log('MongoDB client connected successfully');
+      logger.info('MONGODB', 'CLIENT_CONNECTED', { timestamp: new Date().toISOString() });
       return client;
     })
     .catch(err => {
       console.error('Failed to connect MongoDB client:', err);
+      logger.error('MONGODB', 'CLIENT_CONNECTION_FAILED', { error: err.message }, err);
       throw err;
     });
 };
@@ -61,29 +64,84 @@ if (process.env.NODE_ENV === 'development') {
   clientPromise = createClient();
 }
 
+/**
+ * Automatically initialize required CRM collections if they don't exist
+ */
+async function initializeCRMCollections(db: Db): Promise<void> {
+  const requiredCollections = ['leads', 'tasks', 'proposals', 'clients'];
+  
+  try {
+    logger.debug('MONGODB', 'CHECKING_CRM_COLLECTIONS', { collections: requiredCollections });
+    
+    const existingCollections = await db.listCollections().toArray();
+    const existingNames = new Set(existingCollections.map(c => c.name));
+    
+    logger.debug('MONGODB', 'EXISTING_COLLECTIONS', { collections: Array.from(existingNames) });
+    
+    for (const collectionName of requiredCollections) {
+      if (!existingNames.has(collectionName)) {
+        logger.info('MONGODB', 'CREATING_COLLECTION', { collectionName });
+        
+        // Create collection with schema validation
+        await db.createCollection(collectionName, {
+          validator: {
+            $jsonSchema: {
+              bsonType: 'object',
+              required: ['userId', 'createdAt'],
+              properties: {
+                _id: { bsonType: 'objectId' },
+                userId: { bsonType: 'objectId', description: 'User ID' },
+                createdAt: { bsonType: 'date', description: 'Creation timestamp' },
+                updatedAt: { bsonType: 'date', description: 'Last update timestamp' },
+              }
+            }
+          }
+        });
+        
+        // Create indexes for better query performance
+        await db.collection(collectionName).createIndex({ userId: 1 });
+        await db.collection(collectionName).createIndex({ createdAt: -1 });
+        
+        logger.info('MONGODB', 'COLLECTION_CREATED_SUCCESS', { collectionName });
+      } else {
+        logger.debug('MONGODB', 'COLLECTION_EXISTS', { collectionName });
+      }
+    }
+  } catch (error: any) {
+    logger.warn('MONGODB', 'CRM_COLLECTION_INITIALIZATION_WARNING', { error: error.message });
+    // Don't throw - this is not critical
+  }
+}
+
 // Function to connect to the database with detailed error handling
 export async function connectToDatabase(): Promise<{ client: MongoClient; db: Db }> {
   try {
-    console.log('Connecting to database...');
+    logger.debug('MONGODB', 'CONNECTING_TO_DATABASE', { timestamp: new Date().toISOString() });
     const client = await clientPromise;
     
     // Get database name from URI or use default
     const dbName = uri.split('/').pop()?.split('?')[0] || 'affilify';
-    console.log(`Using database: ${dbName}`);
+    logger.debug('MONGODB', 'DATABASE_NAME_RESOLVED', { dbName });
     
     const db = client.db(dbName);
     
     // Test the connection with a simple command
-    console.log('Testing database connection...');
+    logger.debug('MONGODB', 'TESTING_CONNECTION', {});
     await db.command({ ping: 1 });
-    console.log('Database connection successful');
+    logger.debug('MONGODB', 'CONNECTION_TEST_PASSED', {});
     
+    // Initialize CRM collections if needed
+    await initializeCRMCollections(db);
+    
+    logger.debug('MONGODB', 'DATABASE_CONNECTION_SUCCESSFUL', { dbName });
     return { client, db };
-  } catch (error) {
+  } catch (error: any) {
+    logger.error('MONGODB', 'CONNECTION_ERROR', { error: error.message }, error);
     console.error('Error connecting to database:', error);
     
     // Attempt to reconnect once
     try {
+      logger.info('MONGODB', 'ATTEMPTING_RECONNECTION', {});
       console.log('Attempting to reconnect...');
       client = new MongoClient(uri, options);
       const reconnectPromise = client.connect();
@@ -100,10 +158,15 @@ export async function connectToDatabase(): Promise<{ client: MongoClient; db: Db
       
       // Verify reconnection
       await db.command({ ping: 1 });
+      logger.info('MONGODB', 'RECONNECTION_SUCCESSFUL', { dbName });
       console.log('Reconnection successful');
       
+      // Initialize CRM collections on reconnection
+      await initializeCRMCollections(db);
+      
       return { client: reconnectedClient, db };
-    } catch (reconnectError) {
+    } catch (reconnectError: any) {
+      logger.error('MONGODB', 'RECONNECTION_FAILED', { error: reconnectError.message }, reconnectError);
       console.error('Reconnection failed:', reconnectError);
       throw new Error(`Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
@@ -113,12 +176,13 @@ export async function connectToDatabase(): Promise<{ client: MongoClient; db: Db
 // Function to check database connectivity
 export async function checkDatabaseConnection(): Promise<boolean> {
   try {
-    console.log('Checking database connection...');
+    logger.debug('MONGODB', 'CHECKING_CONNECTION', {});
     const { db } = await connectToDatabase();
     await db.command({ ping: 1 });
-    console.log('Database connection check passed');
+    logger.info('MONGODB', 'CONNECTION_CHECK_PASSED', {});
     return true;
-  } catch (error) {
+  } catch (error: any) {
+    logger.error('MONGODB', 'CONNECTION_CHECK_FAILED', { error: error.message }, error);
     console.error('Database connection check failed:', error);
     return false;
   }
