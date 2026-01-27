@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Lead, { ILead } from '@/lib/models/Lead';
 import { verifyAuth } from '@/lib/auth';
 import { logger } from '@/lib/debug-logger';
+import { connectMongoose, isMongooseConnected } from '@/lib/mongoose-connection';
 import mongoose from 'mongoose';
 
 // GET /api/crm/leads - Get all leads for the authenticated user
@@ -10,6 +11,11 @@ export async function GET(request: NextRequest) {
   
   try {
     logger.info('CRM_LEADS_API', 'GET_REQUEST_START', { requestId, url: request.url });
+    
+    // Ensure Mongoose is connected
+    logger.debug('CRM_LEADS_API', 'ENSURING_MONGOOSE_CONNECTION', { requestId, isConnected: isMongooseConnected() });
+    await connectMongoose();
+    logger.debug('CRM_LEADS_API', 'MONGOOSE_CONNECTION_VERIFIED', { requestId });
     
     const authResult = await verifyAuth(request);
     logger.debug('CRM_LEADS_API', 'AUTH_RESULT', { requestId, success: authResult.success, error: authResult.error, details: authResult.details });
@@ -49,8 +55,13 @@ export async function POST(request: NextRequest) {
   try {
     logger.info('CRM_LEADS_API', 'POST_REQUEST_START', { requestId });
     
+    // Ensure Mongoose is connected
+    logger.debug('CRM_LEADS_API', 'ENSURING_MONGOOSE_CONNECTION_POST', { requestId, isConnected: isMongooseConnected() });
+    await connectMongoose();
+    logger.debug('CRM_LEADS_API', 'MONGOOSE_CONNECTION_VERIFIED_POST', { requestId });
+    
     const authResult = await verifyAuth(request);
-    logger.debug('CRM_LEADS_API', 'AUTH_RESULT', { requestId, success: authResult.success });
+    logger.debug('CRM_LEADS_API', 'AUTH_RESULT_POST', { requestId, success: authResult.success });
     
     if (!authResult.success || !authResult.user) {
       logger.warn('CRM_LEADS_API', 'AUTHENTICATION_FAILED_POST', { requestId, error: authResult.error });
@@ -67,12 +78,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     logger.debug('CRM_LEADS_API', 'REQUEST_BODY_PARSED', { requestId, bodyKeys: Object.keys(body) });
     
-    const newLead: ILead = new Lead({
+    logger.debug('CRM_LEADS_API', 'CREATING_LEAD_DOCUMENT', { requestId, userId, leadName: body.name });
+    
+    const newLead = new Lead({
       ...body,
       userId: new mongoose.Types.ObjectId(userId),
     });
 
+    logger.debug('CRM_LEADS_API', 'SAVING_LEAD_TO_DATABASE', { requestId, leadId: newLead._id });
     await newLead.save();
+    
     logger.info('CRM_LEADS_API', 'LEAD_CREATED_SUCCESS', { requestId, leadId: newLead._id, userId });
     
     return NextResponse.json(newLead, { status: 201 });
@@ -93,8 +108,13 @@ export async function PUT(request: NextRequest) {
   try {
     logger.info('CRM_LEADS_API', 'PUT_REQUEST_START', { requestId });
     
+    // Ensure Mongoose is connected
+    logger.debug('CRM_LEADS_API', 'ENSURING_MONGOOSE_CONNECTION_PUT', { requestId, isConnected: isMongooseConnected() });
+    await connectMongoose();
+    logger.debug('CRM_LEADS_API', 'MONGOOSE_CONNECTION_VERIFIED_PUT', { requestId });
+    
     const authResult = await verifyAuth(request);
-    logger.debug('CRM_LEADS_API', 'AUTH_RESULT', { requestId, success: authResult.success });
+    logger.debug('CRM_LEADS_API', 'AUTH_RESULT_PUT', { requestId, success: authResult.success });
     
     if (!authResult.success || !authResult.user) {
       logger.warn('CRM_LEADS_API', 'AUTHENTICATION_FAILED_PUT', { requestId, error: authResult.error });
@@ -117,6 +137,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ message: 'Lead ID is required for update' }, { status: 400 });
     }
 
+    logger.debug('CRM_LEADS_API', 'UPDATING_LEAD', { requestId, leadId: _id, userId });
     const updatedLead = await Lead.findOneAndUpdate(
       { _id: new mongoose.Types.ObjectId(_id), userId: new mongoose.Types.ObjectId(userId) },
       updateData,
@@ -147,8 +168,13 @@ export async function DELETE(request: NextRequest) {
   try {
     logger.info('CRM_LEADS_API', 'DELETE_REQUEST_START', { requestId });
     
+    // Ensure Mongoose is connected
+    logger.debug('CRM_LEADS_API', 'ENSURING_MONGOOSE_CONNECTION_DELETE', { requestId, isConnected: isMongooseConnected() });
+    await connectMongoose();
+    logger.debug('CRM_LEADS_API', 'MONGOOSE_CONNECTION_VERIFIED_DELETE', { requestId });
+    
     const authResult = await verifyAuth(request);
-    logger.debug('CRM_LEADS_API', 'AUTH_RESULT', { requestId, success: authResult.success });
+    logger.debug('CRM_LEADS_API', 'AUTH_RESULT_DELETE', { requestId, success: authResult.success });
     
     if (!authResult.success || !authResult.user) {
       logger.warn('CRM_LEADS_API', 'AUTHENTICATION_FAILED_DELETE', { requestId, error: authResult.error });
@@ -171,6 +197,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ message: 'Lead ID is required for deletion' }, { status: 400 });
     }
 
+    logger.debug('CRM_LEADS_API', 'DELETING_LEAD', { requestId, leadId: id, userId });
     const deletedLead = await Lead.findOneAndDelete({ 
       _id: new mongoose.Types.ObjectId(id), 
       userId: new mongoose.Types.ObjectId(userId) 

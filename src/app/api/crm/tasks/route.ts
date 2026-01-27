@@ -1,33 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Task, { ITask } from '@/lib/models/Task';
 import { verifyAuth } from '@/lib/auth';
+import { logger } from '@/lib/debug-logger';
+import { connectMongoose, isMongooseConnected } from '@/lib/mongoose-connection';
 import mongoose from 'mongoose';
 
 // GET /api/crm/tasks - Get all tasks for the authenticated user
 export async function GET(request: NextRequest) {
+  const requestId = Math.random().toString(36).substring(7);
+  
   try {
+    logger.info('CRM_TASKS_API', 'GET_REQUEST_START', { requestId });
+    await connectMongoose();
+    
     const authResult = await verifyAuth(request);
     if (!authResult.success || !authResult.user) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      logger.warn('CRM_TASKS_API', 'AUTHENTICATION_FAILED', { requestId });
+      return NextResponse.json({ message: 'Unauthorized', requestId }, { status: 401 });
     }
-    const userId = authResult.user.id;
+    const userId = authResult.user.id || authResult.user._id?.toString();
 
     const tasks = await Task.find({ userId: new mongoose.Types.ObjectId(userId) }).sort({ createdAt: -1 });
+    logger.info('CRM_TASKS_API', 'TASKS_FETCHED_SUCCESS', { requestId, taskCount: tasks.length });
     return NextResponse.json(tasks);
-  } catch (error) {
-    console.error('Error fetching tasks:', error);
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+  } catch (error: any) {
+    logger.error('CRM_TASKS_API', 'GET_REQUEST_ERROR', { requestId, error: error.message }, error);
+    return NextResponse.json({ message: 'Internal Server Error', requestId }, { status: 500 });
   }
 }
 
 // POST /api/crm/tasks - Create a new task
 export async function POST(request: NextRequest) {
+  const requestId = Math.random().toString(36).substring(7);
+  
   try {
+    logger.info('CRM_TASKS_API', 'POST_REQUEST_START', { requestId });
+    await connectMongoose();
+    
     const authResult = await verifyAuth(request);
     if (!authResult.success || !authResult.user) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      logger.warn('CRM_TASKS_API', 'AUTHENTICATION_FAILED_POST', { requestId });
+      return NextResponse.json({ message: 'Unauthorized', requestId }, { status: 401 });
     }
-    const userId = authResult.user.id;
+    const userId = authResult.user.id || authResult.user._id?.toString();
 
     const body = await request.json();
     const newTask: ITask = new Task({
@@ -36,21 +51,28 @@ export async function POST(request: NextRequest) {
     });
 
     await newTask.save();
+    logger.info('CRM_TASKS_API', 'TASK_CREATED_SUCCESS', { requestId, taskId: newTask._id });
     return NextResponse.json(newTask, { status: 201 });
-  } catch (error) {
-    console.error('Error creating task:', error);
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+  } catch (error: any) {
+    logger.error('CRM_TASKS_API', 'POST_REQUEST_ERROR', { requestId, error: error.message }, error);
+    return NextResponse.json({ message: 'Internal Server Error', requestId }, { status: 500 });
   }
 }
 
 // PUT /api/crm/tasks - Update an existing task
 export async function PUT(request: NextRequest) {
+  const requestId = Math.random().toString(36).substring(7);
+  
   try {
+    logger.info('CRM_TASKS_API', 'PUT_REQUEST_START', { requestId });
+    await connectMongoose();
+    
     const authResult = await verifyAuth(request);
     if (!authResult.success || !authResult.user) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      logger.warn('CRM_TASKS_API', 'AUTHENTICATION_FAILED_PUT', { requestId });
+      return NextResponse.json({ message: 'Unauthorized', requestId }, { status: 401 });
     }
-    const userId = authResult.user.id;
+    const userId = authResult.user.id || authResult.user._id?.toString();
 
     const body = await request.json();
     const { _id, ...updateData } = body;
@@ -66,24 +88,32 @@ export async function PUT(request: NextRequest) {
     );
 
     if (!updatedTask) {
+      logger.warn('CRM_TASKS_API', 'TASK_NOT_FOUND', { requestId, taskId: _id });
       return NextResponse.json({ message: 'Task not found or unauthorized' }, { status: 404 });
     }
 
+    logger.info('CRM_TASKS_API', 'TASK_UPDATED_SUCCESS', { requestId, taskId: _id });
     return NextResponse.json(updatedTask);
-  } catch (error) {
-    console.error('Error updating task:', error);
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+  } catch (error: any) {
+    logger.error('CRM_TASKS_API', 'PUT_REQUEST_ERROR', { requestId, error: error.message }, error);
+    return NextResponse.json({ message: 'Internal Server Error', requestId }, { status: 500 });
   }
 }
 
 // DELETE /api/crm/tasks - Delete a task
 export async function DELETE(request: NextRequest) {
+  const requestId = Math.random().toString(36).substring(7);
+  
   try {
+    logger.info('CRM_TASKS_API', 'DELETE_REQUEST_START', { requestId });
+    await connectMongoose();
+    
     const authResult = await verifyAuth(request);
     if (!authResult.success || !authResult.user) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      logger.warn('CRM_TASKS_API', 'AUTHENTICATION_FAILED_DELETE', { requestId });
+      return NextResponse.json({ message: 'Unauthorized', requestId }, { status: 401 });
     }
-    const userId = authResult.user.id;
+    const userId = authResult.user.id || authResult.user._id?.toString();
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -98,12 +128,14 @@ export async function DELETE(request: NextRequest) {
     });
 
     if (!deletedTask) {
+      logger.warn('CRM_TASKS_API', 'TASK_NOT_FOUND_FOR_DELETE', { requestId, taskId: id });
       return NextResponse.json({ message: 'Task not found or unauthorized' }, { status: 404 });
     }
 
+    logger.info('CRM_TASKS_API', 'TASK_DELETED_SUCCESS', { requestId, taskId: id });
     return NextResponse.json({ message: 'Task deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting task:', error);
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+  } catch (error: any) {
+    logger.error('CRM_TASKS_API', 'DELETE_REQUEST_ERROR', { requestId, error: error.message }, error);
+    return NextResponse.json({ message: 'Internal Server Error', requestId }, { status: 500 });
   }
 }
