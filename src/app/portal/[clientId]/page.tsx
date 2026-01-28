@@ -1,42 +1,235 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { IClient } from '@/lib/models/Client';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { BarChart3, FileText, CheckCircle, Clock, TrendingUp, Share2, Download } from 'lucide-react';
+import { format } from 'date-fns';
+import { AlertCircle, FileText, CheckCircle, Clock, Download, Eye, MessageSquare, Settings, LogOut, Bell, Search, Filter, Calendar, DollarSign, TrendingUp } from 'lucide-react';
 
-export default function ClientPortalPage() {
+interface Proposal {
+  _id: string;
+  title: string;
+  description: string;
+  amount: number;
+  currency: string;
+  status: 'draft' | 'sent' | 'viewed' | 'accepted' | 'rejected' | 'expired';
+  validUntil: string;
+  createdAt: string;
+  viewedAt?: string;
+  acceptedAt?: string;
+}
+
+interface Task {
+  _id: string;
+  title: string;
+  description: string;
+  status: 'todo' | 'in-progress' | 'completed' | 'blocked';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  dueDate: string;
+  createdAt: string;
+}
+
+interface ClientPortalData {
+  clientId: string;
+  clientName: string;
+  clientEmail: string;
+  proposals: Proposal[];
+  tasks: Task[];
+  messages: number;
+  lastUpdated: string;
+}
+
+const ClientPortal: React.FC = () => {
   const params = useParams();
-  const clientId = params.clientId as string;
-  const [client, setClient] = useState<IClient | null>(null);
+  const clientId = params?.clientId as string;
+  
+  const [portalData, setPortalData] = useState<ClientPortalData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'tasks' | 'documents'>('overview');
+  const [activeTab, setActiveTab] = useState<'proposals' | 'tasks' | 'messages'>('proposals');
+  const [filterStatus, setFilterStatus] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showNotifications, setShowNotifications] = useState(false);
 
-  useEffect(() => {
-    fetchClientData();
-  }, [clientId]);
-
-  const fetchClientData = async () => {
+  // Fetch portal data
+  const fetchPortalData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
     try {
-      setLoading(true);
-      // In a real implementation, this would fetch the client data by portalId
-      // For now, we'll show a placeholder
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load portal');
+      const response = await fetch(`/api/crm/portal/${clientId}`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          setError('Client portal not found');
+        } else {
+          const data = await response.json();
+          setError(data.message || 'Failed to load portal');
+        }
+        setPortalData(null);
+        return;
+      }
+
+      const data = await response.json();
+      setPortalData(data);
+    } catch (err: any) {
+      setError(err.message || 'An error occurred while loading the portal');
+      setPortalData(null);
     } finally {
       setLoading(false);
+    }
+  }, [clientId]);
+
+  // Initial load
+  useEffect(() => {
+    if (clientId) {
+      fetchPortalData();
+    }
+  }, [clientId, fetchPortalData]);
+
+  // Handle proposal acceptance
+  const handleAcceptProposal = async (proposalId: string) => {
+    try {
+      const response = await fetch(`/api/crm/portal/${clientId}/accept-proposal`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ proposalId }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.message || 'Failed to accept proposal');
+        return;
+      }
+
+      await fetchPortalData();
+    } catch (err: any) {
+      setError(err.message || 'An error occurred');
+    }
+  };
+
+  // Handle proposal rejection
+  const handleRejectProposal = async (proposalId: string) => {
+    try {
+      const response = await fetch(`/api/crm/portal/${clientId}/reject-proposal`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ proposalId }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.message || 'Failed to reject proposal');
+        return;
+      }
+
+      await fetchPortalData();
+    } catch (err: any) {
+      setError(err.message || 'An error occurred');
+    }
+  };
+
+  // Handle proposal download
+  const handleDownloadProposal = async (proposal: Proposal) => {
+    try {
+      const response = await fetch(`/api/crm/portal/${clientId}/download-proposal?proposalId=${proposal._id}`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download proposal');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${proposal.title.replace(/\s+/g, '-')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err: any) {
+      setError(err.message || 'Failed to download proposal');
+    }
+  };
+
+  // Get status color
+  const getStatusColor = (status: string, type: 'proposal' | 'task' = 'proposal') => {
+    if (type === 'proposal') {
+      switch (status) {
+        case 'accepted':
+          return 'bg-green-100 text-green-800';
+        case 'sent':
+        case 'viewed':
+          return 'bg-blue-100 text-blue-800';
+        case 'rejected':
+          return 'bg-red-100 text-red-800';
+        case 'expired':
+          return 'bg-gray-100 text-gray-800';
+        default:
+          return 'bg-yellow-100 text-yellow-800';
+      }
+    } else {
+      switch (status) {
+        case 'completed':
+          return 'bg-green-100 text-green-800';
+        case 'in-progress':
+          return 'bg-blue-100 text-blue-800';
+        case 'blocked':
+          return 'bg-red-100 text-red-800';
+        default:
+          return 'bg-gray-100 text-gray-800';
+      }
+    }
+  };
+
+  // Get priority color
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'critical':
+        return 'text-red-600';
+      case 'high':
+        return 'text-orange-600';
+      case 'medium':
+        return 'text-yellow-600';
+      default:
+        return 'text-green-600';
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading your affiliate portal...</div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+          <p className="text-gray-600">Loading your portal...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !portalData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+          <AlertCircle className="text-red-600 mx-auto mb-4" size={48} />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Portal Error</h2>
+          <p className="text-gray-600 text-center mb-6">{error || 'Unable to load your portal'}</p>
+          <button
+            onClick={() => fetchPortalData()}
+            className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
