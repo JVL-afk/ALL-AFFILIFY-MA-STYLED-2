@@ -1,7 +1,8 @@
+'use server';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { connectToDatabase } from '../../../../lib/mongodb';
-import { VideoAsset, VideoScript, ContentRepurposing } from '../../../../lib/models/MultimediaAssets';
 import { ObjectId } from 'mongodb';
 import jwt from 'jsonwebtoken';
 
@@ -172,17 +173,48 @@ function generateFallbackVideo(
  */
 export async function POST(request: NextRequest) {
   try {
-    // Verify authentication
+    // Verify authentication - institutional-grade auth check
     const token = request.cookies.get('token')?.value;
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.warn('[AUTH] Missing authentication token in video generation request');
+      return NextResponse.json(
+        { error: 'Unauthorized', code: 'NO_AUTH_TOKEN' },
+        { status: 401 }
+      );
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as any;
-    const userId = decoded.userId || decoded.id;
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+    } catch (authError) {
+      console.warn('[AUTH] Invalid JWT token:', authError instanceof Error ? authError.message : 'Unknown');
+      return NextResponse.json(
+        { error: 'Unauthorized', code: 'INVALID_TOKEN' },
+        { status: 401 }
+      );
+    }
 
-    // Parse request body
-    const body = await request.json();
+    const userId = decoded.userId || decoded.id;
+    if (!userId) {
+      console.warn('[AUTH] No userId found in JWT payload');
+      return NextResponse.json(
+        { error: 'Unauthorized', code: 'NO_USER_ID' },
+        { status: 401 }
+      );
+    }
+
+    // Parse request body with validation
+    let body: any;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      console.error('[REQUEST] Failed to parse JSON body:', parseError);
+      return NextResponse.json(
+        { error: 'Invalid request body', code: 'INVALID_JSON' },
+        { status: 400 }
+      );
+    }
+
     const {
       websiteId,
       videoType = 'explainer',
@@ -194,103 +226,159 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!websiteId) {
-      return NextResponse.json({ error: 'websiteId is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'websiteId is required', code: 'MISSING_WEBSITE_ID' },
+        { status: 400 }
+      );
     }
 
-    // Connect to database
-    const { db } = await connectToDatabase();
+    // Connect to database with error handling
+    let db: any;
+    try {
+      const connection = await connectToDatabase();
+      db = connection.db;
+    } catch (dbError) {
+      console.error('[DATABASE] Connection failed:', dbError);
+      return NextResponse.json(
+        { error: 'Database connection failed', code: 'DB_CONNECTION_ERROR' },
+        { status: 500 }
+      );
+    }
 
-    // Fetch website data
-    const website = await db.collection('websites').findOne({
-      _id: new ObjectId(websiteId),
-      userId: new ObjectId(userId),
-    });
+    // Fetch website data with user scope validation
+    let website: any;
+    try {
+      website = await db.collection('websites').findOne({
+        _id: new ObjectId(websiteId),
+        userId: new ObjectId(userId),
+      });
+    } catch (dbError) {
+      console.error('[DATABASE] Query failed:', dbError);
+      return NextResponse.json(
+        { error: 'Database query failed', code: 'DB_QUERY_ERROR' },
+        { status: 500 }
+      );
+    }
 
     if (!website) {
-      return NextResponse.json({ error: 'Website not found' }, { status: 404 });
+      console.warn('[VALIDATION] Website not found or user not authorized:', { websiteId, userId });
+      return NextResponse.json(
+        { error: 'Website not found', code: 'WEBSITE_NOT_FOUND' },
+        { status: 404 }
+      );
     }
 
     // Generate video script if not provided
     let videoScript = script;
     if (!videoScript) {
-      console.log('🎬 [VIDEO] Generating video script from website data...');
-      const scriptText = await generateVideoScript(website, website, videoType);
-      const parsedScript = parseVideoScript(scriptText);
-      videoScript = parsedScript.fullScript;
-
-      // Save script to database
-      const savedScript = await VideoScript.create({
-        websiteId: new ObjectId(websiteId),
-        userId: new ObjectId(userId),
-        title: `${website.title} - ${videoType} Script`,
-        hook: parsedScript.hook,
-        story: parsedScript.story,
-        offer: parsedScript.offer,
-        fullScript: parsedScript.fullScript,
-        duration: Math.ceil((parsedScript.fullScript.split(/\s+/).length / 150) * 60),
-        status: 'approved',
-      });
-
-      console.log('✅ [VIDEO] Script saved:', savedScript._id);
+      try {
+        console.log('🎬 [VIDEO] Generating video script from website data...');
+        const scriptText = await generateVideoScript(website, website, videoType);
+        const parsedScript = parseVideoScript(scriptText);
+        videoScript = parsedScript.fullScript;
+        console.log('✅ [VIDEO] Script generated successfully');
+      } catch (scriptError) {
+        console.error('[SCRIPT_GENERATION] Failed to generate script:', scriptError);
+        return NextResponse.json(
+          {
+            error: 'Failed to generate video script',
+            code: 'SCRIPT_GENERATION_ERROR',
+            details: scriptError instanceof Error ? scriptError.message : 'Unknown error',
+          },
+          { status: 500 }
+        );
+      }
     }
 
     // Call Synthesise AI to generate video
-    console.log('🎥 [VIDEO] Calling Synthesise AI for video generation...');
-    const videoResult = await callSynthesiseAI(videoScript, avatarId, voiceId, videoType);
+    let videoResult: any;
+    try {
+      console.log('🎥 [VIDEO] Calling Synthesise AI for video generation...');
+      videoResult = await callSynthesiseAI(videoScript, avatarId, voiceId, videoType);
+      console.log('✅ [VIDEO] Video generated successfully');
+    } catch (videoError) {
+      console.error('[VIDEO_GENERATION] Failed to generate video:', videoError);
+      return NextResponse.json(
+        {
+          error: 'Failed to generate video',
+          code: 'VIDEO_GENERATION_ERROR',
+          details: videoError instanceof Error ? videoError.message : 'Unknown error',
+        },
+        { status: 500 }
+      );
+    }
 
     // Save video asset to database
-    const videoAsset = await VideoAsset.create({
-      websiteId: new ObjectId(websiteId),
-      userId: new ObjectId(userId),
-      type: videoType,
-      url: videoResult.videoUrl,
-      thumbnailUrl: videoResult.thumbnailUrl,
-      duration: videoResult.duration,
-      script: videoScript,
-      avatarId,
-      voiceId,
-      status: 'ready',
-      metadata: {
-        resolution,
-        format: 'mp4',
-        processingTime: Date.now(),
-      },
-    });
+    try {
+      const videoAssetData = {
+        websiteId: new ObjectId(websiteId),
+        userId: new ObjectId(userId),
+        type: videoType,
+        url: videoResult.videoUrl,
+        thumbnailUrl: videoResult.thumbnailUrl,
+        duration: videoResult.duration,
+        script: videoScript,
+        avatarId,
+        voiceId,
+        status: 'ready',
+        metadata: {
+          resolution,
+          format: 'mp4',
+          processingTime: Date.now(),
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
 
-    console.log('✅ [VIDEO] Video asset created:', videoAsset._id);
+      const insertResult = await db.collection('videoAssets').insertOne(videoAssetData);
+      const videoAssetId = insertResult.insertedId;
 
-    // Update website with video asset reference
-    await db.collection('websites').updateOne(
-      { _id: new ObjectId(websiteId) },
-      {
-        $set: {
-          'multimedia.videoAssets': [
-            ...(website.multimedia?.videoAssets || []),
-            {
-              _id: videoAsset._id,
+      console.log('✅ [VIDEO] Video asset created:', videoAssetId);
+
+      // Update website with video asset reference
+      await db.collection('websites').updateOne(
+        { _id: new ObjectId(websiteId) },
+        {
+          $push: {
+            'multimedia.videoAssets': {
+              _id: videoAssetId,
               type: videoType,
               url: videoResult.videoUrl,
               status: 'ready',
+              createdAt: new Date(),
             },
-          ],
-          updatedAt: new Date(),
-        },
-      }
-    );
+          },
+          $set: {
+            updatedAt: new Date(),
+          },
+        }
+      );
 
-    return NextResponse.json({
-      success: true,
-      videoAssetId: videoAsset._id.toString(),
-      videoUrl: videoResult.videoUrl,
-      thumbnailUrl: videoResult.thumbnailUrl,
-      duration: videoResult.duration,
-      status: 'ready',
-    });
+      return NextResponse.json({
+        success: true,
+        videoAssetId: videoAssetId.toString(),
+        videoUrl: videoResult.videoUrl,
+        thumbnailUrl: videoResult.thumbnailUrl,
+        duration: videoResult.duration,
+        status: 'ready',
+      });
+    } catch (dbError) {
+      console.error('[DATABASE] Failed to save video asset:', dbError);
+      return NextResponse.json(
+        {
+          error: 'Failed to save video asset',
+          code: 'DB_SAVE_ERROR',
+          details: dbError instanceof Error ? dbError.message : 'Unknown error',
+        },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    console.error('❌ [VIDEO] Error generating video:', error);
+    console.error('❌ [VIDEO] Unexpected error generating video:', error);
     return NextResponse.json(
       {
         error: 'Failed to generate video',
+        code: 'UNEXPECTED_ERROR',
         details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
@@ -303,20 +391,31 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
+    // Verify authentication
     const token = request.cookies.get('token')?.value;
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as any;
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+    } catch (authError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const userId = decoded.userId || decoded.id;
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const videoAssetId = request.nextUrl.searchParams.get('videoAssetId');
     if (!videoAssetId) {
       return NextResponse.json({ error: 'videoAssetId is required' }, { status: 400 });
     }
 
-    const videoAsset = await VideoAsset.findOne({
+    const { db } = await connectToDatabase();
+    const videoAsset = await db.collection('videoAssets').findOne({
       _id: new ObjectId(videoAssetId),
       userId: new ObjectId(userId),
     });
