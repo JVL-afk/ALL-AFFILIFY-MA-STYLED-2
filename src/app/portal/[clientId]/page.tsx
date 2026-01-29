@@ -3,7 +3,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { format } from 'date-fns';
-import { AlertCircle, FileText, CheckCircle, Clock, Download, Eye, MessageSquare, Settings, LogOut, Bell, Search, Filter, Calendar, DollarSign, TrendingUp } from 'lucide-react';
+import { AlertCircle, FileText, CheckCircle, Clock, Download, Eye, MessageSquare, Settings, LogOut, Bell, Search, Filter, Calendar, DollarSign, TrendingUp, Share2, BarChart3 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface Proposal {
   _id: string;
@@ -45,7 +48,7 @@ const ClientPortal: React.FC = () => {
   const [portalData, setPortalData] = useState<ClientPortalData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'proposals' | 'tasks' | 'messages'>('proposals');
+  const [activeTab, setActiveTab] = useState<'proposals' | 'tasks' | 'messages' | 'overview' | 'analytics' | 'documents'>('overview');
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
@@ -446,3 +449,5 @@ const ClientPortal: React.FC = () => {
     </div>
   );
 }
+
+export default ClientPortal;

@@ -22,7 +22,8 @@ import {
   Sparkles,
   Download,
   Share2,
-  ChevronRight
+  ChevronRight,
+  Globe
 } from 'lucide-react'
 import Link from 'next/link'
 import { AffiliateContentDNA } from '@/lib/content-brain/types'
