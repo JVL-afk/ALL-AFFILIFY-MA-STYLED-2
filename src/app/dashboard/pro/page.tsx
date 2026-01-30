@@ -8,16 +8,19 @@ import { Badge } from '@/components/ui/badge'
 import { 
   Globe, 
   BarChart3, 
-  Crown,
-  Plus,
-  Settings,
-  TrendingUp,
-  Users,
-  Eye,
-  MousePointer,
-  TestTube,
-  MessageSquare,
-  Zap
+  Crown, 
+  Plus, 
+  Settings, 
+  TrendingUp, 
+  Users, 
+  Eye, 
+  MousePointer, 
+  TestTube, 
+  MessageSquare, 
+  Zap,
+  Feather,
+  Search,
+  Brain
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -215,6 +218,38 @@ export default function ProDashboard() {
               <Button asChild className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 mt-4">
                 <Link href="/pricing">
                   Upgrade to Enterprise - $99/month
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Content Brain Features (Pro Tier) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
+            <CardHeader>
+              <CardTitle className="text-gray-900">Affiliate Content Brain</CardTitle>
+              <CardDescription className="text-gray-700">
+                Pro-level AI content tools
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button asChild className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-gray-900">
+                <Link href="/dashboard/content-studio">
+                  <Feather className="w-4 h-4 mr-2" />
+                  Content Studio
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20">
+                <Link href="/dashboard/seo-auditor">
+                  <Search className="w-4 h-4 mr-2" />
+                  SEO Auditor (5/mo)
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20">
+                <Link href="/dashboard/ideation-lab">
+                  <Brain className="w-4 h-4 mr-2" />
+                  Ideation Lab
                 </Link>
               </Button>
             </CardContent>

@@ -8,13 +8,15 @@ import { Badge } from '@/components/ui/badge'
 import { 
   Globe, 
   BarChart3, 
-  Crown,
-  Plus,
-  Settings,
-  TrendingUp,
-  Users,
-  Eye,
-  MousePointer
+  Crown, 
+  Plus, 
+  Settings, 
+  TrendingUp, 
+  Users, 
+  Eye, 
+  MousePointer,
+  Feather,
+  Database
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -222,6 +224,32 @@ export default function BasicDashboard() {
               <Button asChild className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 mt-4">
                 <Link href="/pricing">
                   Upgrade to Pro - $29/month
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Content Brain Features (Basic Tier) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
+            <CardHeader>
+              <CardTitle className="text-gray-900">Affiliate Content Brain</CardTitle>
+              <CardDescription className="text-gray-700">
+                Start generating AI content
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button asChild className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-gray-900">
+                <Link href="/dashboard/content-studio">
+                  <Feather className="w-4 h-4 mr-2" />
+                  Content Studio (Basic)
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20">
+                <Link href="/dashboard/dna-management">
+                  <Database className="w-4 h-4 mr-2" />
+                  Manage Campaign DNA
                 </Link>
               </Button>
             </CardContent>
