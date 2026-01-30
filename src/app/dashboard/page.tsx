@@ -25,8 +25,13 @@ export default async function DashboardPage() {
   
   // Create a minimal mock request object that verifyAuth can use
   const mockRequest = {
+    url: '/dashboard',
+    headers: {
+      get: (name: string) => null,
+    },
     cookies: {
       get: (name: string) => token,
+      getAll: () => token ? [token] : [],
     },
   } as unknown as NextRequest;
 

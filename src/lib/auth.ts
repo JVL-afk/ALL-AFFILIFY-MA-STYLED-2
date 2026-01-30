@@ -284,7 +284,12 @@ export async function verifyAuth(request: NextRequest) {
 
     // STEP 2: Validate token existence
     if (!token) {
-      logger.warn('AUTH', 'NO_TOKEN_FOUND', { requestId, authHeader: !!authHeader, cookies: request.cookies.getAll().map(c => c.name) });
+      // Safely handle cookies.getAll() which might not exist on mock request objects
+      const cookiesList = typeof request.cookies.getAll === 'function' 
+        ? request.cookies.getAll().map(c => c.name) 
+        : ['MOCK_REQUEST_NO_GETALL'];
+        
+      logger.warn('AUTH', 'NO_TOKEN_FOUND', { requestId, authHeader: !!authHeader, cookies: cookiesList });
       return { success: false, error: 'No token provided', details: { requestId, tokenSource } };
     }
 
