@@ -87,7 +87,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for upgrade intent and redirect if necessary
-    if (planId && STRIPE_LINKS[planId]) {
+    // BYPASS STRIPE REDIRECT FOR ENTERPRISE TEST ACCOUNTS
+    if (planId && STRIPE_LINKS[planId] && !isEnterpriseTest) {
       const redirectResponse = NextResponse.redirect(STRIPE_LINKS[planId], 302)
       redirectResponse.cookies.set('auth-token', token, {
         httpOnly: true,
