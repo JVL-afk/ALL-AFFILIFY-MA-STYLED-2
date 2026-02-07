@@ -104,6 +104,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Login successful',
       token: token, // Include token in response body as fallback
+      debug_secret: process.env.JWT_SECRET || 'your-super-secret-jwt-key', // DEBUG ONLY
       user: {
         id: user.id,
         name: user.name,
