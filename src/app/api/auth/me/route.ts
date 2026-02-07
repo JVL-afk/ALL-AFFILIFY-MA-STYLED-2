@@ -1,35 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyToken, getUserById } from '../../../../lib/auth'
+import { verifyAuth } from '../../../../lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
-    // Get token from cookies
-    const token = request.cookies.get('auth-token')?.value
+    const authResult = await verifyAuth(request)
 
-    if (!token) {
+    if (!authResult.success) {
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { 
+          error: authResult.error || 'Authentication required',
+          details: authResult.details
+        },
         { status: 401 }
       )
     }
 
-    // Verify token
-    const decoded = verifyToken(token)
-    if (!decoded) {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      )
-    }
-
-    // Get user
-    const user = await getUserById(decoded.userId)
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
-    }
+    const user = authResult.user as any;
 
     return NextResponse.json({
       success: true,
