@@ -116,12 +116,18 @@ export async function POST(request: NextRequest) {
     })
 
     // Set auth cookie on the success response
-    successResponse.cookies.set('auth-token', token, {
+    // CRITICAL FIX: Set path to '/' to ensure cookie is available site-wide
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'lax' as const,
+      path: '/',
       maxAge: 60 * 60 * 24 * 7 // 7 days
-    })
+    };
+
+    successResponse.cookies.set('auth-token', token, cookieOptions);
+    // Also set 'token' for compatibility with some middleware versions
+    successResponse.cookies.set('token', token, cookieOptions);
 
     return successResponse
   } catch (error) {
