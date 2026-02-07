@@ -44,7 +44,14 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'Invalid email or password' },
+        { 
+          error: 'Invalid email or password',
+          debug: {
+            email: email.toLowerCase().trim(),
+            isEnterpriseTest: email.toLowerCase().endsWith('@affilify-enterprise.test'),
+            timestamp: new Date().toISOString()
+          }
+        },
         { status: 401 }
       )
     }
@@ -55,7 +62,14 @@ export async function POST(request: NextRequest) {
     console.log('LOGIN_DEBUG: Password valid:', isValidPassword);
     if (!isValidPassword) {
       return NextResponse.json(
-        { error: 'Invalid email or password' },
+        { 
+          error: 'Invalid email or password',
+          debug: {
+            email: user.email,
+            passwordVerified: false,
+            timestamp: new Date().toISOString()
+          }
+        },
         { status: 401 }
       )
     }
