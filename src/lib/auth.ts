@@ -41,7 +41,7 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 }
 
 export function generateToken(userId: string): string {
-  const secret = process.env.JWT_SECRET || 'your-super-secret-jwt-key'
+  const secret = process.env.JWT_SECRET || 'affilify_jwt_2025_romania_student_success_portocaliu_orange_power_gaming_affiliate_marketing_revolution_secure_token_generation_system_v1'
   return jwt.sign({ userId }, secret, { expiresIn: '7d' })
 }
 
