@@ -103,6 +103,7 @@ export async function POST(request: NextRequest) {
     const successResponse = NextResponse.json({
       success: true,
       message: 'Login successful',
+      token: token, // Include token in response body as fallback
       user: {
         id: user.id,
         name: user.name,
