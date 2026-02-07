@@ -22,9 +22,12 @@ export async function POST(request: NextRequest) {
     }
 
     // SPECIAL TESTING FEATURE: Create enterprise account if it doesn't exist and has a specific suffix
+    console.log('LOGIN_DEBUG: Checking user for email:', email.toLowerCase().trim());
     let user = await getUserByEmail(email.toLowerCase().trim())
+    console.log('LOGIN_DEBUG: User found in DB:', !!user);
     
     if (!user && email.toLowerCase().endsWith('@affilify-enterprise.test')) {
+      console.log('LOGIN_DEBUG: Auto-creating enterprise user...');
       const { createUser } = await import('@/lib/auth')
       const newUser = await createUser({
         name: 'Enterprise Tester',
@@ -32,8 +35,10 @@ export async function POST(request: NextRequest) {
         password: password,
         plan: 'enterprise'
       })
+      console.log('LOGIN_DEBUG: New user created:', !!newUser);
       if (newUser) {
         user = await getUserByEmail(email.toLowerCase().trim())
+        console.log('LOGIN_DEBUG: User fetched after creation:', !!user);
       }
     }
 
@@ -45,7 +50,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify password
+    console.log('LOGIN_DEBUG: Verifying password for user:', user.email);
     const isValidPassword = await verifyPassword(password, user.password)
+    console.log('LOGIN_DEBUG: Password valid:', isValidPassword);
     if (!isValidPassword) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
