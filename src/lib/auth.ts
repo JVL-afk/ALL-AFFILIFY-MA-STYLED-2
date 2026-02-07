@@ -40,9 +40,20 @@ export async function verifyPassword(password: string, hashedPassword: string): 
   return bcrypt.compare(password, hashedPassword)
 }
 
-export function generateToken(userId: string): string {
+export async function generateToken(userId: string): Promise<string> {
   const secret = process.env.JWT_SECRET || 'affilify_jwt_2025_romania_student_success_portocaliu_orange_power_gaming_affiliate_marketing_revolution_secure_token_generation_system_v1'
-  return jwt.sign({ userId }, secret, { expiresIn: '7d' })
+  
+  // Fetch user from database to get their plan
+  const user = await getUserById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+  
+  // Include both userId and plan in the token
+  return jwt.sign({ 
+    userId,
+    plan: user.plan 
+  }, secret, { expiresIn: '7d' })
 }
 
 export function verifyToken(token: string): { userId: string } | null {

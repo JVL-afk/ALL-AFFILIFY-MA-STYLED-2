@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate token
-    const token = generateToken(user.id)
+    const token = await generateToken(user.id)
 
     // Define Stripe links
     const STRIPE_LINKS: Record<string, string> = {
