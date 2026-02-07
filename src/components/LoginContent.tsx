@@ -191,6 +191,9 @@ const LoginContent = () => {
           <div>Basic: demo@basic.com / password123</div>
           <div>Pro: demo@pro.com / password123</div>
           <div>Enterprise: demo@enterprise.com / password123</div>
+          <div className="pt-1 border-t border-white border-opacity-10 mt-1">
+            <span className="text-orange-400 font-bold">TESTING:</span> Any email ending in <span className="text-white">@affilify-enterprise.test</span> will be auto-created as an Enterprise account.
+          </div>
         </div>
       </div>
     </div>

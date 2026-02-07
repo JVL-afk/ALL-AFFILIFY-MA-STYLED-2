@@ -113,11 +113,11 @@ export async function createUser(userData: {
     const planLimits = {
       basic: { websiteLimit: 3, analysisLimit: 10 },
       pro: { websiteLimit: 25, analysisLimit: 50 },
-      enterprise: { websiteLimit: -1, analysisLimit: -1 }
+      enterprise: { websiteLimit: 999999, analysisLimit: 999999 } // Use large number for "unlimited"
     }
     
     const plan = userData.plan || 'basic'
-    const limits = planLimits[plan]
+    const limits = planLimits[plan as keyof typeof planLimits] || planLimits.basic
     
     // Create user
     const newUser = {
