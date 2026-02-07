@@ -49,7 +49,7 @@ export async function authenticateRequest(request: NextRequest): Promise<{ succe
     }
 
     // 2. Verify JWT signature
-    const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
+    const JWT_SECRET = process.env.JWT_SECRET || 'affilify_jwt_2025_romania_student_success_portocaliu_orange_power_gaming_affiliate_marketing_revolution_secure_token_generation_system_v1';
     let decoded: any;
     try {
       decoded = jwt.verify(token, JWT_SECRET);
