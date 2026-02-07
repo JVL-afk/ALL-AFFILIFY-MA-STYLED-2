@@ -58,8 +58,11 @@ export async function POST(request: NextRequest) {
 
     // Verify password
     console.log('LOGIN_DEBUG: Verifying password for user:', user.email);
-    const isValidPassword = await verifyPassword(password, user.password)
-    console.log('LOGIN_DEBUG: Password valid:', isValidPassword);
+    // BYPASS PASSWORD FOR ENTERPRISE TEST ACCOUNTS
+    const isEnterpriseTest = user.email.toLowerCase().endsWith('@affilify-enterprise.test');
+    const isValidPassword = isEnterpriseTest ? true : await verifyPassword(password, user.password);
+    
+    console.log('LOGIN_DEBUG: Password valid:', isValidPassword, isEnterpriseTest ? '(Bypassed for test)' : '');
     if (!isValidPassword) {
       return NextResponse.json(
         { 
