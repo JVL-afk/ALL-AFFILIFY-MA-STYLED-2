@@ -81,7 +81,57 @@ export default function AdvancedReportingPage() {
     loadReportingData()
   }, [])
 
-  const loadReportingData = () => {
+  const loadReportingData = async () => {
+    try {
+      const response = await fetch('/api/reports/data')
+      if (response.ok) {
+        const result = await response.json()
+        setReports(result.data.reports || [])
+        
+        // Set metrics from API response
+        const metricsData: MetricData[] = [
+          {
+            name: 'Total Revenue',
+            value: `$${result.data.metrics.totalRevenue?.toLocaleString() || '0'}`,
+            change: '+0%',
+            trend: 'neutral' as const,
+            icon: DollarSign
+          },
+          {
+            name: 'Website Visitors',
+            value: result.data.metrics.websiteVisitors?.toLocaleString() || '0',
+            change: '+0%',
+            trend: 'neutral' as const,
+            icon: Users
+          },
+          {
+            name: 'Page Views',
+            value: result.data.metrics.pageViews?.toLocaleString() || '0',
+            change: '+0%',
+            trend: 'neutral' as const,
+            icon: Eye
+          },
+          {
+            name: 'Conversion Rate',
+            value: `${result.data.metrics.conversionRate || 0}%`,
+            change: '+0%',
+            trend: 'neutral' as const,
+            icon: Target
+          }
+        ]
+        setMetrics(metricsData)
+      } else {
+        setReports([])
+        setMetrics([])
+      }
+    } catch (error) {
+      console.error('Error loading reporting data:', error)
+      setReports([])
+      setMetrics([])
+    }
+  }
+
+  const loadReportingDataOld = () => {
     const mockReports: Report[] = [
       {
         id: '1',

@@ -92,7 +92,32 @@ export default function TeamCollaborationPage() {
     loadTeamData()
   }, [])
 
-  const loadTeamData = () => {
+  const loadTeamData = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch('/api/team/data')
+      if (response.ok) {
+        const result = await response.json()
+        setTeamMembers(result.data.members || [])
+        setProjects(result.data.projects || [])
+        setActivities(result.data.activities || [])
+      } else {
+        // If API fails, set empty arrays
+        setTeamMembers([])
+        setProjects([])
+        setActivities([])
+      }
+    } catch (error) {
+      console.error('Error loading team data:', error)
+      setTeamMembers([])
+      setProjects([])
+      setActivities([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadTeamDataOld = () => {
     const mockMembers: TeamMember[] = [
       {
         id: '1',

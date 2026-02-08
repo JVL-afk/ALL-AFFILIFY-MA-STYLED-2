@@ -85,7 +85,32 @@ export default function ApiManagementPage() {
     loadApiData()
   }, [])
 
-  const loadApiData = () => {
+  const loadApiData = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch('/api/api-management/data')
+      if (response.ok) {
+        const result = await response.json()
+        setApiKeys(result.data.apiKeys || [])
+        // Endpoints are static, can be defined here or fetched
+        setEndpoints([])
+        setUsage([])
+      } else {
+        setApiKeys([])
+        setEndpoints([])
+        setUsage([])
+      }
+    } catch (error) {
+      console.error('Error loading API data:', error)
+      setApiKeys([])
+      setEndpoints([])
+      setUsage([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadApiDataOld = () => {
     const mockKeys: ApiKey[] = [
       {
         id: '1',

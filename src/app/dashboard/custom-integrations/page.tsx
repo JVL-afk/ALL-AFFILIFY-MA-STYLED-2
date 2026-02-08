@@ -80,7 +80,25 @@ export default function CustomIntegrationsPage() {
     loadIntegrationsData()
   }, [])
 
-  const loadIntegrationsData = () => {
+  const loadIntegrationsData = async () => {
+    try {
+      const response = await fetch('/api/integrations/data')
+      if (response.ok) {
+        const result = await response.json()
+        setIntegrations(result.data.integrations || [])
+        setWebhooks(result.data.webhooks || [])
+      } else {
+        setIntegrations([])
+        setWebhooks([])
+      }
+    } catch (error) {
+      console.error('Error loading integrations data:', error)
+      setIntegrations([])
+      setWebhooks([])
+    }
+  }
+
+  const loadIntegrationsDataOld = () => {
     const mockIntegrations: Integration[] = [
       {
         id: '1',

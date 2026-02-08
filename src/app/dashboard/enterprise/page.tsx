@@ -29,14 +29,34 @@ import Link from 'next/link'
 
 export default function EnterpriseDashboard() {
   const [stats, setStats] = useState({
-    websites: 23,
-    totalViews: 284750,
-    totalClicks: 18947,
-    conversionRate: 6.7,
-    revenue: 47892,
-    teamMembers: 8,
-    activeTests: 12
+    websites: 0,
+    totalViews: 0,
+    totalClicks: 0,
+    conversionRate: 0,
+    revenue: 0,
+    teamMembers: 0,
+    activeTests: 0,
+    recentActivities: []
   })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchEnterpriseStats()
+  }, [])
+
+  const fetchEnterpriseStats = async () => {
+    try {
+      const response = await fetch('/api/dashboard/enterprise-stats')
+      if (response.ok) {
+        const data = await response.json()
+        setStats(data.stats)
+      }
+    } catch (error) {
+      console.error('Error fetching enterprise stats:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900">
@@ -285,18 +305,21 @@ export default function EnterpriseDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center space-x-3 p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
-                  <Users className="w-5 h-5 text-cyan-400" />
-                  <p className="text-gray-900"><span className="font-medium">Alice</span> deployed a new website: <span className="font-medium">"Top 10 Gadgets"</span></p>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
-                  <TestTube className="w-5 h-5 text-pink-400" />
-                  <p className="text-gray-900"><span className="font-medium">Bob</span> started an A/B test on <span className="font-medium">"Best Coffee Makers"</span></p>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
-                  <Briefcase className="w-5 h-5 text-yellow-400" />
-                  <p className="text-gray-900"><span className="font-medium">Charlie</span> generated a Q3 Revenue Report</p>
-                </div>
+                {stats.recentActivities && stats.recentActivities.length > 0 ? (
+                  stats.recentActivities.map((activity: any) => (
+                    <div key={activity.id} className="flex items-center space-x-3 p-3 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-5 rounded-lg">
+                      <Users className="w-5 h-5 text-cyan-400" />
+                      <p className="text-gray-900">
+                        <span className="font-medium">{activity.user}</span> {activity.action} <span className="font-medium">{activity.target}</span>
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-700">
+                    <p>No recent activity</p>
+                    <p className="text-sm mt-2">Team activities will appear here</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

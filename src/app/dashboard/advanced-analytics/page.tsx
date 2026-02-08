@@ -58,6 +58,7 @@ interface MetricCard {
 
 export default function AdvancedAnalyticsPage() {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null)
+  const [metrics, setMetrics] = useState<MetricCard[]>([])
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState('30d')
   const [selectedMetric, setSelectedMetric] = useState('revenue')
@@ -69,53 +70,51 @@ export default function AdvancedAnalyticsPage() {
   const fetchAnalyticsData = async () => {
     setLoading(true)
     try {
-      // Simulate API call with mock data
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      const mockData: AnalyticsData = {
-        revenue: [
-          { month: 'Jan', amount: 12500 },
-          { month: 'Feb', amount: 15800 },
-          { month: 'Mar', amount: 18200 },
-          { month: 'Apr', amount: 22100 },
-          { month: 'May', amount: 25600 },
-          { month: 'Jun', amount: 28900 },
-        ],
-        traffic: [
-          { date: '2024-01-01', visitors: 1250, pageViews: 3200 },
-          { date: '2024-01-02', visitors: 1380, pageViews: 3450 },
-          { date: '2024-01-03', visitors: 1420, pageViews: 3680 },
-          { date: '2024-01-04', visitors: 1580, pageViews: 4100 },
-          { date: '2024-01-05', visitors: 1650, pageViews: 4250 },
-        ],
-        conversions: [
-          { source: 'Organic Search', conversions: 245, rate: 3.2 },
-          { source: 'Social Media', conversions: 189, rate: 2.8 },
-          { source: 'Email Marketing', conversions: 156, rate: 4.1 },
-          { source: 'Paid Ads', conversions: 134, rate: 2.5 },
-          { source: 'Direct Traffic', conversions: 98, rate: 3.8 },
-        ],
-        demographics: [
-          { age: '18-24', percentage: 15 },
-          { age: '25-34', percentage: 35 },
-          { age: '35-44', percentage: 28 },
-          { age: '45-54', percentage: 15 },
-          { age: '55+', percentage: 7 },
-        ],
-        devices: [
-          { device: 'Desktop', users: 4250 },
-          { device: 'Mobile', users: 6800 },
-          { device: 'Tablet', users: 1950 },
-        ],
-        topPages: [
-          { page: '/product/wireless-headphones', views: 8500, bounceRate: 25.4 },
-          { page: '/product/smartphone-case', views: 6200, bounceRate: 32.1 },
-          { page: '/product/laptop-stand', views: 5800, bounceRate: 28.7 },
-          { page: '/product/bluetooth-speaker', views: 4900, bounceRate: 35.2 },
-        ],
+      const response = await fetch('/api/analytics/advanced')
+      if (response.ok) {
+        const result = await response.json()
+        
+        // If no data available, use empty arrays
+        const mockData: AnalyticsData = {
+        revenue: result.data.revenue || [],
+        traffic: result.data.traffic || [],
+        conversions: result.data.conversions || [],
+        demographics: result.data.demographics || [],
+        devices: result.data.devices || [],
+        topPages: result.data.topPages || [],
       }
       
       setAnalyticsData(mockData)
+      
+      // Set metrics from API response
+      if (result.data.metrics) {
+        const iconMap: any = {
+          'DollarSign': DollarSign,
+          'Users': Users,
+          'Target': Target,
+          'Eye': Eye,
+          'Clock': Clock,
+          'Activity': Activity
+        }
+        
+        const metricsWithIcons = result.data.metrics.map((m: any) => ({
+          ...m,
+          icon: iconMap[m.icon] || DollarSign
+        }))
+        
+        setMetrics(metricsWithIcons)
+      }
+      } else {
+        // If API fails, set empty data
+        setAnalyticsData({
+          revenue: [],
+          traffic: [],
+          conversions: [],
+          demographics: [],
+          devices: [],
+          topPages: []
+        })
+      }
     } catch (error) {
       console.error('Failed to fetch analytics data:', error)
     } finally {
@@ -124,51 +123,6 @@ export default function AdvancedAnalyticsPage() {
   }
 
   const COLORS = ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981']
-
-  const metrics: MetricCard[] = [
-    {
-      title: 'Total Revenue',
-      value: '$28,900',
-      change: 12.5,
-      icon: DollarSign,
-      color: 'from-blue-500 to-indigo-600'
-    },
-    {
-      title: 'Total Visitors',
-      value: '45,280',
-      change: 8.2,
-      icon: Users,
-      color: 'from-purple-500 to-pink-600'
-    },
-    {
-      title: 'Conversion Rate',
-      value: '3.24%',
-      change: 0.4,
-      icon: Target,
-      color: 'from-indigo-500 to-purple-600'
-    },
-    {
-      title: 'Page Views',
-      value: '128,450',
-      change: 15.3,
-      icon: Eye,
-      color: 'from-blue-500 to-purple-600'
-    },
-    {
-      title: 'Avg. Session',
-      value: '4m 32s',
-      change: 5.7,
-      icon: Clock,
-      color: 'from-purple-500 to-indigo-600'
-    },
-    {
-      title: 'Bounce Rate',
-      value: '42.8%',
-      change: -3.2,
-      icon: Activity,
-      color: 'from-pink-500 to-purple-600'
-    }
-  ]
 
   if (loading) {
     return (

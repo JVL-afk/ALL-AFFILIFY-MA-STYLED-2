@@ -93,12 +93,18 @@ export default function ABTestingPage() {
   const [hasEnterpriseAccess, setHasEnterpriseAccess] = useState(false)
 
   useEffect(() => {
-    checkEnterpriseAccess()
+    const initializeData = async () => {
+      await checkEnterpriseAccess()
+    }
+    initializeData()
+  }, [])
+
+  useEffect(() => {
     if (hasEnterpriseAccess) {
       loadTests()
       loadStats()
     }
-  }, [])
+  }, [hasEnterpriseAccess])
 
   const checkEnterpriseAccess = async () => {
     try {
