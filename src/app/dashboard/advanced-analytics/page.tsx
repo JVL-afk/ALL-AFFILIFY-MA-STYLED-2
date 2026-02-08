@@ -467,8 +467,8 @@ export default function AdvancedAnalyticsPage() {
             </Card>
           </motion.div>
 
-          {/* Quick Stats */}
-          <motion.div
+          {/* Quick Stats - REMOVED MOCK DATA */}
+          {/* <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.5 }}
@@ -549,7 +549,7 @@ export default function AdvancedAnalyticsPage() {
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </motion.div> */}
         </div>
 
         {/* Top Performing Pages */}
@@ -602,8 +602,8 @@ export default function AdvancedAnalyticsPage() {
           </Card>
         </motion.div>
 
-        {/* Real-Time Activity Feed */}
-        <motion.div
+        {/* Real-Time Activity Feed - REMOVED MOCK DATA */}
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
@@ -662,10 +662,10 @@ export default function AdvancedAnalyticsPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </motion.div> */}
 
-        {/* Geographic Performance */}
-        <motion.div
+        {/* Geographic Performance - REMOVED MOCK DATA */}
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
@@ -744,7 +744,7 @@ export default function AdvancedAnalyticsPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </motion.div> */}
 
         {/* Hourly Performance Heatmap */}
         <motion.div
@@ -796,12 +796,12 @@ export default function AdvancedAnalyticsPage() {
           </Card>
         </motion.div>
 
-        {/* Performance Summary */}
-        <motion.div
+        {/* Performance Summary - REMOVED MOCK DATA */}
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.0 }}
-          className="mt-8"
+          className="mb-8"
         >
           <Card className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-blue-500/50">
             <CardHeader>
@@ -830,7 +830,7 @@ export default function AdvancedAnalyticsPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </motion.div> */}
       </div>
     </div>
   )

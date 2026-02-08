@@ -39,14 +39,63 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Mock A/B testing stats
-    const stats = {
-      totalTests: 12,
-      runningTests: 3,
-      completedTests: 8,
-      totalVisitors: 15420,
-      averageUplift: 23.5,
-      significantWins: 6
+    // Calculate real A/B testing stats from database
+    const { connectToDatabase } = await import('@/lib/mongodb')
+    const { ObjectId } = await import('mongodb')
+    const { db } = await connectToDatabase()
+    
+    let stats = {
+      totalTests: 0,
+      runningTests: 0,
+      completedTests: 0,
+      totalVisitors: 0,
+      averageUplift: 0,
+      significantWins: 0
+    }
+    
+    try {
+      const testsData = await db.collection('ab_tests')
+        .find({ userId: new ObjectId(user._id) })
+        .toArray()
+      
+      stats.totalTests = testsData.length
+      stats.runningTests = testsData.filter(t => t.status === 'running').length
+      stats.completedTests = testsData.filter(t => t.status === 'completed').length
+      
+      // Calculate total visitors and average uplift
+      let totalUplift = 0
+      let testsWithUplift = 0
+      
+      testsData.forEach(test => {
+        if (test.variants && Array.isArray(test.variants)) {
+          test.variants.forEach((variant: any) => {
+            stats.totalVisitors += variant.visitors || 0
+          })
+          
+          // Calculate uplift if there's a control and variant
+          const control = test.variants.find((v: any) => v.isControl)
+          const variants = test.variants.filter((v: any) => !v.isControl)
+          
+          if (control && variants.length > 0) {
+            variants.forEach((variant: any) => {
+              if (control.conversionRate > 0) {
+                const uplift = ((variant.conversionRate - control.conversionRate) / control.conversionRate) * 100
+                if (uplift > 0) {
+                  totalUplift += uplift
+                  testsWithUplift++
+                  if (test.metrics?.statisticalSignificance) {
+                    stats.significantWins++
+                  }
+                }
+              }
+            })
+          }
+        }
+      })
+      
+      stats.averageUplift = testsWithUplift > 0 ? Number((totalUplift / testsWithUplift).toFixed(1)) : 0
+    } catch (error) {
+      console.log('Error calculating A/B test stats:', error)
     }
 
     return NextResponse.json({

@@ -39,53 +39,41 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Mock A/B tests data
-    const tests = [
-      {
-        id: '1',
-        name: 'Homepage Headline Test',
-        description: 'Testing different headlines for better conversion',
-        websiteId: 'web1',
-        websiteName: 'My Website',
-        status: 'running',
-        type: 'headline',
-        variants: [
-          {
-            id: 'control',
-            name: 'Original Headline',
-            description: 'Current headline',
-            traffic: 50,
-            conversions: 25,
-            visitors: 500,
-            conversionRate: 5.0,
-            isControl: true
-          },
-          {
-            id: 'variant1',
-            name: 'New Headline',
-            description: 'Improved headline',
-            traffic: 50,
-            conversions: 35,
-            visitors: 500,
-            conversionRate: 7.0,
-            isControl: false
-          }
-        ],
-        metrics: {
+    // Fetch real A/B tests from database
+    const { connectToDatabase } = await import('@/lib/mongodb')
+    const { ObjectId } = await import('mongodb')
+    const { db } = await connectToDatabase()
+    
+    let tests: any[] = []
+    try {
+      const testsData = await db.collection('ab_tests')
+        .find({ userId: new ObjectId(user._id) })
+        .toArray()
+      
+      tests = testsData.map(test => ({
+        id: test._id.toString(),
+        name: test.name || '',
+        description: test.description || '',
+        websiteId: test.websiteId?.toString() || '',
+        websiteName: test.websiteName || '',
+        status: test.status || 'draft',
+        type: test.type || 'headline',
+        variants: test.variants || [],
+        metrics: test.metrics || {
           primaryGoal: 'conversions',
-          confidenceLevel: 95,
-          statisticalSignificance: true,
-          winner: 'variant1'
+          confidenceLevel: 0,
+          statisticalSignificance: false
         },
-        schedule: {
-          startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        schedule: test.schedule || {
+          startDate: '',
           duration: 14
         },
-        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    ]
+        createdAt: test.createdAt || new Date().toISOString(),
+        updatedAt: test.updatedAt || new Date().toISOString()
+      }))
+    } catch (error) {
+      console.log('A/B tests collection not found or error:', error)
+    }
 
     return NextResponse.json({
       success: true,
