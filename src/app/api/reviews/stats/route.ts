@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, getUserById } from '@/lib/auth'
+import { connectToDatabase } from '@/lib/mongodb'
+import { ObjectId } from 'mongodb'
 
 export async function GET(request: NextRequest) {
   try {
@@ -39,25 +41,44 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Mock stats data
-    const stats = {
-      total: 25,
-      approved: 20,
-      pending: 3,
-      rejected: 2,
-      averageRating: 4.3,
-      ratingDistribution: {
-        5: 12,
-        4: 8,
-        3: 3,
-        2: 1,
-        1: 1
-      },
-      monthlyTrend: [
-        { month: 'Jan', count: 5, rating: 4.2 },
-        { month: 'Feb', count: 8, rating: 4.1 },
-        { month: 'Mar', count: 12, rating: 4.3 }
-      ]
+    // Calculate real stats from database
+    const { db } = await connectToDatabase()
+    const userId = new ObjectId(user._id)
+
+    let stats = {
+      total: 0,
+      approved: 0,
+      pending: 0,
+      rejected: 0,
+      averageRating: 0,
+      ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+      monthlyTrend: [] as Array<{ month: string; count: number; rating: number }>
+    }
+
+    try {
+      const reviews = await db.collection('reviews')
+        .find({ userId })
+        .toArray()
+      
+      stats.total = reviews.length
+      stats.approved = reviews.filter(r => r.status === 'approved').length
+      stats.pending = reviews.filter(r => r.status === 'pending').length
+      stats.rejected = reviews.filter(r => r.status === 'rejected').length
+      
+      if (reviews.length > 0) {
+        const totalRating = reviews.reduce((sum, r) => sum + (r.rating || 0), 0)
+        stats.averageRating = Number((totalRating / reviews.length).toFixed(1))
+        
+        // Calculate rating distribution
+        reviews.forEach(r => {
+          const rating = r.rating || 0
+          if (rating >= 1 && rating <= 5) {
+            stats.ratingDistribution[rating as 1|2|3|4|5]++
+          }
+        })
+      }
+    } catch (error) {
+      console.log('Reviews collection not found, returning empty stats')
     }
 
     return NextResponse.json({

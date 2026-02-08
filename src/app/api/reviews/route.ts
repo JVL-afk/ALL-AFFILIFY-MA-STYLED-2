@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, getUserById } from '@/lib/auth'
+import { connectToDatabase } from '@/lib/mongodb'
+import { ObjectId } from 'mongodb'
 
 export async function GET(request: NextRequest) {
   try {
@@ -39,32 +41,43 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Mock reviews data for now
-    const reviews = [
-      {
-        id: '1',
-        customerName: 'John Smith',
-        customerEmail: 'john@example.com',
-        rating: 5,
-        title: 'Amazing product!',
-        content: 'This product exceeded my expectations. Highly recommended!',
-        productId: 'prod1',
-        productName: 'Sample Product',
-        websiteId: 'web1',
-        websiteName: 'My Website',
-        status: 'approved',
-        isVisible: true,
-        isFeatured: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        source: 'manual',
-        metadata: {
-          verified: true,
-          helpfulVotes: 5,
+    // Fetch real reviews from database
+    const { db } = await connectToDatabase()
+    const userId = new ObjectId(user._id)
+
+    let reviews: any[] = []
+    try {
+      const reviewsData = await db.collection('reviews')
+        .find({ userId })
+        .sort({ createdAt: -1 })
+        .toArray()
+      
+      reviews = reviewsData.map(review => ({
+        id: review._id.toString(),
+        customerName: review.customerName || '',
+        customerEmail: review.customerEmail || '',
+        rating: review.rating || 0,
+        title: review.title || '',
+        content: review.content || '',
+        productId: review.productId || '',
+        productName: review.productName || '',
+        websiteId: review.websiteId || '',
+        websiteName: review.websiteName || '',
+        status: review.status || 'pending',
+        isVisible: review.isVisible || false,
+        isFeatured: review.isFeatured || false,
+        createdAt: review.createdAt || new Date().toISOString(),
+        updatedAt: review.updatedAt || new Date().toISOString(),
+        source: review.source || 'manual',
+        metadata: review.metadata || {
+          verified: false,
+          helpfulVotes: 0,
           reportedCount: 0
         }
-      }
-    ]
+      }))
+    } catch (error) {
+      console.log('Reviews collection not found, returning empty array')
+    }
 
     return NextResponse.json({
       success: true,

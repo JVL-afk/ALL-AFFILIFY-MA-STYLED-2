@@ -83,128 +83,48 @@ export default function EmailMarketingPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [stats, setStats] = useState({
+    totalSubscribers: 0,
+    openRate: 0,
+    clickRate: 0,
+    revenue: 0
+  })
 
   useEffect(() => {
-    loadCampaigns()
-    loadTemplates()
-    loadSubscribers()
+    loadAllData()
   }, [])
 
-  const loadCampaigns = () => {
-    const mockCampaigns: EmailCampaign[] = [
-      {
-        id: '1',
-        name: 'Welcome Series - New Subscribers',
-        subject: 'Welcome to AFFILIFY! Your journey starts here',
-        status: 'active',
-        recipients: 1250,
-        openRate: 45.2,
-        clickRate: 12.8,
-        type: 'automated',
-        revenue: 3240,
-        conversions: 156
-      },
-      {
-        id: '2',
-        name: 'Black Friday Deals 2024',
-        subject: '🔥 Exclusive Black Friday Deals - Up to 70% Off!',
-        status: 'sent',
-        recipients: 8500,
-        openRate: 38.7,
-        clickRate: 15.3,
-        sentDate: new Date(Date.now() - 86400000),
-        type: 'promotional',
-        revenue: 12850,
-        conversions: 428
-      },
-      {
-        id: '3',
-        name: 'Weekly Newsletter #47',
-        subject: 'Top Affiliate Marketing Trends This Week',
-        status: 'scheduled',
-        recipients: 6200,
-        openRate: 0,
-        clickRate: 0,
-        scheduledDate: new Date(Date.now() + 172800000),
-        type: 'newsletter',
-        revenue: 0,
-        conversions: 0
-      },
-      {
-        id: '4',
-        name: 'Product Launch - AI Website Builder',
-        subject: 'Introducing: AI-Powered Website Builder',
-        status: 'draft',
-        recipients: 0,
-        openRate: 0,
-        clickRate: 0,
-        type: 'promotional',
-        revenue: 0,
-        conversions: 0
-      },
-    ]
-    setCampaigns(mockCampaigns)
+  const loadAllData = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch('/api/email-marketing/data')
+      if (response.ok) {
+        const result = await response.json()
+        setCampaigns(result.data.campaigns || [])
+        setTemplates(result.data.templates || [])
+        setSubscribers(result.data.subscribers || [])
+        setStats(result.data.stats || {
+          totalSubscribers: 0,
+          openRate: 0,
+          clickRate: 0,
+          revenue: 0
+        })
+      } else {
+        setCampaigns([])
+        setTemplates([])
+        setSubscribers([])
+      }
+    } catch (error) {
+      console.error('Error loading email marketing data:', error)
+      setCampaigns([])
+      setTemplates([])
+      setSubscribers([])
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const loadTemplates = () => {
-    const mockTemplates: EmailTemplate[] = [
-      {
-        id: '1',
-        name: 'Welcome Email',
-        category: 'Onboarding',
-        thumbnail: '/templates/welcome.jpg',
-        description: 'Perfect for welcoming new subscribers',
-        uses: 245
-      },
-      {
-        id: '2',
-        name: 'Product Promotion',
-        category: 'Sales',
-        thumbnail: '/templates/promotion.jpg',
-        description: 'Drive sales with compelling product showcases',
-        uses: 189
-      },
-      {
-        id: '3',
-        name: 'Newsletter Template',
-        category: 'Content',
-        thumbnail: '/templates/newsletter.jpg',
-        description: 'Share valuable content with your audience',
-        uses: 312
-      },
-      {
-        id: '4',
-        name: 'Abandoned Cart',
-        category: 'Automation',
-        thumbnail: '/templates/cart.jpg',
-        description: 'Recover lost sales with targeted reminders',
-        uses: 156
-      },
-    ]
-    setTemplates(mockTemplates)
-  }
-
-  const loadSubscribers = () => {
-    const mockSubscribers: Subscriber[] = [
-      {
-        id: '1',
-        email: 'john@example.com',
-        name: 'John Doe',
-        status: 'active',
-        joinedDate: new Date(Date.now() - 30 * 86400000),
-        tags: ['Premium', 'Engaged']
-      },
-      {
-        id: '2',
-        email: 'sarah@example.com',
-        name: 'Sarah Smith',
-        status: 'active',
-        joinedDate: new Date(Date.now() - 15 * 86400000),
-        tags: ['New']
-      },
-    ]
-    setSubscribers(mockSubscribers)
-  }
+  // Removed: loadCampaigns, loadTemplates, loadSubscribers - now using loadAllData
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -303,10 +223,9 @@ export default function EmailMarketingPage() {
               <Users className="h-4 w-4 text-teal-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">12,450</div>
-              <p className="text-xs text-teal-300/60 mt-1 flex items-center">
-                <ArrowUp className="w-3 h-3 mr-1 text-green-400" />
-                +8.2% from last month
+              <div className="text-3xl font-bold text-white">{stats.totalSubscribers.toLocaleString()}</div>
+              <p className="text-xs text-teal-300/60 mt-1">
+                Total active subscribers
               </p>
             </CardContent>
           </Card>
@@ -317,10 +236,9 @@ export default function EmailMarketingPage() {
               <Eye className="h-4 w-4 text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">42.3%</div>
-              <p className="text-xs text-green-300/60 mt-1 flex items-center">
-                <ArrowUp className="w-3 h-3 mr-1 text-green-400" />
-                +2.1% from last month
+              <div className="text-3xl font-bold text-white">{stats.openRate}%</div>
+              <p className="text-xs text-green-300/60 mt-1">
+                Average email open rate
               </p>
             </CardContent>
           </Card>
@@ -331,10 +249,9 @@ export default function EmailMarketingPage() {
               <MousePointer className="h-4 w-4 text-teal-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">14.7%</div>
-              <p className="text-xs text-teal-300/60 mt-1 flex items-center">
-                <ArrowUp className="w-3 h-3 mr-1 text-green-400" />
-                +1.3% from last month
+              <div className="text-3xl font-bold text-white">{stats.clickRate}%</div>
+              <p className="text-xs text-teal-300/60 mt-1">
+                Average click-through rate
               </p>
             </CardContent>
           </Card>
@@ -345,10 +262,9 @@ export default function EmailMarketingPage() {
               <DollarSign className="h-4 w-4 text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">$18,250</div>
-              <p className="text-xs text-green-300/60 mt-1 flex items-center">
-                <ArrowUp className="w-3 h-3 mr-1 text-green-400" />
-                +15.4% from last month
+              <div className="text-3xl font-bold text-white">${stats.revenue.toLocaleString()}</div>
+              <p className="text-xs text-green-300/60 mt-1">
+                Total email revenue
               </p>
             </CardContent>
           </Card>
