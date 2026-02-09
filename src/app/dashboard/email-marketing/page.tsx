@@ -816,143 +816,57 @@ export default function EmailMarketingPage() {
           </Card>
         </motion.div>
 
-        {/* Recent Activity */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="mt-8"
-        >
-          <Card className="bg-black/40 backdrop-blur-sm border-teal-500/30">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center space-x-2">
-                <Activity className="w-5 h-5 text-teal-400" />
-                <span>Recent Activity</span>
-              </CardTitle>
-              <CardDescription className="text-teal-200/60">Latest email marketing updates</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-start space-x-3 p-3 bg-green-500/10 rounded-lg border border-green-500/30">
-                  <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Send className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-white font-medium text-sm">Campaign "Black Friday Deals" sent successfully</div>
-                    <div className="text-xs text-green-200/70 mt-1">8,500 recipients • 1 hour ago</div>
+        {/* Recent Activity - Hidden when empty to avoid mock data */}
+        {campaigns.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="mt-8"
+          >
+            <Card className="bg-black/40 backdrop-blur-sm border-teal-500/30">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center space-x-2">
+                  <Activity className="w-5 h-5 text-teal-400" />
+                  <span>Recent Activity</span>
+                </CardTitle>
+                <CardDescription className="text-teal-200/60">Latest email marketing updates</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="text-center py-8 text-teal-200/50">
+                    No recent activity to show
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
-                <div className="flex items-start space-x-3 p-3 bg-teal-500/10 rounded-lg border border-teal-500/30">
-                  <div className="w-8 h-8 bg-gradient-to-r from-teal-500 to-cyan-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Users className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-white font-medium text-sm">125 new subscribers added</div>
-                    <div className="text-xs text-teal-200/70 mt-1">From website signup form • 3 hours ago</div>
-                  </div>
+        {/* Performance Insights - Hidden when empty to avoid mock data */}
+        {campaigns.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="mt-8 mb-8"
+          >
+            <Card className="bg-black/40 backdrop-blur-sm border-green-500/30">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center space-x-2">
+                  <Sparkles className="w-5 h-5 text-green-400" />
+                  <span>AI-Powered Insights</span>
+                </CardTitle>
+                <CardDescription className="text-green-200/60">Recommendations to improve your campaigns</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-green-200/50">
+                  Insufficient data for AI insights. Start sending campaigns to see recommendations.
                 </div>
-
-                <div className="flex items-start space-x-3 p-3 bg-green-500/10 rounded-lg border border-green-500/30">
-                  <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-teal-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <TrendingUp className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-white font-medium text-sm">Open rate improved by 12% this week</div>
-                    <div className="text-xs text-green-200/70 mt-1">Compared to last week • 1 day ago</div>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3 p-3 bg-teal-500/10 rounded-lg border border-teal-500/30">
-                  <div className="w-8 h-8 bg-gradient-to-r from-teal-500 to-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-white font-medium text-sm">New template "Product Launch" created</div>
-                    <div className="text-xs text-teal-200/70 mt-1">Ready to use • 2 days ago</div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Performance Insights */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className="mt-8 mb-8"
-        >
-          <Card className="bg-black/40 backdrop-blur-sm border-green-500/30">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center space-x-2">
-                <Sparkles className="w-5 h-5 text-green-400" />
-                <span>AI-Powered Insights</span>
-              </CardTitle>
-              <CardDescription className="text-green-200/60">Recommendations to improve your campaigns</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/30">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <TrendingUp className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <div className="text-white font-semibold mb-1">Best Send Time</div>
-                      <div className="text-sm text-green-200/70">
-                        Your subscribers are most active on Tuesdays at 10 AM. Schedule campaigns accordingly for +23% open rates.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-teal-500/10 rounded-lg border border-teal-500/30">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-teal-500 to-cyan-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Target className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <div className="text-white font-semibold mb-1">Segment Opportunity</div>
-                      <div className="text-sm text-teal-200/70">
-                        Create a "High Engagement" segment for subscribers who opened 5+ emails. They convert 3x better.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/30">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Sparkles className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <div className="text-white font-semibold mb-1">Subject Line Tip</div>
-                      <div className="text-sm text-green-200/70">
-                        Emails with emojis in subject lines get 15% higher open rates. Try adding relevant emojis to your next campaign.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-teal-500/10 rounded-lg border border-teal-500/30">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-teal-500 to-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Zap className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <div className="text-white font-semibold mb-1">Re-engagement Campaign</div>
-                      <div className="text-sm text-teal-200/70">
-                        You have 847 inactive subscribers. Send a win-back campaign to re-engage them before they forget you.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Create Campaign Modal */}
         <AnimatePresence>
