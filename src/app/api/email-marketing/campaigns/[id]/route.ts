@@ -6,9 +6,10 @@ import { ObjectId } from 'mongodb'
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const authResult = await verifyAuth(request)
     if (!authResult.success) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     
@@ -16,7 +17,7 @@ export async function DELETE(
     const { db } = await connectToDatabase()
     
     await db.collection('email_campaigns').deleteOne({
-      _id: new ObjectId(params.id),
+      _id: new ObjectId(id),
       userId: new ObjectId(user.id)
     })
     
