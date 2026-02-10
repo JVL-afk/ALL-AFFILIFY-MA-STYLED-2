@@ -83,6 +83,11 @@ export default function EmailMarketingPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [newCampaign, setNewCampaign] = useState({
+    name: '',
+    subject: '',
+    type: 'newsletter'
+  })
   const [stats, setStats] = useState({
     totalSubscribers: 0,
     openRate: 0,
@@ -124,7 +129,56 @@ export default function EmailMarketingPage() {
     }
   }
 
-  // Removed: loadCampaigns, loadTemplates, loadSubscribers - now using loadAllData
+  const handleCreateCampaign = async () => {
+    if (!newCampaign.name || !newCampaign.subject) {
+      setError('Please fill in all fields')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch('/api/email-marketing/campaigns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newCampaign)
+      })
+
+      if (response.ok) {
+        setSuccess('Campaign created successfully!')
+        setShowCreateModal(false)
+        setNewCampaign({ name: '', subject: '', type: 'newsletter' })
+        loadAllData()
+      } else {
+        setError('Failed to create campaign')
+      }
+    } catch (error) {
+      setError('Error creating campaign')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteCampaign = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this campaign?')) return
+
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/email-marketing/campaigns/${id}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        setSuccess('Campaign deleted successfully!')
+        loadAllData()
+      } else {
+        setError('Failed to delete campaign')
+      }
+    } catch (error) {
+      setError('Error deleting campaign')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -185,6 +239,24 @@ export default function EmailMarketingPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
+          {error && (
+            <div className="mb-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 flex items-center justify-between">
+              <div className="flex items-center">
+                <AlertCircle className="w-5 h-5 mr-2" />
+                {error}
+              </div>
+              <button onClick={() => setError('')}><X className="w-4 h-4" /></button>
+            </div>
+          )}
+          {success && (
+            <div className="mb-4 p-4 bg-green-500/20 border border-green-500/50 rounded-lg text-green-200 flex items-center justify-between">
+              <div className="flex items-center">
+                <CheckCircle className="w-5 h-5 mr-2" />
+                {success}
+              </div>
+              <button onClick={() => setSuccess('')}><X className="w-4 h-4" /></button>
+            </div>
+          )}
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
             <div>
               <div className="flex items-center space-x-3 mb-2">
@@ -435,7 +507,13 @@ export default function EmailMarketingPage() {
                           <Button size="sm" variant="outline" className="border-teal-500/50 text-teal-300 hover:bg-teal-500/20">
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button size="sm" variant="outline" className="border-red-500/50 text-red-300 hover:bg-red-500/20">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="border-red-500/50 text-red-300 hover:bg-red-500/20"
+                            onClick={() => handleDeleteCampaign(campaign.id)}
+                            disabled={loading}
+                          >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -901,6 +979,8 @@ export default function EmailMarketingPage() {
                   <div>
                     <label className="block text-sm font-medium text-teal-200 mb-2">Campaign Name</label>
                     <Input 
+                      value={newCampaign.name}
+                      onChange={(e) => setNewCampaign({ ...newCampaign, name: e.target.value })}
                       placeholder="e.g., Summer Sale 2024" 
                       className="bg-black/50 border-teal-500/30 text-white placeholder:text-teal-300/50 h-12"
                     />
@@ -909,6 +989,8 @@ export default function EmailMarketingPage() {
                   <div>
                     <label className="block text-sm font-medium text-teal-200 mb-2">Subject Line</label>
                     <Input 
+                      value={newCampaign.subject}
+                      onChange={(e) => setNewCampaign({ ...newCampaign, subject: e.target.value })}
                       placeholder="e.g., 🔥 Don't Miss Our Summer Sale!" 
                       className="bg-black/50 border-teal-500/30 text-white placeholder:text-teal-300/50 h-12"
                     />
@@ -916,8 +998,11 @@ export default function EmailMarketingPage() {
                   
                   <div>
                     <label className="block text-sm font-medium text-teal-200 mb-2">Campaign Type</label>
-                    <select className="w-full p-3 border border-teal-500/30 rounded-lg bg-black/50 text-white h-12">
-                      <option value="">Select type</option>
+                    <select 
+                      value={newCampaign.type}
+                      onChange={(e) => setNewCampaign({ ...newCampaign, type: e.target.value as any })}
+                      className="w-full p-3 border border-teal-500/30 rounded-lg bg-black/50 text-white h-12"
+                    >
                       <option value="newsletter">Newsletter</option>
                       <option value="promotional">Promotional</option>
                       <option value="automated">Automated</option>
@@ -959,14 +1044,12 @@ export default function EmailMarketingPage() {
                     Cancel
                   </Button>
                   <Button
-                    onClick={() => {
-                      setShowCreateModal(false)
-                      setSuccess('Campaign created successfully!')
-                    }}
+                    onClick={handleCreateCampaign}
+                    disabled={loading}
                     className="flex-1 bg-gradient-to-r from-teal-500 to-green-600 hover:from-teal-600 hover:to-green-700 text-white"
                   >
                     <Sparkles className="w-4 h-4 mr-2" />
-                    Create Campaign
+                    {loading ? 'Creating...' : 'Create Campaign'}
                   </Button>
                 </div>
               </motion.div>
