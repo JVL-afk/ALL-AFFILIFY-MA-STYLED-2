@@ -94,6 +94,14 @@ export default function EmailMarketingPage() {
     clickRate: 0,
     revenue: 0
   })
+  const [showImportModal, setShowImportModal] = useState(false)
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [settings, setSettings] = useState({
+    senderName: 'AFFILIFY Enterprise',
+    senderEmail: 'marketing@affilify.eu',
+    replyTo: 'support@affilify.eu',
+    footerAddress: '123 Enterprise Way, Tech City'
+  })
 
   useEffect(() => {
     loadAllData()
@@ -178,6 +186,47 @@ export default function EmailMarketingPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleImportContacts = async () => {
+    // In a real-world scenario, this would handle a file upload.
+    // For this demonstration, we'll simulate an import of sample data.
+    const sampleSubscribers = [
+      { email: 'customer1@example.com', name: 'John Doe', tags: ['imported', 'vip'] },
+      { email: 'customer2@example.com', name: 'Jane Smith', tags: ['imported', 'lead'] }
+    ]
+
+    setLoading(true)
+    try {
+      const response = await fetch('/api/email-marketing/subscribers/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscribers: sampleSubscribers })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        setSuccess(result.message || 'Contacts imported successfully!')
+        setShowImportModal(false)
+        loadAllData()
+      } else {
+        setError('Failed to import contacts')
+      }
+    } catch (error) {
+      setError('Error importing contacts')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSaveSettings = async () => {
+    setLoading(true)
+    // Simulate API call for settings
+    setTimeout(() => {
+      setSuccess('Settings saved successfully!')
+      setShowSettingsModal(false)
+      setLoading(false)
+    }, 1000)
   }
 
   const getStatusColor = (status: string) => {
@@ -842,7 +891,10 @@ export default function EmailMarketingPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <button className="p-4 bg-teal-500/10 rounded-lg border border-teal-500/30 hover:border-green-500/50 transition-all text-left group">
+                <button 
+                  onClick={() => setShowCreateModal(true)}
+                  className="p-4 bg-teal-500/10 rounded-lg border border-teal-500/30 hover:border-green-500/50 transition-all text-left group"
+                >
                   <div className="flex items-start space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-r from-teal-500 to-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Plus className="w-5 h-5 text-white" />
@@ -854,7 +906,10 @@ export default function EmailMarketingPage() {
                   </div>
                 </button>
 
-                <button className="p-4 bg-green-500/10 rounded-lg border border-green-500/30 hover:border-teal-500/50 transition-all text-left group">
+                <button 
+                  onClick={() => setShowImportModal(true)}
+                  className="p-4 bg-green-500/10 rounded-lg border border-green-500/30 hover:border-teal-500/50 transition-all text-left group"
+                >
                   <div className="flex items-start space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Users className="w-5 h-5 text-white" />
@@ -866,7 +921,10 @@ export default function EmailMarketingPage() {
                   </div>
                 </button>
 
-                <button className="p-4 bg-teal-500/10 rounded-lg border border-teal-500/30 hover:border-green-500/50 transition-all text-left group">
+                <button 
+                  onClick={() => setActiveTab('analytics')}
+                  className="p-4 bg-teal-500/10 rounded-lg border border-teal-500/30 hover:border-green-500/50 transition-all text-left group"
+                >
                   <div className="flex items-start space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-r from-teal-500 to-cyan-600 rounded-lg flex items-center justify-center flex-shrink-0">
                       <BarChart3 className="w-5 h-5 text-white" />
@@ -878,7 +936,10 @@ export default function EmailMarketingPage() {
                   </div>
                 </button>
 
-                <button className="p-4 bg-green-500/10 rounded-lg border border-green-500/30 hover:border-teal-500/50 transition-all text-left group">
+                <button 
+                  onClick={() => setShowSettingsModal(true)}
+                  className="p-4 bg-green-500/10 rounded-lg border border-green-500/30 hover:border-teal-500/50 transition-all text-left group"
+                >
                   <div className="flex items-start space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-600 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Settings className="w-5 h-5 text-white" />
@@ -1050,6 +1111,125 @@ export default function EmailMarketingPage() {
                   >
                     <Sparkles className="w-4 h-4 mr-2" />
                     {loading ? 'Creating...' : 'Create Campaign'}
+                  </Button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Import Contacts Modal */}
+        <AnimatePresence>
+          {showImportModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+              onClick={() => setShowImportModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-gradient-to-br from-gray-900 via-teal-950 to-gray-900 border border-teal-500/30 rounded-xl p-6 w-full max-w-md"
+              >
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-white">Import Contacts</h2>
+                  <button onClick={() => setShowImportModal(false)} className="text-teal-200 hover:text-white">
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                <div className="space-y-4 mb-6">
+                  <div className="p-8 border-2 border-dashed border-teal-500/30 rounded-lg text-center">
+                    <Download className="w-10 h-10 text-teal-400 mx-auto mb-3" />
+                    <p className="text-teal-200 font-medium">Click to upload CSV</p>
+                    <p className="text-xs text-teal-200/50 mt-1">or drag and drop your file here</p>
+                  </div>
+                  <div className="text-xs text-teal-200/60 bg-teal-500/10 p-3 rounded border border-teal-500/20">
+                    <p className="font-semibold mb-1">CSV Format Requirements:</p>
+                    <p>Column 1: Email (required)</p>
+                    <p>Column 2: Name (optional)</p>
+                    <p>Column 3: Tags (comma separated)</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setShowImportModal(false)} className="flex-1 border-teal-500/50 text-teal-300">
+                    Cancel
+                  </Button>
+                  <Button onClick={handleImportContacts} disabled={loading} className="flex-1 bg-teal-500 text-white">
+                    {loading ? 'Importing...' : 'Start Import'}
+                  </Button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Settings Modal */}
+        <AnimatePresence>
+          {showSettingsModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+              onClick={() => setShowSettingsModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-gradient-to-br from-gray-900 via-teal-950 to-gray-900 border border-teal-500/30 rounded-xl p-6 w-full max-w-lg"
+              >
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-white">Email Settings</h2>
+                  <button onClick={() => setShowSettingsModal(false)} className="text-teal-200 hover:text-white">
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-teal-200 mb-1">Default Sender Name</label>
+                    <Input 
+                      value={settings.senderName}
+                      onChange={(e) => setSettings({...settings, senderName: e.target.value})}
+                      className="bg-black/50 border-teal-500/30 text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-teal-200 mb-1">Default Sender Email</label>
+                    <Input 
+                      value={settings.senderEmail}
+                      onChange={(e) => setSettings({...settings, senderEmail: e.target.value})}
+                      className="bg-black/50 border-teal-500/30 text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-teal-200 mb-1">Reply-To Address</label>
+                    <Input 
+                      value={settings.replyTo}
+                      onChange={(e) => setSettings({...settings, replyTo: e.target.value})}
+                      className="bg-black/50 border-teal-500/30 text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-teal-200 mb-1">Physical Address (for footer)</label>
+                    <Input 
+                      value={settings.footerAddress}
+                      onChange={(e) => setSettings({...settings, footerAddress: e.target.value})}
+                      className="bg-black/50 border-teal-500/30 text-white"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setShowSettingsModal(false)} className="flex-1 border-teal-500/50 text-teal-300">
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSaveSettings} disabled={loading} className="flex-1 bg-green-600 text-white">
+                    {loading ? 'Saving...' : 'Save Settings'}
                   </Button>
                 </div>
               </motion.div>
