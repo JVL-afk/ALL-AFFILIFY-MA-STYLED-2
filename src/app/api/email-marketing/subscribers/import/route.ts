@@ -1,14 +1,13 @@
 
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyAuth } from '@/lib/auth';
 import { connectToDatabase } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const authResult = await verifyAuth(req);
+    if (!authResult.success) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -19,7 +18,8 @@ export async function POST(req: Request) {
     }
 
     const { db } = await connectToDatabase();
-    const userId = session.user.id;
+    const user = authResult.user as any;
+    const userId = user._id || user.id;
 
     const formattedSubscribers = subscribers.map((sub: any) => ({
       userId: new ObjectId(userId),
