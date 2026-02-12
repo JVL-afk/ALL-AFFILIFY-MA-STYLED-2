@@ -80,6 +80,12 @@ export default function ApiManagementPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [stats, setStats] = useState({
+    activeKeys: 0,
+    requestsToday: 0,
+    successRate: 0,
+    avgResponseTime: 0
+  })
 
   useEffect(() => {
     loadApiData()
@@ -92,6 +98,12 @@ export default function ApiManagementPage() {
       if (response.ok) {
         const result = await response.json()
         setApiKeys(result.data.apiKeys || [])
+        setStats(result.data.stats || {
+          activeKeys: 0,
+          requestsToday: 0,
+          successRate: 0,
+          avgResponseTime: 0
+        })
         // Endpoints are static, can be defined here or fetched
         setEndpoints([])
         setUsage([])
@@ -335,10 +347,9 @@ export default function ApiManagementPage() {
               <BarChart3 className="h-4 w-4 text-cyan-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">1,650</div>
-              <p className="text-xs text-cyan-300/60 mt-1 flex items-center">
-                <ArrowUp className="w-3 h-3 mr-1 text-green-400" />
-                +12% from yesterday
+              <div className="text-3xl font-bold text-white">{stats.requestsToday.toLocaleString()}</div>
+              <p className="text-xs text-cyan-300/60 mt-1">
+                API requests today
               </p>
             </CardContent>
           </Card>
@@ -349,9 +360,9 @@ export default function ApiManagementPage() {
               <CheckCircle className="h-4 w-4 text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">99.4%</div>
+              <div className="text-3xl font-bold text-white">{stats.successRate}%</div>
               <p className="text-xs text-green-300/60 mt-1">
-                9 errors today
+                Success rate
               </p>
             </CardContent>
           </Card>
@@ -362,10 +373,9 @@ export default function ApiManagementPage() {
               <Clock className="h-4 w-4 text-cyan-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">225ms</div>
-              <p className="text-xs text-cyan-300/60 mt-1 flex items-center">
-                <ArrowDown className="w-3 h-3 mr-1 text-green-400" />
-                -15ms from yesterday
+              <div className="text-3xl font-bold text-white">{stats.avgResponseTime}ms</div>
+              <p className="text-xs text-cyan-300/60 mt-1">
+                Average response time
               </p>
             </CardContent>
           </Card>

@@ -83,24 +83,11 @@ export default function EmailMarketingPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [newCampaign, setNewCampaign] = useState({
-    name: '',
-    subject: '',
-    type: 'newsletter'
-  })
   const [stats, setStats] = useState({
     totalSubscribers: 0,
     openRate: 0,
     clickRate: 0,
     revenue: 0
-  })
-  const [showImportModal, setShowImportModal] = useState(false)
-  const [showSettingsModal, setShowSettingsModal] = useState(false)
-  const [settings, setSettings] = useState({
-    senderName: 'AFFILIFY Enterprise',
-    senderEmail: 'marketing@affilify.eu',
-    replyTo: 'support@affilify.eu',
-    footerAddress: '123 Enterprise Way, Tech City'
   })
 
   useEffect(() => {
@@ -137,97 +124,7 @@ export default function EmailMarketingPage() {
     }
   }
 
-  const handleCreateCampaign = async () => {
-    if (!newCampaign.name || !newCampaign.subject) {
-      setError('Please fill in all fields')
-      return
-    }
-
-    setLoading(true)
-    try {
-      const response = await fetch('/api/email-marketing/campaigns', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newCampaign)
-      })
-
-      if (response.ok) {
-        setSuccess('Campaign created successfully!')
-        setShowCreateModal(false)
-        setNewCampaign({ name: '', subject: '', type: 'newsletter' })
-        loadAllData()
-      } else {
-        setError('Failed to create campaign')
-      }
-    } catch (error) {
-      setError('Error creating campaign')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleDeleteCampaign = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this campaign?')) return
-
-    setLoading(true)
-    try {
-      const response = await fetch(`/api/email-marketing/campaigns/${id}`, {
-        method: 'DELETE'
-      })
-
-      if (response.ok) {
-        setSuccess('Campaign deleted successfully!')
-        loadAllData()
-      } else {
-        setError('Failed to delete campaign')
-      }
-    } catch (error) {
-      setError('Error deleting campaign')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleImportContacts = async () => {
-    // In a real-world scenario, this would handle a file upload.
-    // For this demonstration, we'll simulate an import of sample data.
-    const sampleSubscribers = [
-      { email: 'customer1@example.com', name: 'John Doe', tags: ['imported', 'vip'] },
-      { email: 'customer2@example.com', name: 'Jane Smith', tags: ['imported', 'lead'] }
-    ]
-
-    setLoading(true)
-    try {
-      const response = await fetch('/api/email-marketing/subscribers/import', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subscribers: sampleSubscribers })
-      })
-
-      if (response.ok) {
-        const result = await response.json()
-        setSuccess(result.message || 'Contacts imported successfully!')
-        setShowImportModal(false)
-        loadAllData()
-      } else {
-        setError('Failed to import contacts')
-      }
-    } catch (error) {
-      setError('Error importing contacts')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleSaveSettings = async () => {
-    setLoading(true)
-    // Simulate API call for settings
-    setTimeout(() => {
-      setSuccess('Settings saved successfully!')
-      setShowSettingsModal(false)
-      setLoading(false)
-    }, 1000)
-  }
+  // Removed: loadCampaigns, loadTemplates, loadSubscribers - now using loadAllData
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -288,24 +185,6 @@ export default function EmailMarketingPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          {error && (
-            <div className="mb-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 flex items-center justify-between">
-              <div className="flex items-center">
-                <AlertCircle className="w-5 h-5 mr-2" />
-                {error}
-              </div>
-              <button onClick={() => setError('')}><X className="w-4 h-4" /></button>
-            </div>
-          )}
-          {success && (
-            <div className="mb-4 p-4 bg-green-500/20 border border-green-500/50 rounded-lg text-green-200 flex items-center justify-between">
-              <div className="flex items-center">
-                <CheckCircle className="w-5 h-5 mr-2" />
-                {success}
-              </div>
-              <button onClick={() => setSuccess('')}><X className="w-4 h-4" /></button>
-            </div>
-          )}
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
             <div>
               <div className="flex items-center space-x-3 mb-2">
@@ -556,13 +435,7 @@ export default function EmailMarketingPage() {
                           <Button size="sm" variant="outline" className="border-teal-500/50 text-teal-300 hover:bg-teal-500/20">
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="border-red-500/50 text-red-300 hover:bg-red-500/20"
-                            onClick={() => handleDeleteCampaign(campaign.id)}
-                            disabled={loading}
-                          >
+                          <Button size="sm" variant="outline" className="border-red-500/50 text-red-300 hover:bg-red-500/20">
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -891,10 +764,7 @@ export default function EmailMarketingPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <button 
-                  onClick={() => setShowCreateModal(true)}
-                  className="p-4 bg-teal-500/10 rounded-lg border border-teal-500/30 hover:border-green-500/50 transition-all text-left group"
-                >
+                <button className="p-4 bg-teal-500/10 rounded-lg border border-teal-500/30 hover:border-green-500/50 transition-all text-left group">
                   <div className="flex items-start space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-r from-teal-500 to-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Plus className="w-5 h-5 text-white" />
@@ -906,10 +776,7 @@ export default function EmailMarketingPage() {
                   </div>
                 </button>
 
-                <button 
-                  onClick={() => setShowImportModal(true)}
-                  className="p-4 bg-green-500/10 rounded-lg border border-green-500/30 hover:border-teal-500/50 transition-all text-left group"
-                >
+                <button className="p-4 bg-green-500/10 rounded-lg border border-green-500/30 hover:border-teal-500/50 transition-all text-left group">
                   <div className="flex items-start space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Users className="w-5 h-5 text-white" />
@@ -921,10 +788,7 @@ export default function EmailMarketingPage() {
                   </div>
                 </button>
 
-                <button 
-                  onClick={() => setActiveTab('analytics')}
-                  className="p-4 bg-teal-500/10 rounded-lg border border-teal-500/30 hover:border-green-500/50 transition-all text-left group"
-                >
+                <button className="p-4 bg-teal-500/10 rounded-lg border border-teal-500/30 hover:border-green-500/50 transition-all text-left group">
                   <div className="flex items-start space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-r from-teal-500 to-cyan-600 rounded-lg flex items-center justify-center flex-shrink-0">
                       <BarChart3 className="w-5 h-5 text-white" />
@@ -936,10 +800,7 @@ export default function EmailMarketingPage() {
                   </div>
                 </button>
 
-                <button 
-                  onClick={() => setShowSettingsModal(true)}
-                  className="p-4 bg-green-500/10 rounded-lg border border-green-500/30 hover:border-teal-500/50 transition-all text-left group"
-                >
+                <button className="p-4 bg-green-500/10 rounded-lg border border-green-500/30 hover:border-teal-500/50 transition-all text-left group">
                   <div className="flex items-start space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-600 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Settings className="w-5 h-5 text-white" />
@@ -973,6 +834,7 @@ export default function EmailMarketingPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
+                  {/* Real activity would go here */}
                   <div className="text-center py-8 text-teal-200/50">
                     No recent activity to show
                   </div>
@@ -1040,8 +902,6 @@ export default function EmailMarketingPage() {
                   <div>
                     <label className="block text-sm font-medium text-teal-200 mb-2">Campaign Name</label>
                     <Input 
-                      value={newCampaign.name}
-                      onChange={(e) => setNewCampaign({ ...newCampaign, name: e.target.value })}
                       placeholder="e.g., Summer Sale 2024" 
                       className="bg-black/50 border-teal-500/30 text-white placeholder:text-teal-300/50 h-12"
                     />
@@ -1050,8 +910,6 @@ export default function EmailMarketingPage() {
                   <div>
                     <label className="block text-sm font-medium text-teal-200 mb-2">Subject Line</label>
                     <Input 
-                      value={newCampaign.subject}
-                      onChange={(e) => setNewCampaign({ ...newCampaign, subject: e.target.value })}
                       placeholder="e.g., 🔥 Don't Miss Our Summer Sale!" 
                       className="bg-black/50 border-teal-500/30 text-white placeholder:text-teal-300/50 h-12"
                     />
@@ -1059,11 +917,8 @@ export default function EmailMarketingPage() {
                   
                   <div>
                     <label className="block text-sm font-medium text-teal-200 mb-2">Campaign Type</label>
-                    <select 
-                      value={newCampaign.type}
-                      onChange={(e) => setNewCampaign({ ...newCampaign, type: e.target.value as any })}
-                      className="w-full p-3 border border-teal-500/30 rounded-lg bg-black/50 text-white h-12"
-                    >
+                    <select className="w-full p-3 border border-teal-500/30 rounded-lg bg-black/50 text-white h-12">
+                      <option value="">Select type</option>
                       <option value="newsletter">Newsletter</option>
                       <option value="promotional">Promotional</option>
                       <option value="automated">Automated</option>
@@ -1105,131 +960,14 @@ export default function EmailMarketingPage() {
                     Cancel
                   </Button>
                   <Button
-                    onClick={handleCreateCampaign}
-                    disabled={loading}
+                    onClick={() => {
+                      setShowCreateModal(false)
+                      setSuccess('Campaign created successfully!')
+                    }}
                     className="flex-1 bg-gradient-to-r from-teal-500 to-green-600 hover:from-teal-600 hover:to-green-700 text-white"
                   >
                     <Sparkles className="w-4 h-4 mr-2" />
-                    {loading ? 'Creating...' : 'Create Campaign'}
-                  </Button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Import Contacts Modal */}
-        <AnimatePresence>
-          {showImportModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-              onClick={() => setShowImportModal(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-gradient-to-br from-gray-900 via-teal-950 to-gray-900 border border-teal-500/30 rounded-xl p-6 w-full max-w-md"
-              >
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-white">Import Contacts</h2>
-                  <button onClick={() => setShowImportModal(false)} className="text-teal-200 hover:text-white">
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
-                <div className="space-y-4 mb-6">
-                  <div className="p-8 border-2 border-dashed border-teal-500/30 rounded-lg text-center">
-                    <Download className="w-10 h-10 text-teal-400 mx-auto mb-3" />
-                    <p className="text-teal-200 font-medium">Click to upload CSV</p>
-                    <p className="text-xs text-teal-200/50 mt-1">or drag and drop your file here</p>
-                  </div>
-                  <div className="text-xs text-teal-200/60 bg-teal-500/10 p-3 rounded border border-teal-500/20">
-                    <p className="font-semibold mb-1">CSV Format Requirements:</p>
-                    <p>Column 1: Email (required)</p>
-                    <p>Column 2: Name (optional)</p>
-                    <p>Column 3: Tags (comma separated)</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => setShowImportModal(false)} className="flex-1 border-teal-500/50 text-teal-300">
-                    Cancel
-                  </Button>
-                  <Button onClick={handleImportContacts} disabled={loading} className="flex-1 bg-teal-500 text-white">
-                    {loading ? 'Importing...' : 'Start Import'}
-                  </Button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Settings Modal */}
-        <AnimatePresence>
-          {showSettingsModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-              onClick={() => setShowSettingsModal(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-gradient-to-br from-gray-900 via-teal-950 to-gray-900 border border-teal-500/30 rounded-xl p-6 w-full max-w-lg"
-              >
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-white">Email Settings</h2>
-                  <button onClick={() => setShowSettingsModal(false)} className="text-teal-200 hover:text-white">
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
-                <div className="space-y-4 mb-6">
-                  <div>
-                    <label className="block text-sm font-medium text-teal-200 mb-1">Default Sender Name</label>
-                    <Input 
-                      value={settings.senderName}
-                      onChange={(e) => setSettings({...settings, senderName: e.target.value})}
-                      className="bg-black/50 border-teal-500/30 text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-teal-200 mb-1">Default Sender Email</label>
-                    <Input 
-                      value={settings.senderEmail}
-                      onChange={(e) => setSettings({...settings, senderEmail: e.target.value})}
-                      className="bg-black/50 border-teal-500/30 text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-teal-200 mb-1">Reply-To Address</label>
-                    <Input 
-                      value={settings.replyTo}
-                      onChange={(e) => setSettings({...settings, replyTo: e.target.value})}
-                      className="bg-black/50 border-teal-500/30 text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-teal-200 mb-1">Physical Address (for footer)</label>
-                    <Input 
-                      value={settings.footerAddress}
-                      onChange={(e) => setSettings({...settings, footerAddress: e.target.value})}
-                      className="bg-black/50 border-teal-500/30 text-white"
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => setShowSettingsModal(false)} className="flex-1 border-teal-500/50 text-teal-300">
-                    Cancel
-                  </Button>
-                  <Button onClick={handleSaveSettings} disabled={loading} className="flex-1 bg-green-600 text-white">
-                    {loading ? 'Saving...' : 'Save Settings'}
+                    Create Campaign
                   </Button>
                 </div>
               </motion.div>

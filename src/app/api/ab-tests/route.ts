@@ -137,9 +137,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create new A/B test (mock implementation)
-    const newTest = {
-      id: Date.now().toString(),
+    // Create new A/B test in database
+    const { connectToDatabase } = await import('@/lib/mongodb')
+    const { ObjectId } = await import('mongodb')
+    const { db } = await connectToDatabase()
+    
+    const newTestData = {
+      userId: new ObjectId(user._id),
       name,
       description: description || '',
       websiteId,
@@ -159,17 +163,34 @@ export async function POST(request: NextRequest) {
         statisticalSignificance: false
       },
       schedule: {
-        startDate: '',
+        startDate: new Date().toISOString(),
         duration: duration || 14
       },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
 
+    const result = await db.collection('ab_tests').insertOne(newTestData)
+    
+    const newTest = {
+      id: result.insertedId.toString(),
+      name,
+      description: description || '',
+      websiteId,
+      websiteName: 'Website Name',
+      status: 'draft',
+      type,
+      variants: newTestData.variants,
+      metrics: newTestData.metrics,
+      schedule: newTestData.schedule,
+      createdAt: newTestData.createdAt,
+      updatedAt: newTestData.updatedAt
+    }
+
     return NextResponse.json({
       success: true,
       test: newTest,
-      message: 'A/B test created successfully'
+      message: 'A/B test created successfully! Configure variants and start testing.'
     })
   } catch (error) {
     console.error('Create A/B test error:', error)
