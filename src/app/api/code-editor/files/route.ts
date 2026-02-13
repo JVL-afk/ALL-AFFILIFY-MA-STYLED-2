@@ -187,7 +187,7 @@ export const POST = requireEnterprise(async (request: NextRequest, user: Authent
       return NextResponse.json({
         success: true,
         message: isFolder ? 'Folder created successfully' : 'File created successfully',
-        file: newUserCode.value?.files.find(f => f.path === filePath)
+        file: newUserCode?.files?.find(f => f.path === filePath)
       })
     }
   } catch (error) {

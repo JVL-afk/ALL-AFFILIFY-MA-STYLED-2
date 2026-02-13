@@ -1,110 +1,115 @@
+
 'use client'
 
-import { useState } from 'react'
-import { Search, Replace, Code2, Wand2 } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { 
+  Save, 
+  Rocket, 
+  Sparkles, 
+  Eye, 
+  Code2, 
+  Loader2, 
+  Search 
+} from 'lucide-react'
+import { Dispatch, SetStateAction } from 'react'
+
+interface FileItem {
+  path: string
+  content: string
+  lastModified: Date
+}
 
 interface CodeEditorToolbarProps {
-  onFormat: () => void
-  onSearch: (query: string) => void
-  onReplace: (find: string, replace: string) => void
-  onAIAssist: () => void
+  currentFile: FileItem | null
+  saveFile: () => Promise<void>
+  isSaving: boolean
+  deployToNetlify: () => Promise<void>
+  isDeploying: boolean
+  editorMode: 'code' | 'visual'
+  setEditorMode: Dispatch<SetStateAction<'code' | 'visual'>>
+  getAISuggestions: () => Promise<void>
+  setShowAIPanel: Dispatch<SetStateAction<boolean>>
+  showAIPanel: boolean
 }
 
 export default function CodeEditorToolbar({
-  onFormat,
-  onSearch,
-  onReplace,
-  onAIAssist
+  currentFile,
+  saveFile,
+  isSaving,
+  deployToNetlify,
+  isDeploying,
+  editorMode,
+  setEditorMode,
+  getAISuggestions,
+  setShowAIPanel,
+  showAIPanel
 }: CodeEditorToolbarProps) {
-  const [showSearch, setShowSearch] = useState(false)
-  const [showReplace, setShowReplace] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [findText, setFindText] = useState('')
-  const [replaceText, setReplaceText] = useState('')
-
   return (
-    <div className="bg-gray-800 border-b border-gray-700 p-2">
-      <div className="flex items-center space-x-2">
-        <button
-          onClick={onFormat}
-          className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm flex items-center space-x-1"
-        >
-          <Code2 className="w-4 h-4" />
-          <span>Format</span>
-        </button>
-
-        <button
-          onClick={() => setShowSearch(!showSearch)}
-          className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm flex items-center space-x-1"
-        >
-          <Search className="w-4 h-4" />
-          <span>Search</span>
-        </button>
-
-        <button
-          onClick={() => setShowReplace(!showReplace)}
-          className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm flex items-center space-x-1"
-        >
-          <Replace className="w-4 h-4" />
-          <span>Replace</span>
-        </button>
-
-        <button
-          onClick={onAIAssist}
-          className="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-sm flex items-center space-x-1"
-        >
-          <Wand2 className="w-4 h-4" />
-          <span>AI Assist</span>
-        </button>
-      </div>
-
-      {showSearch && (
-        <div className="mt-2 flex items-center space-x-2">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search in files..."
-            className="flex-1 px-3 py-1 bg-gray-700 text-white rounded text-sm"
-          />
-          <button
-            onClick={() => onSearch(searchQuery)}
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm"
+    <div className="flex items-center justify-between p-2 border-b border-green-900/50 bg-black/50 backdrop-blur-sm">
+      <div className="flex items-center space-x-4">
+        <div className="flex bg-green-900/20 rounded-lg p-1">
+          <button 
+            onClick={() => setEditorMode('code')}
+            className={`px-3 py-1 rounded-md text-xs font-mono transition-all flex items-center space-x-2 ${
+              editorMode === 'code' ? 'bg-green-500 text-black shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'text-green-500 hover:bg-green-900/30'
+            }`}
           >
-            Search
+            <Code2 className="h-3.5 w-3.5" />
+            <span>CODE</span>
+          </button>
+          <button 
+            onClick={() => setEditorMode('visual')}
+            className={`px-3 py-1 rounded-md text-xs font-mono transition-all flex items-center space-x-2 ${
+              editorMode === 'visual' ? 'bg-green-500 text-black shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'text-green-500 hover:bg-green-900/30'
+            }`}
+          >
+            <Eye className="h-3.5 w-3.5" />
+            <span>VISUAL</span>
           </button>
         </div>
-      )}
+        
+        {currentFile && (
+          <div className="text-xs font-mono text-green-500/70 truncate max-w-[200px]">
+            {currentFile.path}
+          </div>
+        )}
+      </div>
 
-      {showReplace && (
-        <div className="mt-2 space-y-2">
-          <div className="flex items-center space-x-2">
-            <input
-              type="text"
-              value={findText}
-              onChange={(e) => setFindText(e.target.value)}
-              placeholder="Find..."
-              className="flex-1 px-3 py-1 bg-gray-700 text-white rounded text-sm"
-            />
-          </div>
-          <div className="flex items-center space-x-2">
-            <input
-              type="text"
-              value={replaceText}
-              onChange={(e) => setReplaceText(e.target.value)}
-              placeholder="Replace with..."
-              className="flex-1 px-3 py-1 bg-gray-700 text-white rounded text-sm"
-            />
-            <button
-              onClick={() => onReplace(findText, replaceText)}
-              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm"
-            >
-              Replace All
-            </button>
-          </div>
-        </div>
-      )}
+      <div className="flex items-center space-x-2">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={getAISuggestions}
+          className={`p-2 rounded-md transition-all flex items-center space-x-2 border ${
+            showAIPanel ? 'bg-purple-500/20 border-purple-500 text-purple-400' : 'bg-black border-green-900/50 text-green-500 hover:border-green-500'
+          }`}
+        >
+          <Sparkles className="h-4 w-4" />
+          <span className="text-xs font-mono hidden md:inline">AI ASSIST</span>
+        </motion.button>
+
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={saveFile}
+          disabled={isSaving || !currentFile}
+          className="p-2 rounded-md bg-black border border-green-900/50 text-green-500 hover:border-green-500 transition-all flex items-center space-x-2 disabled:opacity-50"
+        >
+          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          <span className="text-xs font-mono hidden md:inline">SAVE</span>
+        </motion.button>
+
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={deployToNetlify}
+          disabled={isDeploying}
+          className="p-2 rounded-md bg-green-500 text-black font-bold hover:bg-green-400 transition-all flex items-center space-x-2 disabled:opacity-50 shadow-[0_0_15px_rgba(34,197,94,0.3)]"
+        >
+          {isDeploying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
+          <span className="text-xs font-mono hidden md:inline">DEPLOY</span>
+        </motion.button>
+      </div>
     </div>
   )
 }
-

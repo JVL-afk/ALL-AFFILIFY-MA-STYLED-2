@@ -38,10 +38,11 @@ interface Component {
 }
 
 interface VisualEditorProps {
+  code: string
   onCodeChange: (code: string) => void
 }
 
-export default function VisualEditor({ onCodeChange }: VisualEditorProps) {
+export default function VisualEditor({ code, onCodeChange }: VisualEditorProps) {
   const [components, setComponents] = useState<Component[]>([])
   const [selectedComponent, setSelectedComponent] = useState<Component | null>(null)
   const [isDragging, setIsDragging] = useState(false)

@@ -580,7 +580,7 @@ export default function CodeEditorPage() {
                   }}
                 />
               ) : (
-                <VisualEditor code={code} />
+                <VisualEditor code={code} onCodeChange={setCode} />
               )}
               
               <AnimatePresence>
