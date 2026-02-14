@@ -379,6 +379,8 @@ export default function CodeEditorPage() {
   }
 
   const toggleFolder = (folderPath: string) => {
+    console.log("Toggle folder triggered for:", folderPath);
+
     const newExpandedFolders = new Set(expandedFolders)
     if (newExpandedFolders.has(folderPath)) {
       newExpandedFolders.delete(folderPath)
@@ -408,6 +410,8 @@ export default function CodeEditorPage() {
   }
 
   const handleContextMenu = (event: React.MouseEvent, filePath: string, isFolder: boolean) => {
+    console.log("Context menu triggered for:", filePath, "isFolder:", isFolder);
+
     event.preventDefault();
     setContextMenu({ x: event.clientX, y: event.clientY, filePath, isFolder });
   };
@@ -465,7 +469,8 @@ export default function CodeEditorPage() {
           return (node as any[]).map((file: FileItem) => (
             <div 
               key={file.path} 
-              className={`pl-${level * 4} flex items-center space-x-2 cursor-pointer hover:bg-green-900/50 p-1 rounded ${currentFile?.path === file.path ? 'bg-green-800/70' : ''}`}
+              className={`flex items-center space-x-2 cursor-pointer hover:bg-green-900/50 p-1 rounded ${currentFile?.path === file.path ? 'bg-green-800/70' : ''}`}
+              style={{ paddingLeft: `${level * 1}rem` }}
               onClick={() => handleFileSelect(file)}
               onContextMenu={(e) => handleContextMenu(e, file.path, false)}
             >
@@ -481,7 +486,8 @@ export default function CodeEditorPage() {
         return (
           <div key={folderPath}>
             <div 
-              className={`pl-${level * 4} flex items-center space-x-2 cursor-pointer hover:bg-green-900/50 p-1 rounded`}
+              className={`flex items-center space-x-2 cursor-pointer hover:bg-green-900/50 p-1 rounded`}
+              style={{ paddingLeft: `${level * 1}rem` }}
               onClick={() => toggleFolder(folderPath)}
               onContextMenu={(e) => handleContextMenu(e, folderPath, true)}
             >
