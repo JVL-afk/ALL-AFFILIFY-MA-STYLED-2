@@ -165,49 +165,45 @@ export default function CodeEditorPage() {
       alert('Failed to delete file. Please try again.');
     }
   };
-
   const renameFile = async (oldPath: string, newPath: string) => {
     if (oldPath === newPath) return;
     
-    // Validate new name
-    const newName = newPath.split('/').pop() || '';
-    if (!newName || newName.trim().length === 0) {
-      alert('Name cannot be empty.');
-      return;
-    }
-    if (newName.length > 255) {
-      alert('Name is too long (max 255 characters).');
-      return;
-    }
-    const invalidChars = /[<>:"|?*\\]/;
-    if (invalidChars.test(newName)) {
-      alert('Name contains invalid characters: < > : " | ? * \\');
-      return;
-    }
-    
-    if (!confirm(`Are you sure you want to rename ${oldPath} to ${newPath}?`)) {
-      return
-    }
     try {
+      console.log(`Attempting to rename: ${oldPath} -> ${newPath}`);
+      
       const response = await fetch('/api/code-editor/files', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ oldPath, newPath }),
       });
 
+      console.log(`Rename API response status: ${response.status}`);
+      
       if (response.ok) {
-        setFiles(files.map((f) => (f.path === oldPath ? { ...f, path: newPath } : f)));
+        const data = await response.json();
+        console.log(`Rename successful:`, data);
+        
+        // Update files in state
+        setFiles(prevFiles => prevFiles.map((f) => (f.path === oldPath ? { ...f, path: newPath } : f)));
+        
+        // Update current file if it was the one being renamed
         if (currentFile?.path === oldPath) {
-          setCurrentFile({ ...currentFile, path: newPath });
+          setCurrentFile(prev => prev ? { ...prev, path: newPath } : null);
         }
+        
+        console.log(`File renamed successfully in state`);
         alert('File renamed successfully!');
+        return true;
       } else {
         const data = await response.json();
+        console.error(`Rename failed:`, data);
         alert(`Failed to rename file: ${data.error}`);
+        return false;
       }
     } catch (error) {
       console.error('Failed to rename file:', error);
       alert('Failed to rename file. Please try again.');
+      return false;
     }
   };
 
@@ -919,11 +915,28 @@ export default function CodeEditorPage() {
                 </button>
                 <button
                   className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                  onClick={() => {
+                  onClick={async () => {
                     // Construct full new path by replacing only the filename
                     const parentPath = renamePath.substring(0, renamePath.lastIndexOf('/'));
                     const newFullPath = parentPath ? `${parentPath}/${renameNewName}` : renameNewName;
-                    renameFile(renamePath, newFullPath);
+                    
+                    // Validate before calling rename
+                    if (!renameNewName || renameNewName.trim().length === 0) {
+                      alert('Name cannot be empty.');
+                      return;
+                    }
+                    if (renameNewName.length > 255) {
+                      alert('Name is too long (max 255 characters).');
+                      return;
+                    }
+                    const invalidChars = /[<>:"|?*\\]/;
+                    if (invalidChars.test(renameNewName)) {
+                      alert('Name contains invalid characters: < > : " | ? * \\');
+                      return;
+                    }
+                    
+                    // Call rename and wait for it to complete
+                    await renameFile(renamePath, newFullPath);
                     setShowRenameDialog(false);
                   }}
                 >
