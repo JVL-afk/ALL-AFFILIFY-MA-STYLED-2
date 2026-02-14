@@ -916,28 +916,43 @@ export default function CodeEditorPage() {
                 <button
                   className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                   onClick={async () => {
-                    // Construct full new path by replacing only the filename
-                    const parentPath = renamePath.substring(0, renamePath.lastIndexOf('/'));
-                    const newFullPath = parentPath ? `${parentPath}/${renameNewName}` : renameNewName;
-                    
-                    // Validate before calling rename
-                    if (!renameNewName || renameNewName.trim().length === 0) {
-                      alert('Name cannot be empty.');
-                      return;
+                    try {
+                      // Construct full new path by replacing only the filename
+                      const parentPath = renamePath.substring(0, renamePath.lastIndexOf('/'));
+                      const newFullPath = parentPath ? `${parentPath}/${renameNewName}` : renameNewName;
+                      
+                      // Validate before calling rename
+                      if (!renameNewName || renameNewName.trim().length === 0) {
+                        alert('Name cannot be empty.');
+                        return;
+                      }
+                      if (renameNewName.length > 255) {
+                        alert('Name is too long (max 255 characters).');
+                        return;
+                      }
+                      const invalidChars = /[<>:"|?*\\]/;
+                      if (invalidChars.test(renameNewName)) {
+                        alert('Name contains invalid characters: < > : " | ? * \\');
+                        return;
+                      }
+                      
+                      console.log(`Dialog: Attempting rename from ${renamePath} to ${newFullPath}`);
+                      
+                      // Call rename and wait for it to complete
+                      const success = await renameFile(renamePath, newFullPath);
+                      
+                      if (success) {
+                        console.log(`Dialog: Rename successful, closing dialog`);
+                        setShowRenameDialog(false);
+                        setRenameNewName('');
+                        setRenamePath('');
+                      } else {
+                        console.log(`Dialog: Rename failed`);
+                      }
+                    } catch (error) {
+                      console.error('Dialog: Error during rename:', error);
+                      alert('An error occurred during rename. Please try again.');
                     }
-                    if (renameNewName.length > 255) {
-                      alert('Name is too long (max 255 characters).');
-                      return;
-                    }
-                    const invalidChars = /[<>:"|?*\\]/;
-                    if (invalidChars.test(renameNewName)) {
-                      alert('Name contains invalid characters: < > : " | ? * \\');
-                      return;
-                    }
-                    
-                    // Call rename and wait for it to complete
-                    await renameFile(renamePath, newFullPath);
-                    setShowRenameDialog(false);
                   }}
                 >
                   Rename
