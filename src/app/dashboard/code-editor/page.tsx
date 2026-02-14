@@ -587,7 +587,7 @@ export default function CodeEditorPage() {
                   }}
                 />
               ) : (
-                <VisualEditor code={code} />
+                <VisualEditor code={code} onCodeChange={setCode} />
               )}
               
               <AnimatePresence>
@@ -666,7 +666,7 @@ export default function CodeEditorPage() {
                 </h3>
                 <div className="bg-gray-900/70 p-3 rounded border border-gray-700 text-xs space-y-1">
                   <p><span className="font-bold">ID:</span> {activeDeployment.id}</p>
-                  <p><span className="font-bold">Timestamp:</span> {newDeployment.timestamp).toLocaleString()}</p>
+                  <p><span className="font-bold">Timestamp:</span> {new Date(activeDeployment.timestamp).toLocaleString()}</p>
                   <p><span className="font-bold">Status:</span> <span className={`font-bold ${activeDeployment.status === 'success' ? 'text-green-400' : activeDeployment.status === 'failed' ? 'text-red-400' : 'text-yellow-400'}`}>{activeDeployment.status}</span></p>
                   {activeDeployment.liveUrl && <p><span className="font-bold">URL:</span> <a href={activeDeployment.liveUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">{activeDeployment.liveUrl}</a></p>}
                   <div className="pt-2">
