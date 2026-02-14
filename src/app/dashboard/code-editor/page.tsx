@@ -144,10 +144,16 @@ export default function CodeEditorPage() {
       });
 
       if (response.ok) {
-        setFiles(files.filter((f) => f.path !== filePath));
+        const updatedFiles = files.filter((f) => f.path !== filePath);
+        setFiles(updatedFiles);
         if (currentFile?.path === filePath) {
-          setCurrentFile(files.length > 1 ? files[0] : null);
-          setCode(files.length > 1 ? files[0].content : '');
+          if (updatedFiles.length > 0) {
+            setCurrentFile(updatedFiles[0]);
+            setCode(updatedFiles[0].content);
+          } else {
+            setCurrentFile(null);
+            setCode('');
+          }
         }
         alert('File deleted successfully!');
       } else {
@@ -162,6 +168,23 @@ export default function CodeEditorPage() {
 
   const renameFile = async (oldPath: string, newPath: string) => {
     if (oldPath === newPath) return;
+    
+    // Validate new name
+    const newName = newPath.split('/').pop() || '';
+    if (!newName || newName.trim().length === 0) {
+      alert('Name cannot be empty.');
+      return;
+    }
+    if (newName.length > 255) {
+      alert('Name is too long (max 255 characters).');
+      return;
+    }
+    const invalidChars = /[<>:"|?*\\]/;
+    if (invalidChars.test(newName)) {
+      alert('Name contains invalid characters: < > : " | ? * \\');
+      return;
+    }
+    
     if (!confirm(`Are you sure you want to rename ${oldPath} to ${newPath}?`)) {
       return
     }
@@ -189,6 +212,22 @@ export default function CodeEditorPage() {
   };
 
   const createNewFile = async (parentPath: string, fileName: string) => {
+    // Validate file name
+    if (!fileName || fileName.trim().length === 0) {
+      alert('File name cannot be empty.');
+      return;
+    }
+    if (fileName.length > 255) {
+      alert('File name is too long (max 255 characters).');
+      return;
+    }
+    // Check for invalid characters
+    const invalidChars = /[<>:"|?*\\]/;
+    if (invalidChars.test(fileName)) {
+      alert('File name contains invalid characters: < > : " | ? * \\');
+      return;
+    }
+    
     const filePath = parentPath ? `${parentPath}/${fileName}` : fileName;
     try {
       const response = await fetch('/api/code-editor/files', {
@@ -214,6 +253,22 @@ export default function CodeEditorPage() {
   };
 
   const createNewFolder = async (parentPath: string, folderName: string) => {
+    // Validate folder name
+    if (!folderName || folderName.trim().length === 0) {
+      alert('Folder name cannot be empty.');
+      return;
+    }
+    if (folderName.length > 255) {
+      alert('Folder name is too long (max 255 characters).');
+      return;
+    }
+    // Check for invalid characters
+    const invalidChars = /[<>:"|?*\\]/;
+    if (invalidChars.test(folderName)) {
+      alert('Folder name contains invalid characters: < > : " | ? * \\');
+      return;
+    }
+    
     const folderPath = parentPath ? `${parentPath}/${folderName}` : folderName;
     try {
       const response = await fetch('/api/code-editor/files', {
@@ -287,23 +342,34 @@ export default function CodeEditorPage() {
   }
 
   const pollDeploymentStatus = async (deploymentId: string) => {
+    let isPolling = true;
+    let pollCount = 0;
+    const maxPolls = 120;
+    
     const interval = setInterval(async () => {
+      if (!isPolling || pollCount >= maxPolls) {
+        clearInterval(interval);
+        isPolling = false;
+        return;
+      }
+      
+      pollCount++;
       try {
-        const response = await fetch(`/api/code-editor/deploy?deploymentId=${deploymentId}`)
+        const response = await fetch(`/api/code-editor/deploy?deploymentId=${deploymentId}`);
         if (response.ok) {
-          const data = await response.json()
-          const deployment = data.deployment
+          const data = await response.json();
+          const deployment = data.deployment;
 
           if (deployment.status === 'success' || deployment.status === 'failed') {
-            clearInterval(interval)
-            loadDeployments()
+            clearInterval(interval);
+            isPolling = false;
+            loadDeployments();
           }
         }
       } catch (error) {
-        console.error('Failed to poll deployment status:', error)
-        clearInterval(interval)
+        console.error('Failed to poll deployment status:', error);
       }
-    }, 3000)
+    }, 3000);
   }
 
   const rollbackToDeployment = async (deploymentId: string) => {
@@ -464,19 +530,19 @@ export default function CodeEditorPage() {
       });
     });
 
-    const renderNodes = (nodes: any, pathPrefix = '') => {
+    const renderNodes = (nodes: any, pathPrefix = '', depth = 0) => {
       return Object.entries(nodes).map(([name, node]) => {
         if (name === '_files') {
           return (node as any[]).map((file: FileItem) => (
             <div 
               key={file.path} 
-              className={`flex items-center space-x-2 cursor-pointer hover:bg-green-900/50 p-1 rounded ${currentFile?.path === file.path ? 'bg-green-800/70' : ''}`}
-              style={{ paddingLeft: `${level * 1}rem` }}
+              className={`flex items-center space-x-2 cursor-pointer hover:bg-green-900/50 p-1 rounded transition-colors ${currentFile?.path === file.path ? 'bg-green-800/70' : ''}`}
+              style={{ paddingLeft: `${depth * 1}rem` }}
               onClick={() => handleFileSelect(file)}
               onContextMenu={(e) => handleContextMenu(e, file.path, false)}
             >
               <FileCode className="h-4 w-4 text-green-400" />
-              <span>{file.path.split('/').pop()}</span>
+              <span className="truncate">{file.path.split('/').pop()}</span>
             </div>
           ));
         }
@@ -487,18 +553,18 @@ export default function CodeEditorPage() {
         return (
           <div key={folderPath}>
             <div 
-              className={`flex items-center space-x-2 cursor-pointer hover:bg-green-900/50 p-1 rounded`}
-              style={{ paddingLeft: `${level * 1}rem` }}
+              className={`flex items-center space-x-2 cursor-pointer hover:bg-green-900/50 p-1 rounded transition-colors`}
+              style={{ paddingLeft: `${depth * 1}rem` }}
               onClick={() => toggleFolder(folderPath)}
               onContextMenu={(e) => handleContextMenu(e, folderPath, true)}
             >
               {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
               {isExpanded ? <FolderOpen className="h-4 w-4 text-yellow-400" /> : <Folder className="h-4 w-4 text-yellow-400" />}
-              <span>{name}</span>
+              <span className="truncate">{name}</span>
             </div>
             {isExpanded && (
-              <div className="pl-4">
-                {renderNodes(node, folderPath)}
+              <div>
+                {renderNodes(node, folderPath, depth + 1)}
               </div>
             )}
           </div>
@@ -506,7 +572,7 @@ export default function CodeEditorPage() {
       });
     };
 
-    return <div>{renderNodes(tree)}</div>;
+    return <div>{renderNodes(tree, '', 0)}</div>;
   };
 
   return (
