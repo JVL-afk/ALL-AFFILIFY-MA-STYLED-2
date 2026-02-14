@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
@@ -543,7 +544,7 @@ export default function CodeEditorPage() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="w-64 bg-black/50 p-2 border-r border-green-900/50 overflow-y-auto font-mono text-sm"
           >
-            <h2 className="text-lg font-semibold mb-2 flex items-center space-x-2">
+            <h2 className="text-lg font-semibold mb-2 flex items-center space-x-2" onClick={() => console.log("File Explorer container clicked")}>
               <Folder className="h-5 w-5" />
               <span>File Explorer</span>
             </h2>
@@ -586,7 +587,7 @@ export default function CodeEditorPage() {
                   }}
                 />
               ) : (
-                <VisualEditor code={code} onCodeChange={setCode} />
+                <VisualEditor code={code} />
               )}
               
               <AnimatePresence>
@@ -665,7 +666,7 @@ export default function CodeEditorPage() {
                 </h3>
                 <div className="bg-gray-900/70 p-3 rounded border border-gray-700 text-xs space-y-1">
                   <p><span className="font-bold">ID:</span> {activeDeployment.id}</p>
-                  <p><span className="font-bold">Timestamp:</span> {new Date(activeDeployment.timestamp).toLocaleString()}</p>
+                  <p><span className="font-bold">Timestamp:</span> {newDeployment.timestamp).toLocaleString()}</p>
                   <p><span className="font-bold">Status:</span> <span className={`font-bold ${activeDeployment.status === 'success' ? 'text-green-400' : activeDeployment.status === 'failed' ? 'text-red-400' : 'text-yellow-400'}`}>{activeDeployment.status}</span></p>
                   {activeDeployment.liveUrl && <p><span className="font-bold">URL:</span> <a href={activeDeployment.liveUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">{activeDeployment.liveUrl}</a></p>}
                   <div className="pt-2">
@@ -749,7 +750,6 @@ export default function CodeEditorPage() {
         </div>
       )}
 
-      {/* New File Dialog */}
       <AnimatePresence>
         {showNewFileDialog && (
           <motion.div
