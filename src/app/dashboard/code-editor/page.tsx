@@ -920,7 +920,10 @@ export default function CodeEditorPage() {
                 <button
                   className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                   onClick={() => {
-                    renameFile(renamePath, renameNewName);
+                    // Construct full new path by replacing only the filename
+                    const parentPath = renamePath.substring(0, renamePath.lastIndexOf('/'));
+                    const newFullPath = parentPath ? `${parentPath}/${renameNewName}` : renameNewName;
+                    renameFile(renamePath, newFullPath);
                     setShowRenameDialog(false);
                   }}
                 >
