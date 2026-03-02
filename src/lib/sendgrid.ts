@@ -1,4 +1,5 @@
 import sgMail from '@sendgrid/mail';
+import { logger } from '@/lib/debug-logger';
 
 interface EmailTemplate {
   to: string;
@@ -34,7 +35,11 @@ class SendGridService {
 
   private initialize() {
     if (!process.env.SENDGRID_API_KEY) {
-      console.warn('SendGrid API key not configured. Email functionality will use mock mode.');
+      logger.error('SendGridService', 'initialize', 'SendGrid API key not configured. Email functionality will be disabled.', { error: 'SENDGRID_API_KEY is missing' });
+      return;
+    }
+    if (!process.env.SENDGRID_FROM_EMAIL) {
+      logger.error('SendGridService', 'initialize', 'SendGrid FROM email not configured. Email functionality will be disabled.', { error: 'SENDGRID_FROM_EMAIL is missing' });
       return;
     }
 
@@ -44,15 +49,15 @@ class SendGridService {
 
   async sendEmail(emailData: EmailTemplate): Promise<boolean> {
     if (!this.initialized) {
-      console.log('SendGrid not initialized. Mock email sent:', emailData.subject);
-      return true; // Return success for mock mode
+      logger.error('SendGridService', 'sendEmail', 'SendGrid not initialized. Cannot send email.', { subject: emailData.subject });
+      return false; // Return failure if not initialized
     }
 
     try {
       const msg = {
         to: emailData.to,
         from: {
-          email: process.env.SENDGRID_FROM_EMAIL || 'noreply@affilify.com',
+          email: process.env.SENDGRID_FROM_EMAIL as string,
           name: 'AFFILIFY Platform',
         },
         subject: emailData.subject,
@@ -61,10 +66,10 @@ class SendGridService {
       };
 
       await sgMail.send(msg);
-      console.log('Email sent successfully to:', emailData.to);
+      logger.info('SendGridService', 'sendEmail', 'Email sent successfully', { to: emailData.to, subject: emailData.subject });
       return true;
     } catch (error) {
-      console.error('SendGrid email error:', error);
+      logger.error('SendGridService', 'sendEmail', 'SendGrid email error', { to: emailData.to, subject: emailData.subject, error: (error as Error).message, stack: (error as Error).stack }, error as Error);
       return false;
     }
   }
@@ -107,6 +112,11 @@ class SendGridService {
     };
 
     return this.sendEmail(emailTemplate);
+  }
+
+  // Helper to strip HTML tags for text content
+  private stripHtml(html: string): string {
+    return html.replace(/<[^>]*>?/gm, "");
   }
 
   private getWelcomeEmailTemplate(data: WelcomeEmailData): string {
