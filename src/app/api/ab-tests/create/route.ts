@@ -1,56 +1,105 @@
-import { MongoClient, ObjectId } from 'mongodb';
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyToken, getUserById } from '@/lib/auth';
+import { connectToDatabase } from '@/lib/mongodb';
+import { ABTestingRepository } from '@/lib/repositories/ab-testing-repository';
+import { logger } from '@/lib/debug-logger';
+import { getTraceId, initializeTraceContext, runWithTraceContext } from '@/lib/trace-context';
+import { ExperimentSchema } from '@/lib/models/ab-testing';
+import { ObjectId } from 'mongodb';
 
-const uri = process.env.MONGODB_URI as string;
-const client = new MongoClient(uri);
+/**
+ * A/B Testing Create API Route (Production Grade)
+ * 
+ * Replaces mock implementation with strict Zod validation, tenant isolation,
+ * and repository-based persistence.
+ */
+export async function POST(request: NextRequest) {
+  const traceContext = initializeTraceContext();
+  const traceId = traceContext.traceId;
 
-export async function POST(req: NextRequest) {
-  try {
-    await client.connect();
-    const database = client.db('affilify'); // Your database name
-    const abTestsCollection = database.collection('ab_tests');
+  return runWithTraceContext(traceContext, async () => {
+    try {
+      // 1. Authentication & Authorization
+      const token = request.cookies.get('auth-token')?.value;
+      if (!token) {
+        logger.warn('ABTestingCreateAPI', 'POST', 'Authentication required', { traceId });
+        return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+      }
 
-    const { name, description, websiteId, websiteName, type, variants, metrics, schedule } = await req.json();
+      const decoded = verifyToken(token);
+      if (!decoded) {
+        logger.warn('ABTestingCreateAPI', 'POST', 'Invalid token', { traceId });
+        return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+      }
 
-    if (!name || !websiteId || !type || !variants || variants.length < 2) {
-      return NextResponse.json({ message: 'Missing required fields or insufficient variants' }, { status: 400 });
+      const user = await getUserById(decoded.userId);
+      if (!user) {
+        logger.warn('ABTestingCreateAPI', 'POST', 'User not found', { userId: decoded.userId, traceId });
+        return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      }
+
+      // 2. Enterprise Plan Enforcement
+      if (user.plan !== 'enterprise') {
+        logger.warn('ABTestingCreateAPI', 'POST', 'Enterprise plan required', { userId: user._id, plan: user.plan, traceId });
+        return NextResponse.json({ error: 'Enterprise plan required' }, { status: 403 });
+      }
+
+      // 3. Input Validation with Zod
+      const body = await request.json();
+      
+      // Prepare data for validation
+      const experimentData = {
+        ...body,
+        tenantId: new ObjectId(user._id),
+        websiteId: body.websiteId ? new ObjectId(body.websiteId) : undefined,
+        status: 'DRAFT',
+        version: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const validationResult = ExperimentSchema.safeParse(experimentData);
+      
+      if (!validationResult.success) {
+        logger.warn('ABTestingCreateAPI', 'POST', 'Validation failed', { 
+          errors: validationResult.error.format(),
+          traceId 
+        });
+        return NextResponse.json({ 
+          error: 'Invalid experiment data', 
+          details: validationResult.error.format(),
+          traceId 
+        }, { status: 400 });
+      }
+
+      // 4. Persistence via Repository
+      const { db } = await connectToDatabase();
+      const repository = new ABTestingRepository(db, user._id);
+      const result = await repository.create(validationResult.data);
+
+      logger.info('ABTestingCreateAPI', 'POST', 'Experiment created successfully', {
+        userId: user._id,
+        experimentId: result.insertedId.toString(),
+        traceId,
+      });
+
+      return NextResponse.json({
+        success: true,
+        testId: result.insertedId.toString(),
+        message: 'A/B test created successfully! Configure variants and start testing.',
+        traceId,
+      }, { status: 201 });
+
+    } catch (error) {
+      logger.error('ABTestingCreateAPI', 'POST', 'Internal server error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+        traceId,
+      });
+      return NextResponse.json(
+        { error: 'Internal server error', traceId },
+        { status: 500 }
+      );
     }
-
-    const newABTest = {
-      name,
-      description,
-      websiteId,
-      websiteName,
-      status: 'draft', // Default status
-      type,
-      variants: variants.map((variant: any) => ({
-        ...variant,
-        id: new ObjectId().toHexString(), // Assign unique ID to each variant
-        conversions: 0,
-        visitors: 0,
-        conversionRate: 0,
-      })),
-      metrics: {
-        ...metrics,
-        confidenceLevel: 0,
-        statisticalSignificance: false,
-      },
-      schedule: {
-        ...schedule,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    const result = await abTestsCollection.insertOne(newABTest);
-
-    return NextResponse.json({ message: 'A/B test created successfully', testId: result.insertedId }, { status: 201 });
-  } catch (error) {
-    console.error('Error creating A/B test:', error);
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
-  } finally {
-    await client.close();
-  }
+  });
 }
