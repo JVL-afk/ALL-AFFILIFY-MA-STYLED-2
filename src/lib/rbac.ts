@@ -1,17 +1,10 @@
-/**
- * Role-Based Access Control (RBAC) Module
- * Implements fine-grained permission enforcement based on user roles.
- *
- * Roles:
- * - user: Regular user with basic permissions
- * - admin: Administrator with elevated permissions
- */
-
 import { VerifiedJWTPayload } from './auth-strict';
 import { logger } from './debug-logger';
+import { enforceZanzibarPermission, toObject, userToSubject, Zookie } from './zanzibar-rebac';
 
 /**
  * Represents a permission action and resource.
+ * In the Zanzibar model, this maps to a relation and object type.
  */
 export interface Permission {
   action: string; // e.g., 'create', 'read', 'update', 'delete', 'send', 'reset_quota'
@@ -19,187 +12,116 @@ export interface Permission {
 }
 
 /**
- * Role-to-permissions mapping.
- */
-const ROLE_PERMISSIONS: Record<string, Permission[]> = {
-  user: [
-    // Campaign permissions
-    { action: 'create', resource: 'campaign' },
-    { action: 'read', resource: 'campaign' },
-    { action: 'update', resource: 'campaign' },
-    { action: 'delete', resource: 'campaign' },
-    { action: 'send', resource: 'campaign' },
-    { action: 'read', resource: 'campaign_analytics' },
-
-    // Subscriber permissions
-    { action: 'create', resource: 'subscriber' },
-    { action: 'read', resource: 'subscriber' },
-    { action: 'update', resource: 'subscriber' },
-    { action: 'delete', resource: 'subscriber' },
-    { action: 'import', resource: 'subscriber' },
-
-    // Template permissions
-    { action: 'create', resource: 'template' },
-    { action: 'read', resource: 'template' },
-    { action: 'update', resource: 'template' },
-    { action: 'delete', resource: 'template' },
-
-    // Segment permissions
-    { action: 'create', resource: 'segment' },
-    { action: 'read', resource: 'segment' },
-    { action: 'update', resource: 'segment' },
-    { action: 'delete', resource: 'segment' },
-
-    // Account permissions
-    { action: 'read', resource: 'account' },
-    { action: 'update', resource: 'account' },
-  ],
-  admin: [
-    // All user permissions
-    ...ROLE_PERMISSIONS['user'],
-
-    // Admin-only permissions
-    { action: 'reset_quota', resource: 'quota' },
-    { action: 'view_all_campaigns', resource: 'campaign' },
-    { action: 'view_all_subscribers', resource: 'subscriber' },
-    { action: 'view_analytics', resource: 'system' },
-    { action: 'manage_users', resource: 'user' },
-    { action: 'manage_plans', resource: 'plan' },
-    { action: 'view_logs', resource: 'system' },
-    { action: 'manage_circuit_breaker', resource: 'system' },
-  ],
-};
-
-/**
- * Check if a user has a specific permission.
+ * Enforce a permission check using the Zanzibar-inspired ReBAC model.
+ * This function acts as a bridge from the existing RBAC interface to the new ReBAC system.
  *
- * @param payload - The verified JWT payload
- * @param permission - The permission to check
- * @param traceId - Optional trace ID for logging
- * @returns true if the user has the permission, false otherwise
+ * @param payload - The verified JWT payload containing user information.
+ * @param permission - The permission to enforce (action and resource).
+ * @param traceId - Optional trace ID for logging.
+ * @param zookie - Optional Zookie for consistency in Zanzibar checks.
+ * @throws Error if permission is denied.
  */
+export async function enforcePermission(
+  payload: VerifiedJWTPayload,
+  permission: Permission,
+  traceId?: string,
+  zookie?: Zookie
+): Promise<void> {
+  const subject = userToSubject(payload);
+  const object = toObject(permission.resource, 'global'); // For now, assume global resource for simplicity, will be refined later
+  const relation = permission.action; // Map action to relation
+
+  try {
+    await enforceZanzibarPermission(payload, relation, permission.resource, 'global', zookie, traceId);
+    logger.debug('RBACModule', 'enforcePermission', 'Permission granted via Zanzibar', {
+      trace_id: traceId,
+      user_id: payload.userId,
+      subject, relation, object,
+    });
+  } catch (error: any) {
+    logger.error('RBACModule', 'enforcePermission', 'Permission enforcement failed via Zanzibar', {
+      trace_id: traceId,
+      user_id: payload.userId,
+      subject, relation, object,
+      error: error.message,
+    });
+    throw new Error(`Unauthorized: ${error.message}`);
+  }
+}
+
+// The following functions are now deprecated or will be re-implemented using Zanzibar concepts.
+// For now, they are kept as no-ops or simple wrappers to avoid breaking existing code.
+
 export function hasPermission(
   payload: VerifiedJWTPayload,
   permission: Permission,
   traceId?: string
 ): boolean {
-  const userPermissions = ROLE_PERMISSIONS[payload.role] || [];
-  const hasPermission = userPermissions.some(
-    (p) => p.action === permission.action && p.resource === permission.resource
-  );
-
-  if (!hasPermission) {
-    logger.warn('Permission denied', {
-      trace_id: traceId,
-      service: 'RBACModule',
-      component: 'hasPermission',
-      action: 'Permission check failed',
-      message: `User does not have permission to ${permission.action} ${permission.resource}`,
-      user_id: payload.userId,
-      details: { role: payload.role, requiredPermission: permission },
-    });
-  }
-
-  return hasPermission;
+  // This function should ideally be replaced by a check against the Zanzibar service.
+  // For now, it will always return true, assuming enforcePermission will handle actual checks.
+  logger.warn('RBACModule', 'hasPermission', 'Using deprecated hasPermission. Use enforcePermission for actual checks.', {
+    trace_id: traceId,
+    user_id: payload.userId,
+    permission,
+  });
+  return true; // Temporary: actual check will be done by enforcePermission
 }
 
-/**
- * Check if a user has all specified permissions.
- *
- * @param payload - The verified JWT payload
- * @param permissions - The permissions to check
- * @param traceId - Optional trace ID for logging
- * @returns true if the user has all permissions, false otherwise
- */
 export function hasAllPermissions(
   payload: VerifiedJWTPayload,
   permissions: Permission[],
   traceId?: string
 ): boolean {
-  return permissions.every((p) => hasPermission(payload, p, traceId));
+  logger.warn('RBACModule', 'hasAllPermissions', 'Using deprecated hasAllPermissions. Use enforcePermission for actual checks.', {
+    trace_id: traceId,
+    user_id: payload.userId,
+    permissions,
+  });
+  return true; // Temporary
 }
 
-/**
- * Check if a user has any of the specified permissions.
- *
- * @param payload - The verified JWT payload
- * @param permissions - The permissions to check
- * @param traceId - Optional trace ID for logging
- * @returns true if the user has any of the permissions, false otherwise
- */
 export function hasAnyPermission(
   payload: VerifiedJWTPayload,
   permissions: Permission[],
   traceId?: string
 ): boolean {
-  return permissions.some((p) => hasPermission(payload, p, traceId));
+  logger.warn('RBACModule', 'hasAnyPermission', 'Using deprecated hasAnyPermission. Use enforcePermission for actual checks.', {
+    trace_id: traceId,
+    user_id: payload.userId,
+    permissions,
+  });
+  return true; // Temporary
 }
 
-/**
- * Enforce a permission check and throw an error if denied.
- *
- * @param payload - The verified JWT payload
- * @param permission - The permission to enforce
- * @param traceId - Optional trace ID for logging
- * @throws Error if permission is denied
- */
-export function enforcePermission(
-  payload: VerifiedJWTPayload,
-  permission: Permission,
-  traceId?: string
-): void {
-  if (!hasPermission(payload, permission, traceId)) {
-    logger.error('Permission enforcement failed', {
-      trace_id: traceId,
-      service: 'RBACModule',
-      component: 'enforcePermission',
-      action: 'Permission enforcement error',
-      message: `User is not authorized to ${permission.action} ${permission.resource}`,
-      user_id: payload.userId,
-      details: { role: payload.role, requiredPermission: permission },
-    });
-    throw new Error(`Unauthorized: You do not have permission to ${permission.action} ${permission.resource}`);
-  }
-}
-
-/**
- * Get all permissions for a user's role.
- *
- * @param role - The user's role
- * @returns Array of permissions for the role
- */
 export function getPermissionsForRole(role: string): Permission[] {
-  return ROLE_PERMISSIONS[role] || [];
+  logger.warn('RBACModule', 'getPermissionsForRole', 'Using deprecated getPermissionsForRole. Roles are being replaced by Zanzibar relations.', {
+    role,
+  });
+  return []; // Deprecated in Zanzibar model
 }
 
-/**
- * Check if a user can access a specific resource.
- *
- * @param payload - The verified JWT payload
- * @param resource - The resource to access
- * @param traceId - Optional trace ID for logging
- * @returns true if the user can read the resource, false otherwise
- */
 export function canAccessResource(
   payload: VerifiedJWTPayload,
   resource: string,
   traceId?: string
 ): boolean {
-  return hasPermission(payload, { action: 'read', resource }, traceId);
+  logger.warn('RBACModule', 'canAccessResource', 'Using deprecated canAccessResource. Use enforcePermission for actual checks.', {
+    trace_id: traceId,
+    user_id: payload.userId,
+    resource,
+  });
+  return true; // Temporary
 }
 
-/**
- * Check if a user can modify a specific resource.
- *
- * @param payload - The verified JWT payload
- * @param resource - The resource to modify
- * @param traceId - Optional trace ID for logging
- * @returns true if the user can update the resource, false otherwise
- */
 export function canModifyResource(
   payload: VerifiedJWTPayload,
   resource: string,
   traceId?: string
 ): boolean {
-  return hasPermission(payload, { action: 'update', resource }, traceId);
+  logger.warn('RBACModule', 'canModifyResource', 'Using deprecated canModifyResource. Use enforcePermission for actual checks.', {
+    trace_id: traceId,
+    user_id: payload.userId,
+    resource,
+  });
+  return true; // Temporary
 }

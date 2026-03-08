@@ -110,26 +110,37 @@ export class TenantAwareCollection<T extends Document = Document> {
    */
   private enhanceFilter(filter: Filter<T>): Filter<T> {
     const userIdField = 'userId';
+    // Ensure userId is always present in the tenant context
+    if (!this.tenantContext.userId) {
+      logger.error('TenantAwareCollection', 'enhanceFilter', 'TenantContext missing userId', {
+        filter: filter,
+      });
+      throw new Error('TenantContext missing userId: Cannot perform tenant-aware operation without a valid tenant ID.');
+    }
     const userIdValue = this.tenantContext.userId instanceof ObjectId
       ? this.tenantContext.userId
       : new ObjectId(this.tenantContext.userId as string);
 
+    // Create a mutable copy of the filter
+    const newFilter = { ...filter };
+
     // If filter already has userId, verify it matches the tenant context
-    if ((filter as any)[userIdField]) {
-      const filterUserId = (filter as any)[userIdField];
+    if ((newFilter as any)[userIdField]) {
+      const filterUserId = (newFilter as any)[userIdField];
       if (filterUserId.toString() !== userIdValue.toString()) {
-        logger.error('TenantAwareCollection', 'enhanceFilter', 'Tenant isolation violation detected', {
+        logger.error('TenantAwareCollection', 'enhanceFilter', 'Tenant isolation violation detected: Mismatched userId in filter', {
           user_id: this.tenantContext.userId.toString(),
           attemptedUserId: filterUserId.toString(),
         });
-        throw new Error('Tenant isolation violation: Cannot query data from a different tenant');
+        throw new Error('Tenant isolation violation: Cannot query data from a different tenant.');
       }
+    } else {
+      // If userId is not in the filter, add it implicitly to enforce tenant isolation.
+      // This ensures that no query can accidentally bypass the tenant filter.
+      (newFilter as any)[userIdField] = userIdValue;
     }
 
-    return {
-      ...filter,
-      [userIdField]: userIdValue,
-    } as Filter<T>;
+    return newFilter;
   }
 
   /**
