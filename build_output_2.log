@@ -1,0 +1,22 @@
+
+> affilify-platform@0.1.0 build /home/ubuntu/ALL-AFFILIFY-MA-STYLED-2
+> next build
+
+▲ Next.js 16.1.4 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 13.4s
+  Running TypeScript ...
+Failed to compile.
+
+Type error: Type 'typeof import("/home/ubuntu/ALL-AFFILIFY-MA-STYLED-2/src/app/api/email-marketing/campaigns/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/email-marketing/campaigns/[id]">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ success: boolean; data: WithId<Document>; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+
+Next.js build worker exited with code: 1 and signal: null
+ ELIFECYCLE  Command failed with exit code 1.

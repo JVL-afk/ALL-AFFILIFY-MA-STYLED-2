@@ -26,29 +26,78 @@ class DebugLogger {
   /**
    * Log a debug message
    */
-  debug(service: string, component: string, action: string, message?: string, details: Record<string, any> = {}) {
-    this.addLog('DEBUG', service, component, action, message, details);
+  debug(service: string, component: string, action: string, messageOrDetails?: string | Record<string, any>, details?: Record<string, any>) {
+    let message: string | undefined;
+    let finalDetails: Record<string, any> = {};
+    
+    if (typeof messageOrDetails === 'string') {
+      message = messageOrDetails;
+      finalDetails = details || {};
+    } else if (typeof messageOrDetails === 'object') {
+      finalDetails = messageOrDetails;
+    }
+    
+    this.addLog('DEBUG', service, component, action, message, finalDetails);
   }
 
   /**
    * Log an info message
    */
-  info(service: string, component: string, action: string, message?: string, details: Record<string, any> = {}) {
-    this.addLog('INFO', service, component, action, message, details);
+  info(service: string, component: string, action: string, messageOrDetails?: string | Record<string, any>, details?: Record<string, any>) {
+    let message: string | undefined;
+    let finalDetails: Record<string, any> = {};
+    
+    if (typeof messageOrDetails === 'string') {
+      message = messageOrDetails;
+      finalDetails = details || {};
+    } else if (typeof messageOrDetails === 'object') {
+      finalDetails = messageOrDetails;
+    }
+    
+    this.addLog('INFO', service, component, action, message, finalDetails);
   }
 
   /**
    * Log a warning message
    */
-  warn(service: string, component: string, action: string, message?: string, details: Record<string, any> = {}) {
-    this.addLog('WARN', service, component, action, message, details);
+  warn(service: string, component: string, action: string, messageOrDetails?: string | Record<string, any>, details?: Record<string, any>) {
+    let message: string | undefined;
+    let finalDetails: Record<string, any> = {};
+    
+    if (typeof messageOrDetails === 'string') {
+      message = messageOrDetails;
+      finalDetails = details || {};
+    } else if (typeof messageOrDetails === 'object') {
+      finalDetails = messageOrDetails;
+    }
+    
+    this.addLog('WARN', service, component, action, message, finalDetails);
   }
 
   /**
    * Log an error message
    */
-  error(service: string, component: string, action: string, message?: string, details: Record<string, any> = {}, error?: Error) {
-    this.addLog('ERROR', service, component, action, message, details, error?.stack);
+  error(service: string, component: string, action: string, messageOrDetails?: string | Record<string, any>, detailsOrError?: Record<string, any> | Error, errorParam?: Error) {
+    let message: string | undefined;
+    let finalDetails: Record<string, any> = {};
+    let error: Error | undefined;
+    
+    if (typeof messageOrDetails === 'string') {
+      message = messageOrDetails;
+      if (typeof detailsOrError === 'object' && !(detailsOrError instanceof Error)) {
+        finalDetails = detailsOrError;
+        error = errorParam;
+      } else if (detailsOrError instanceof Error) {
+        error = detailsOrError;
+      }
+    } else if (typeof messageOrDetails === 'object') {
+      finalDetails = messageOrDetails;
+      if (detailsOrError instanceof Error) {
+        error = detailsOrError;
+      }
+    }
+    
+    this.addLog('ERROR', service, component, action, message, finalDetails, error?.stack);
   }
 
   /**

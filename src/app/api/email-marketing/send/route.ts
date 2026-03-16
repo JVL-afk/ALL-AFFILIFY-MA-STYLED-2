@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       // Extract and verify JWT with strict validation
       const authHeader = request.headers.get('Authorization');
       if (!authHeader) {
-        logger.warn('EmailMarketingAPI', 'POST /send', 'Missing Authorization header', {
+        logger.warn('EmailMarketingAPI', 'POST /send', 'Missing Authorization header', undefined, {
           trace_id: traceContext.traceId,
           service: 'EmailMarketingAPI',
         });
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       const jwtSecret = process.env.JWT_SECRET || 'your-secret-key';
       const payload = verifyAuthStrict(authHeader, jwtSecret);
       if (!payload) {
-        logger.warn('EmailMarketingAPI', 'POST /send', 'JWT verification failed', {
+        logger.warn('EmailMarketingAPI', 'POST /send', 'JWT verification failed', undefined, {
           trace_id: traceContext.traceId,
           service: 'EmailMarketingAPI',
         });
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       try {
         enforcePermission(payload, { action: 'send', resource: 'campaign' }, traceContext.traceId);
       } catch (error) {
-        logger.warn('EmailMarketingAPI', 'POST /send', 'Permission denied', {
+        logger.warn('EmailMarketingAPI', 'POST /send', 'Permission denied', undefined, {
           trace_id: traceContext.traceId,
           user_id: payload.userId,
           service: 'EmailMarketingAPI',
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       const validationResult = SendCampaignSchema.safeParse(body);
 
       if (!validationResult.success) {
-        logger.warn('EmailMarketingAPI', 'POST /send', 'Invalid send campaign payload', {
+        logger.warn('EmailMarketingAPI', 'POST /send', 'Invalid send campaign payload', undefined, {
           trace_id: traceContext.traceId,
           user_id: payload.userId,
           service: 'EmailMarketingAPI',
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       // Enforce dynamic recipient limit based on plan
       const planLimits = configService.getPlanLimits(payload.userPlan);
       if (recipients.length > planLimits.maxRecipientsPerSend) {
-        logger.warn('EmailMarketingAPI', 'POST /send', 'Recipient limit exceeded for plan', {
+        logger.warn('EmailMarketingAPI', 'POST /send', 'Recipient limit exceeded for plan', undefined, {
           trace_id: traceContext.traceId,
           user_id: payload.userId,
           userPlan: payload.userPlan,
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (!campaign) {
-        logger.warn('EmailMarketingAPI', 'POST /send', 'Campaign not found or unauthorized', {
+        logger.warn('EmailMarketingAPI', 'POST /send', 'Campaign not found or unauthorized', undefined, {
           trace_id: traceContext.traceId,
           user_id: payload.userId,
           campaign_id: campaignId,
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
 
       // Verify campaign is in a sendable state
       if (campaign.status === 'sent') {
-        logger.warn('EmailMarketingAPI', 'POST /send', 'Cannot resend already sent campaign', {
+        logger.warn('EmailMarketingAPI', 'POST /send', 'Cannot resend already sent campaign', undefined, {
           trace_id: traceContext.traceId,
           user_id: payload.userId,
           campaign_id: campaignId,
@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
         textContent: campaign.textContent,
       });
 
-      logger.info('EmailMarketingAPI', 'POST /send', 'Campaign sent successfully', {
+      logger.info('EmailMarketingAPI', 'POST /send', 'Campaign sent successfully', undefined, {
         trace_id: traceContext.traceId,
         user_id: payload.userId,
         campaign_id: campaignId,
@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
       );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('EmailMarketingAPI', 'POST /send', 'Failed to send campaign', {
+      logger.error('EmailMarketingAPI', 'POST /send', 'Failed to send campaign', undefined, {
         trace_id: traceContext.traceId,
         service: 'EmailMarketingAPI',
         error: errorMessage,

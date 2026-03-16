@@ -3,7 +3,8 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { logger } from '@/lib/debug-logger';
 import { verifyAuthStrict } from '@/lib/auth-strict';
-import { enforcePermission, hasPlanOrHigher } from '@/lib/rbac';
+import { enforcePermission } from '@/lib/rbac';
+import { hasPlanOrHigher } from '@/lib/auth-strict';
 import { parsePaginationParams, buildPaginationFilter, createPaginatedResult, formatPaginationMetadata, validatePaginationParams } from '@/lib/pagination';
 import { getTraceId, initializeTraceContext, runWithTraceContext } from '@/lib/trace-context';
 
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
       // Extract and verify JWT
       const authHeader = request.headers.get('Authorization');
       if (!authHeader) {
-        logger.warn('EmailMarketingAPI', 'GET /data', 'Missing Authorization header', {
+        logger.warn('EmailMarketingAPI', 'GET /data', 'Missing Authorization header', undefined, {
           trace_id: traceContext.traceId,
           service: 'EmailMarketingAPI',
         });
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
       const jwtSecret = process.env.JWT_SECRET || 'your-secret-key';
       const payload = verifyAuthStrict(authHeader, jwtSecret);
       if (!payload) {
-        logger.warn('EmailMarketingAPI', 'GET /data', 'JWT verification failed', {
+        logger.warn('EmailMarketingAPI', 'GET /data', 'JWT verification failed', undefined, {
           trace_id: traceContext.traceId,
           service: 'EmailMarketingAPI',
         });
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
       try {
         enforcePermission(payload, { action: 'read', resource: 'campaign_analytics' }, traceContext.traceId);
         if (!hasPlanOrHigher(payload, 'pro')) {
-          logger.warn('EmailMarketingAPI', 'GET /data', 'Insufficient plan for analytics access', {
+          logger.warn('EmailMarketingAPI', 'GET /data', 'Insufficient plan for analytics access', undefined, {
             trace_id: traceContext.traceId,
             user_id: payload.userId,
             userPlan: payload.userPlan,
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
           return NextResponse.json({ error: 'Forbidden: Pro or Enterprise plan required' }, { status: 403 });
         }
       } catch (error) {
-        logger.warn('EmailMarketingAPI', 'GET /data', 'Permission denied', {
+        logger.warn('EmailMarketingAPI', 'GET /data', 'Permission denied', undefined, {
           trace_id: traceContext.traceId,
           user_id: payload.userId,
           service: 'EmailMarketingAPI',
@@ -68,7 +69,7 @@ export async function GET(request: NextRequest) {
       const subscriberPaginationParams = parsePaginationParams(subscriberLimit, subscriberCursor || undefined);
 
       if (!validatePaginationParams(campaignPaginationParams) || !validatePaginationParams(subscriberPaginationParams)) {
-        logger.warn('EmailMarketingAPI', 'GET /data', 'Invalid pagination parameters', {
+        logger.warn('EmailMarketingAPI', 'GET /data', 'Invalid pagination parameters', undefined, {
           trace_id: traceContext.traceId,
           user_id: payload.userId,
           service: 'EmailMarketingAPI',
@@ -110,7 +111,7 @@ export async function GET(request: NextRequest) {
           conversions: campaign.conversions || 0,
         }));
       } catch (error) {
-        logger.warn('EmailMarketingAPI', 'GET /data', 'Failed to fetch campaigns', {
+        logger.warn('EmailMarketingAPI', 'GET /data', 'Failed to fetch campaigns', undefined, {
           trace_id: traceContext.traceId,
           user_id: payload.userId.toString(),
           service: 'EmailMarketingAPI',
@@ -145,7 +146,7 @@ export async function GET(request: NextRequest) {
           stats.revenue = allCampaigns.reduce((sum, c) => sum + (c.revenue || 0), 0);
         }
       } catch (error) {
-        logger.warn('EmailMarketingAPI', 'GET /data', 'Failed to calculate stats', {
+        logger.warn('EmailMarketingAPI', 'GET /data', 'Failed to calculate stats', undefined, {
           trace_id: traceContext.traceId,
           user_id: payload.userId.toString(),
           service: 'EmailMarketingAPI',
@@ -158,7 +159,7 @@ export async function GET(request: NextRequest) {
         const subscribersCount = await db.collection('email_subscribers').countDocuments({ userId, status: 'active' });
         stats.totalSubscribers = subscribersCount;
       } catch (error) {
-        logger.warn('EmailMarketingAPI', 'GET /data', 'Failed to fetch subscriber count', {
+        logger.warn('EmailMarketingAPI', 'GET /data', 'Failed to fetch subscriber count', undefined, {
           trace_id: traceContext.traceId,
           user_id: payload.userId.toString(),
           service: 'EmailMarketingAPI',
@@ -189,7 +190,7 @@ export async function GET(request: NextRequest) {
           uses: template.uses || 0,
         }));
       } catch (error) {
-        logger.warn('EmailMarketingAPI', 'GET /data', 'Failed to fetch templates', {
+        logger.warn('EmailMarketingAPI', 'GET /data', 'Failed to fetch templates', undefined, {
           trace_id: traceContext.traceId,
           user_id: payload.userId.toString(),
           service: 'EmailMarketingAPI',
@@ -220,7 +221,7 @@ export async function GET(request: NextRequest) {
           tags: sub.tags || [],
         }));
       } catch (error) {
-        logger.warn('EmailMarketingAPI', 'GET /data', 'Failed to fetch subscribers', {
+        logger.warn('EmailMarketingAPI', 'GET /data', 'Failed to fetch subscribers', undefined, {
           trace_id: traceContext.traceId,
           user_id: payload.userId.toString(),
           service: 'EmailMarketingAPI',
@@ -228,7 +229,7 @@ export async function GET(request: NextRequest) {
         });
       }
 
-      logger.info('EmailMarketingAPI', 'GET /data', 'Email marketing data retrieved successfully', {
+      logger.info('EmailMarketingAPI', 'GET /data', 'Email marketing data retrieved successfully', undefined, {
         trace_id: traceContext.traceId,
         user_id: payload.userId,
         service: 'EmailMarketingAPI',
@@ -253,7 +254,7 @@ export async function GET(request: NextRequest) {
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('EmailMarketingAPI', 'GET /data', 'Error fetching email marketing data', {
+      logger.error('EmailMarketingAPI', 'GET /data', 'Error fetching email marketing data', undefined, {
         trace_id: traceContext.traceId,
         service: 'EmailMarketingAPI',
         error: errorMessage,

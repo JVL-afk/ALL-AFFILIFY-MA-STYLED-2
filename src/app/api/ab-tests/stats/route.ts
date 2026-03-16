@@ -20,25 +20,25 @@ export async function GET(request: NextRequest) {
       // 1. Authentication & Authorization
       const token = request.cookies.get('auth-token')?.value;
       if (!token) {
-        logger.warn('ABTestingStatsAPI', 'GET', 'Authentication required', { traceId });
+        logger.warn('ABTestingStatsAPI', 'GET', 'Authentication required', undefined, { traceId });
         return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
       }
 
       const decoded = verifyToken(token);
       if (!decoded) {
-        logger.warn('ABTestingStatsAPI', 'GET', 'Invalid token', { traceId });
+        logger.warn('ABTestingStatsAPI', 'GET', 'Invalid token', undefined, { traceId });
         return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
       }
 
       const user = await getUserById(decoded.userId);
       if (!user) {
-        logger.warn('ABTestingStatsAPI', 'GET', 'User not found', { userId: decoded.userId, traceId });
+        logger.warn('ABTestingStatsAPI', 'GET', 'User not found', undefined, { userId: decoded.userId, traceId });
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
 
       // 2. Enterprise Plan Enforcement
       if (user.plan !== 'enterprise') {
-        logger.warn('ABTestingStatsAPI', 'GET', 'Enterprise plan required', { userId: user._id, plan: user.plan, traceId });
+        logger.warn('ABTestingStatsAPI', 'GET', 'Enterprise plan required', undefined, { userId: user._id, plan: user.plan, traceId });
         return NextResponse.json({ error: 'Enterprise plan required' }, { status: 403 });
       }
 
@@ -71,8 +71,8 @@ export async function GET(request: NextRequest) {
           const control = test.variants.find((v: any) => v.isControl);
           const variants = test.variants.filter((v: any) => !v.isControl);
 
-          if (control && variants.length > 0 && control.visitors > 0) {
-            const controlCR = (control.conversions || 0) / control.visitors;
+          if (control && variants.length > 0 && (control as any).visitors > 0) {
+            const controlCR = ((control as any).conversions || 0) / (control as any).visitors;
             
             variants.forEach((variant: any) => {
               if (variant.visitors > 0) {
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
 
       stats.averageUplift = testsWithUplift > 0 ? Number((totalUplift / testsWithUplift).toFixed(1)) : 0;
 
-      logger.info('ABTestingStatsAPI', 'GET', 'Stats calculated successfully', {
+      logger.info('ABTestingStatsAPI', 'GET', 'Stats calculated successfully', undefined, {
         userId: user._id,
         totalTests: stats.totalTests,
         traceId,
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
       });
 
     } catch (error) {
-      logger.error('ABTestingStatsAPI', 'GET', 'Internal server error', {
+      logger.error('ABTestingStatsAPI', 'GET', 'Internal server error', undefined, {
         error: (error as Error).message,
         stack: (error as Error).stack,
         traceId,

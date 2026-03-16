@@ -22,25 +22,25 @@ export async function POST(request: NextRequest) {
       // 1. Authentication & Authorization
       const token = request.cookies.get('auth-token')?.value;
       if (!token) {
-        logger.warn('ABTestingCreateAPI', 'POST', 'Authentication required', { traceId });
+        logger.warn('ABTestingCreateAPI', 'POST', 'Authentication required', undefined, { traceId });
         return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
       }
 
       const decoded = verifyToken(token);
       if (!decoded) {
-        logger.warn('ABTestingCreateAPI', 'POST', 'Invalid token', { traceId });
+        logger.warn('ABTestingCreateAPI', 'POST', 'Invalid token', undefined, { traceId });
         return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
       }
 
       const user = await getUserById(decoded.userId);
       if (!user) {
-        logger.warn('ABTestingCreateAPI', 'POST', 'User not found', { userId: decoded.userId, traceId });
+        logger.warn('ABTestingCreateAPI', 'POST', 'User not found', undefined, { userId: decoded.userId, traceId });
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
 
       // 2. Enterprise Plan Enforcement
       if (user.plan !== 'enterprise') {
-        logger.warn('ABTestingCreateAPI', 'POST', 'Enterprise plan required', { userId: user._id, plan: user.plan, traceId });
+        logger.warn('ABTestingCreateAPI', 'POST', 'Enterprise plan required', undefined, { userId: user._id, plan: user.plan, traceId });
         return NextResponse.json({ error: 'Enterprise plan required' }, { status: 403 });
       }
 
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       const validationResult = ExperimentSchema.safeParse(experimentData);
       
       if (!validationResult.success) {
-        logger.warn('ABTestingCreateAPI', 'POST', 'Validation failed', { 
+        logger.warn('ABTestingCreateAPI', 'POST', 'Validation failed', undefined, { 
           errors: validationResult.error.format(),
           traceId 
         });
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       const repository = new ABTestingRepository(db, user._id);
       const result = await repository.create(validationResult.data);
 
-      logger.info('ABTestingCreateAPI', 'POST', 'Experiment created successfully', {
+      logger.info('ABTestingCreateAPI', 'POST', 'Experiment created successfully', undefined, {
         userId: user._id,
         experimentId: result.insertedId.toString(),
         traceId,
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
       }, { status: 201 });
 
     } catch (error) {
-      logger.error('ABTestingCreateAPI', 'POST', 'Internal server error', {
+      logger.error('ABTestingCreateAPI', 'POST', 'Internal server error', undefined, {
         error: (error as Error).message,
         stack: (error as Error).stack,
         traceId,

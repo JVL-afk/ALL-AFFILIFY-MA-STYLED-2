@@ -19,25 +19,25 @@ export async function GET(request: NextRequest) {
       // 1. Authentication & Authorization
       const token = request.cookies.get('auth-token')?.value;
       if (!token) {
-        logger.warn('ABTestingListAPI', 'GET', 'Authentication required', { traceId });
+        logger.warn('ABTestingListAPI', 'GET', 'Authentication required', undefined, { traceId });
         return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
       }
 
       const decoded = verifyToken(token);
       if (!decoded) {
-        logger.warn('ABTestingListAPI', 'GET', 'Invalid token', { traceId });
+        logger.warn('ABTestingListAPI', 'GET', 'Invalid token', undefined, { traceId });
         return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
       }
 
       const user = await getUserById(decoded.userId);
       if (!user) {
-        logger.warn('ABTestingListAPI', 'GET', 'User not found', { userId: decoded.userId, traceId });
+        logger.warn('ABTestingListAPI', 'GET', 'User not found', undefined, { userId: decoded.userId, traceId });
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
 
       // 2. Enterprise Plan Enforcement
       if (user.plan !== 'enterprise') {
-        logger.warn('ABTestingListAPI', 'GET', 'Enterprise plan required', { userId: user._id, plan: user.plan, traceId });
+        logger.warn('ABTestingListAPI', 'GET', 'Enterprise plan required', undefined, { userId: user._id, plan: user.plan, traceId });
         return NextResponse.json({ error: 'Enterprise plan required' }, { status: 403 });
       }
 
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       const repository = new ABTestingRepository(db, user._id);
       const experiments = await repository.findAll();
 
-      logger.info('ABTestingListAPI', 'GET', 'Experiments retrieved successfully', {
+      logger.info('ABTestingListAPI', 'GET', 'Experiments retrieved successfully', undefined, {
         userId: user._id,
         count: experiments.length,
         traceId,
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
       });
 
     } catch (error) {
-      logger.error('ABTestingListAPI', 'GET', 'Internal server error', {
+      logger.error('ABTestingListAPI', 'GET', 'Internal server error', undefined, {
         error: (error as Error).message,
         stack: (error as Error).stack,
         traceId,

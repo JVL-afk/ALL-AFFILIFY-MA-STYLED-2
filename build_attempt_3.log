@@ -1,0 +1,29 @@
+
+> affilify-platform@0.1.0 build /home/ubuntu/ALL-AFFILIFY-MA-STYLED-2
+> next build
+
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+▲ Next.js 16.1.4 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 13.3s
+  Running TypeScript ...
+Failed to compile.
+
+./src/app/api/ab-tests/create/route.ts:25:78
+Type error: Argument of type '{ traceId: string; }' is not assignable to parameter of type 'string'.
+
+[0m [90m 23 |[39m       [36mconst[39m token [33m=[39m request[33m.[39mcookies[33m.[39m[36mget[39m([32m'auth-token'[39m)[33m?[39m[33m.[39mvalue[33m;[39m
+ [90m 24 |[39m       [36mif[39m ([33m![39mtoken) {
+[31m[1m>[22m[39m[90m 25 |[39m         logger[33m.[39mwarn([32m'ABTestingCreateAPI'[39m[33m,[39m [32m'POST'[39m[33m,[39m [32m'Authentication required'[39m[33m,[39m { traceId })[33m;[39m
+ [90m    |[39m                                                                              [31m[1m^[22m[39m
+ [90m 26 |[39m         [36mreturn[39m [33mNextResponse[39m[33m.[39mjson({ error[33m:[39m [32m'Authentication required'[39m }[33m,[39m { status[33m:[39m [35m401[39m })[33m;[39m
+ [90m 27 |[39m       }
+ [90m 28 |[39m[0m
+Next.js build worker exited with code: 1 and signal: null
+ ELIFECYCLE  Command failed with exit code 1.

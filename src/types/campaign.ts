@@ -12,7 +12,3 @@ export const EmailCampaignSchema = z.object({
 });
 
 export type EmailCampaignCreation = z.infer<typeof EmailCampaignSchema>;
-Schema>;
->;
->;
->;

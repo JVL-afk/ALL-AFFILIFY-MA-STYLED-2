@@ -1,0 +1,52 @@
+
+> affilify-platform@0.1.0 build /home/ubuntu/ALL-AFFILIFY-MA-STYLED-2
+> next build
+
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+▲ Next.js 16.1.4 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 2 errors:
+./src/types/campaign.ts:15:8
+Parsing ecmascript source code failed
+[0m [90m 13 |[39m
+ [90m 14 |[39m [36mexport[39m type [33mEmailCampaignCreation[39m [33m=[39m z[33m.[39minfer[33m<[39m[36mtypeof[39m [33mEmailCampaignSchema[39m[33m>[39m[33m;[39m
+[31m[1m>[22m[39m[90m 15 |[39m [33mSchema[39m[33m>[39m[33m;[39m
+ [90m    |[39m        [31m[1m^[22m[39m
+ [90m 16 |[39m [33m>[39m[33m;[39m
+ [90m 17 |[39m [33m>[39m[33m;[39m
+ [90m 18 |[39m [33m>[39m[33m;[39m[0m
+
+Expression expected
+
+Import trace:
+  App Route:
+    ./src/types/campaign.ts
+    ./src/app/api/email-marketing/campaigns/route.ts
+
+
+./src/app/api/email-marketing/data/route.ts:6:1
+Export hasPlanOrHigher doesn't exist in target module
+[0m [90m 4 |[39m [36mimport[39m { logger } [36mfrom[39m [32m'@/lib/debug-logger'[39m[33m;[39m
+ [90m 5 |[39m [36mimport[39m { verifyAuthStrict } [36mfrom[39m [32m'@/lib/auth-strict'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 6 |[39m [36mimport[39m { enforcePermission[33m,[39m hasPlanOrHigher } [36mfrom[39m [32m'@/lib/rbac'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 7 |[39m [36mimport[39m { parsePaginationParams[33m,[39m buildPaginationFilter[33m,[39m createPaginatedResult[33m,[39m formatPaginationMetadata[33m,[39m validatePaginationParams } [36mfrom[39m [32m'@/lib/pagination'[39m[33m;[39m
+ [90m 8 |[39m [36mimport[39m { getTraceId[33m,[39m initializeTraceContext[33m,[39m runWithTraceContext } [36mfrom[39m [32m'@/lib/trace-context'[39m[33m;[39m
+ [90m 9 |[39m[0m
+
+The export hasPlanOrHigher was not found in module [project]/src/lib/rbac.ts [app-route] (ecmascript).
+Did you mean to import hasPermission?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+    at <unknown> (./src/types/campaign.ts:15:8)
+    at <unknown> (./src/app/api/email-marketing/data/route.ts:6:1)
+ ELIFECYCLE  Command failed with exit code 1.
