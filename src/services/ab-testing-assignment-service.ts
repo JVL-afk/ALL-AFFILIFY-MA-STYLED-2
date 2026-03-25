@@ -22,7 +22,7 @@ export class ABTestingAssignmentService {
     const traceId = getTraceId();
 
     if (experiment.status !== 'RUNNING') {
-      logger.debug('ABTestingAssignmentService', 'assignVariant', 'Experiment not running', {
+      logger.debug('ABTestingAssignmentService', 'assignVariant', 'Experiment not running', 'Experiment not running', {
         experimentId: experiment._id?.toString(),
         status: experiment.status,
         traceId,
@@ -40,7 +40,7 @@ export class ABTestingAssignmentService {
     for (const variant of experiment.variants) {
       cumulativeAllocation += variant.trafficAllocation;
       if (bucket < cumulativeAllocation) {
-        logger.info('ABTestingAssignmentService', 'assignVariant', 'Variant assigned', {
+        logger.info('ABTestingAssignmentService', 'assignVariant', 'Variant assigned', 'Variant assigned', {
           userId,
           experimentId: experiment._id?.toString(),
           variantId: variant.id,
@@ -53,7 +53,7 @@ export class ABTestingAssignmentService {
 
     // 3. Fallback to Control
     const control = experiment.variants.find(v => v.isControl) || experiment.variants[0];
-    logger.warn('ABTestingAssignmentService', 'assignVariant', 'Fallback to control', {
+    logger.warn('ABTestingAssignmentService', 'assignVariant', 'Fallback to control', 'Fallback to control', {
       userId,
       experimentId: experiment._id?.toString(),
       traceId,

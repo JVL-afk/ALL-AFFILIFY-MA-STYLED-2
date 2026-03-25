@@ -58,7 +58,7 @@ export class QuotaService {
       throw new Error(`Failed to initialize quota for user ${userId.toString()}`);
     }
 
-    logger.info('QuotaService', 'initializeUserQuota', 'User quota initialized', {
+    logger.info('QuotaService', 'initializeUserQuota', 'User quota initialized', 'User quota initialized', {
       userId: userId.toString(),
       planType,
       monthlyLimit: quotaLimits.monthly,
@@ -82,7 +82,7 @@ export class QuotaService {
     // First, ensure quota record exists
     const quota = await this.db.collection('user_quotas').findOne({ userId });
     if (!quota) {
-      logger.warn('QuotaService', 'checkAndDecrementQuota', 'User quota not found', { userId: userId.toString() });
+      logger.warn('QuotaService', 'checkAndDecrementQuota', 'User quota not found', 'User quota not found', { userId: userId.toString() });
       return { allowed: false, remaining: 0, reason: 'Quota not initialized' };
     }
 
@@ -110,7 +110,7 @@ export class QuotaService {
 
     // Check monthly quota
     if (quota.emailsSentThisMonth + emailCount > quota.emailsAllowedPerMonth) {
-      logger.warn('QuotaService', 'checkAndDecrementQuota', 'Monthly quota exceeded', {
+      logger.warn('QuotaService', 'checkAndDecrementQuota', 'Monthly quota exceeded', 'Monthly quota exceeded', {
         userId: userId.toString(),
         requested: emailCount,
         current: quota.emailsSentThisMonth,
@@ -125,7 +125,7 @@ export class QuotaService {
 
     // Check daily quota
     if (quota.emailsSentToday + emailCount > quota.emailsAllowedPerDay) {
-      logger.warn('QuotaService', 'checkAndDecrementQuota', 'Daily quota exceeded', {
+      logger.warn('QuotaService', 'checkAndDecrementQuota', 'Daily quota exceeded', 'Daily quota exceeded', {
         userId: userId.toString(),
         requested: emailCount,
         current: quota.emailsSentToday,
@@ -160,7 +160,7 @@ export class QuotaService {
 
     if (!updateResult.value) {
       // This should rarely happen as we checked quotas above, but it's possible in high-concurrency scenarios
-      logger.error('QuotaService', 'checkAndDecrementQuota', 'Atomic quota decrement failed due to race condition', {
+      logger.error('QuotaService', 'checkAndDecrementQuota', 'Atomic quota decrement failed due to race condition', 'Atomic quota decrement failed due to race condition', {
         userId: userId.toString(),
         emailCount,
       });
@@ -171,7 +171,7 @@ export class QuotaService {
       };
     }
 
-    logger.info('QuotaService', 'checkAndDecrementQuota', 'Quota decremented successfully', {
+    logger.info('QuotaService', 'checkAndDecrementQuota', 'Quota decremented successfully', 'Quota decremented successfully', {
       userId: userId.toString(),
       emailCount,
       newMonthlyUsage: updateResult.value.emailsSentThisMonth,
@@ -216,7 +216,7 @@ export class QuotaService {
       }
     );
 
-    logger.info('QuotaService', 'resetUserQuota', 'User quota reset', { userId: userId.toString() });
+    logger.info('QuotaService', 'resetUserQuota', 'User quota reset', 'User quota reset', { userId: userId.toString() });
   }
 
   /**

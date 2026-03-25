@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
         },
       };
 
-      logger.info('HealthCheck', 'GET /health', 'Health check performed', undefined, {
+      logger.info('HealthCheck', 'GET /health', 'Health check performed', 'Health check performed', {
         trace_id: traceContext.traceId,
         service: 'HealthCheck',
         status: healthStatus.status,
@@ -146,7 +146,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(comprehensiveHealthStatus, { status: statusCode });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('HealthCheck', 'GET /health', 'Health check failed', undefined, {
+      logger.error('HealthCheck', 'GET /health', 'Health check failed', 'Health check failed', {
         trace_id: traceContext.traceId,
         service: 'HealthCheck',
         error: errorMessage,

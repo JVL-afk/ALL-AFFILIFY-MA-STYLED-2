@@ -54,7 +54,7 @@ export class ABTestingRepository {
       updatedAt: new Date(),
     });
 
-    logger.info('ABTestingRepository', 'create', 'Creating new experiment', {
+    logger.info('ABTestingRepository', 'create', 'Creating new experiment', 'Creating new experiment', {
       tenantId: this.tenantId.toString(),
       name: validatedData.name,
       traceId,
@@ -82,7 +82,7 @@ export class ABTestingRepository {
       $inc: { version: 1 }
     };
 
-    logger.info('ABTestingRepository', 'updateStatus', 'Updating experiment status', {
+    logger.info('ABTestingRepository', 'updateStatus', 'Updating experiment status', 'Updating experiment status', {
       id: id.toString(),
       status,
       currentVersion,
@@ -92,7 +92,7 @@ export class ABTestingRepository {
     const result = await this.collection.updateOne(filter, update);
 
     if (result.matchedCount === 0) {
-      logger.warn('ABTestingRepository', 'updateStatus', 'Update failed: version mismatch or not found', {
+      logger.warn('ABTestingRepository', 'updateStatus', 'Update failed: version mismatch or not found', 'Update failed: version mismatch or not found', {
         id: id.toString(),
         currentVersion,
         traceId,

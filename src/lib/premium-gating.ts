@@ -42,7 +42,7 @@ export async function checkPremiumStatus(userId: string): Promise<PremiumUser | 
     const user = await User.findById(new mongoose.Types.ObjectId(userId));
     
     if (!user) {
-      logger.warn('PREMIUM_GATING', 'USER_NOT_FOUND', { userId });
+      logger.warn('PREMIUM_GATING', 'USER_NOT_FOUND', 'USER_NOT_FOUND', { userId });
       return null;
     }
 
@@ -54,7 +54,7 @@ export async function checkPremiumStatus(userId: string): Promise<PremiumUser | 
       (!user.subscription.endDate || new Date(user.subscription.endDate) > now);
 
     if (!isSubscriptionActive) {
-      logger.warn('PREMIUM_GATING', 'SUBSCRIPTION_INACTIVE', { userId, status: user.subscription?.status });
+      logger.warn('PREMIUM_GATING', 'SUBSCRIPTION_INACTIVE', 'SUBSCRIPTION_INACTIVE', { userId, status: user.subscription?.status });
       return null;
     }
 
@@ -108,10 +108,10 @@ export async function checkPremiumStatus(userId: string): Promise<PremiumUser | 
       crmFeatures: featureAccess[tier],
     };
 
-    logger.info('PREMIUM_GATING', 'PREMIUM_STATUS_VERIFIED', { userId, tier, features: premiumUser.crmFeatures });
+    logger.info('PREMIUM_GATING', 'PREMIUM_STATUS_VERIFIED', 'PREMIUM_STATUS_VERIFIED', { userId, tier, features: premiumUser.crmFeatures });
     return premiumUser;
   } catch (error: any) {
-    logger.error('PREMIUM_GATING', 'CHECK_STATUS_ERROR', { userId, error: error.message }, error);
+    logger.error('PREMIUM_GATING', 'CHECK_STATUS_ERROR', 'CHECK_STATUS_ERROR', { userId, error: error.message }, error);
     return null;
   }
 }
@@ -126,12 +126,12 @@ export function requirePremiumCRM(
     const requestId = Math.random().toString(36).substring(7);
     
     try {
-      logger.info('PREMIUM_GATE', 'REQUEST_START', { requestId, url: request.url });
+      logger.info('PREMIUM_GATE', 'REQUEST_START', 'REQUEST_START', { requestId, url: request.url });
 
       // Verify authentication
       const authResult = await verifyAuth(request);
       if (!authResult.success || !authResult.user) {
-        logger.warn('PREMIUM_GATE', 'AUTH_FAILED', { requestId, error: authResult.error });
+        logger.warn('PREMIUM_GATE', 'AUTH_FAILED', 'AUTH_FAILED', { requestId, error: authResult.error });
         return NextResponse.json(
           { message: 'Unauthorized', requestId },
           { status: 401 }
@@ -139,13 +139,13 @@ export function requirePremiumCRM(
       }
 
       const userId = authResult.user.id || authResult.user._id?.toString();
-      logger.debug('PREMIUM_GATE', 'USER_AUTHENTICATED', { requestId, userId });
+      logger.debug('PREMIUM_GATE', 'USER_AUTHENTICATED', 'USER_AUTHENTICATED', { requestId, userId });
 
       // Check premium status
       const premiumUser = await checkPremiumStatus(userId);
       
       if (!premiumUser) {
-        logger.warn('PREMIUM_GATE', 'PREMIUM_REQUIRED', { requestId, userId });
+        logger.warn('PREMIUM_GATE', 'PREMIUM_REQUIRED', 'PREMIUM_REQUIRED', { requestId, userId });
         return NextResponse.json(
           {
             message: 'Premium subscription required for CRM features',
@@ -156,12 +156,12 @@ export function requirePremiumCRM(
         );
       }
 
-      logger.debug('PREMIUM_GATE', 'PREMIUM_VERIFIED', { requestId, userId, tier: premiumUser.tier });
+      logger.debug('PREMIUM_GATE', 'PREMIUM_VERIFIED', 'PREMIUM_VERIFIED', { requestId, userId, tier: premiumUser.tier });
 
       // Call the handler with the premium user
       return await handler(request, premiumUser);
     } catch (error: any) {
-      logger.error('PREMIUM_GATE', 'GATE_ERROR', { requestId, error: error.message }, error);
+      logger.error('PREMIUM_GATE', 'GATE_ERROR', 'GATE_ERROR', { requestId, error: error.message }, error);
       return NextResponse.json(
         { message: 'Internal Server Error', requestId },
         { status: 500 }
@@ -188,7 +188,7 @@ export async function canAccessCRMFeature(userId: string, feature: keyof Premium
 
     return premiumUser.crmFeatures[feature] as boolean;
   } catch (error: any) {
-    logger.error('PREMIUM_GATING', 'FEATURE_CHECK_ERROR', { userId, feature, error: error.message }, error);
+    logger.error('PREMIUM_GATING', 'FEATURE_CHECK_ERROR', 'FEATURE_CHECK_ERROR', { userId, feature, error: error.message }, error);
     return false;
   }
 }
@@ -201,7 +201,7 @@ export async function getPremiumTier(userId: string): Promise<PremiumTier | null
     const premiumUser = await checkPremiumStatus(userId);
     return premiumUser?.tier || null;
   } catch (error: any) {
-    logger.error('PREMIUM_GATING', 'GET_TIER_ERROR', { userId, error: error.message }, error);
+    logger.error('PREMIUM_GATING', 'GET_TIER_ERROR', 'GET_TIER_ERROR', { userId, error: error.message }, error);
     return null;
   }
 }

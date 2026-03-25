@@ -57,14 +57,14 @@ export class SendGridAdapter {
    */
   private initialize(): void {
     if (!process.env.SENDGRID_API_KEY) {
-      logger.error('SendGridAdapter', 'initialize', 'SendGrid API key not configured', {
+      logger.error('SendGridAdapter', 'initialize', 'SendGrid API key not configured', 'SendGrid API key not configured', {
         error: 'SENDGRID_API_KEY is missing',
       });
       return;
     }
 
     if (!process.env.SENDGRID_FROM_EMAIL) {
-      logger.error('SendGridAdapter', 'initialize', 'SendGrid FROM email not configured', {
+      logger.error('SendGridAdapter', 'initialize', 'SendGrid FROM email not configured', 'SendGrid FROM email not configured', {
         error: 'SENDGRID_FROM_EMAIL is missing',
       });
       return;
@@ -80,7 +80,7 @@ export class SendGridAdapter {
    */
   async sendEmail(message: EmailMessage): Promise<SendResult> {
     if (!this.initialized) {
-      logger.error('SendGridAdapter', 'sendEmail', 'SendGrid adapter not initialized', {
+      logger.error('SendGridAdapter', 'sendEmail', 'SendGrid adapter not initialized', 'SendGrid adapter not initialized', {
         to: message.to,
         subject: message.subject,
       });
@@ -98,7 +98,7 @@ export class SendGridAdapter {
         )
       );
 
-      logger.info('SendGridAdapter', 'sendEmail', 'Email sent successfully', {
+      logger.info('SendGridAdapter', 'sendEmail', 'Email sent successfully', 'Email sent successfully', {
         to: message.to,
         subject: message.subject,
         messageId: result,
@@ -110,7 +110,7 @@ export class SendGridAdapter {
       };
     } catch (error) {
       const errorMessage = (error as Error).message;
-      logger.error('SendGridAdapter', 'sendEmail', 'Failed to send email', {
+      logger.error('SendGridAdapter', 'sendEmail', 'Failed to send email', 'Failed to send email', {
         to: message.to,
         subject: message.subject,
         error: errorMessage,

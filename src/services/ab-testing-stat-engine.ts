@@ -64,7 +64,7 @@ export class ABTestingStatEngine {
       winner = zScore > 0 ? 'variant' : 'control';
     }
 
-    logger.info('ABTestingStatEngine', 'calculateSignificance', 'Significance calculated', {
+    logger.info('ABTestingStatEngine', 'calculateSignificance', 'Significance calculated', 'Significance calculated', {
       controlCR,
       variantCR,
       uplift,

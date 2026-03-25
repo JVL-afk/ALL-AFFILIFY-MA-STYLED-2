@@ -51,7 +51,7 @@ export class ABTestingEventService {
       );
 
       if (eventResult.matchedCount > 0) {
-        logger.warn('ABTestingEventService', 'ingestEvent', 'Duplicate event detected', {
+        logger.warn('ABTestingEventService', 'ingestEvent', 'Duplicate event detected', 'Duplicate event detected', {
           eventId: validatedEvent.eventId,
           traceId,
         });
@@ -79,7 +79,7 @@ export class ABTestingEventService {
       );
 
       if (updateResult.matchedCount === 0) {
-        logger.error('ABTestingEventService', 'ingestEvent', 'Experiment or variant not found', {
+        logger.error('ABTestingEventService', 'ingestEvent', 'Experiment or variant not found', 'Experiment or variant not found', {
           experimentId: validatedEvent.experimentId.toString(),
           variantId: validatedEvent.variantId,
           traceId,
@@ -87,7 +87,7 @@ export class ABTestingEventService {
         return { success: false, message: 'Experiment or variant not found' };
       }
 
-      logger.info('ABTestingEventService', 'ingestEvent', 'Event ingested successfully', {
+      logger.info('ABTestingEventService', 'ingestEvent', 'Event ingested successfully', 'Event ingested successfully', {
         eventId: validatedEvent.eventId,
         type: validatedEvent.eventType,
         traceId,
@@ -96,7 +96,7 @@ export class ABTestingEventService {
       return { success: true, message: 'Event ingested successfully' };
 
     } catch (error) {
-      logger.error('ABTestingEventService', 'ingestEvent', 'Failed to ingest event', {
+      logger.error('ABTestingEventService', 'ingestEvent', 'Failed to ingest event', 'Failed to ingest event', {
         error: (error as Error).message,
         traceId,
       });

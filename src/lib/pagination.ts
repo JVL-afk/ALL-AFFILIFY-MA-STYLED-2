@@ -82,7 +82,7 @@ export function decodeCursor(cursor: string): ObjectId | null {
     const decoded = Buffer.from(cursor, 'base64').toString('utf-8');
     return new ObjectId(decoded);
   } catch (error) {
-    logger.warn('PaginationModule', 'decodeCursor', 'Invalid cursor provided', {
+    logger.warn('PaginationModule', 'decodeCursor', 'Invalid cursor provided', 'Invalid cursor provided', {
       cursor,
       error: error instanceof Error ? error.message : String(error),
     });
@@ -149,7 +149,7 @@ export function createPaginatedResult<T extends { _id: ObjectId }>(
  */
 export function validatePaginationParams(params: PaginationParams): boolean {
   if (params.limit < 1 || params.limit > MAX_LIMIT) {
-    logger.warn('PaginationModule', 'validatePaginationParams', 'Invalid limit', {
+    logger.warn('PaginationModule', 'validatePaginationParams', 'Invalid limit', 'Invalid limit', {
       limit: params.limit,
       maxLimit: MAX_LIMIT,
     });
@@ -159,7 +159,7 @@ export function validatePaginationParams(params: PaginationParams): boolean {
   if (params.cursor) {
     const decodedId = decodeCursor(params.cursor);
     if (!decodedId) {
-      logger.warn('PaginationModule', 'validatePaginationParams', 'Invalid cursor', {
+      logger.warn('PaginationModule', 'validatePaginationParams', 'Invalid cursor', 'Invalid cursor', {
         cursor: params.cursor,
       });
       return false;

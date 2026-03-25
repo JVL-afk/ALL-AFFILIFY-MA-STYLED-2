@@ -33,13 +33,13 @@ export async function enforcePermission(
 
   try {
     await enforceZanzibarPermission(payload, relation, permission.resource, 'global', zookie, traceId);
-    logger.debug('RBACModule', 'enforcePermission', 'Permission granted via Zanzibar', {
+    logger.debug('RBACModule', 'enforcePermission', 'Permission granted via Zanzibar', 'Permission granted via Zanzibar', {
       trace_id: traceId,
       user_id: payload.userId,
       subject, relation, object,
     });
   } catch (error: any) {
-    logger.error('RBACModule', 'enforcePermission', 'Permission enforcement failed via Zanzibar', {
+    logger.error('RBACModule', 'enforcePermission', 'Permission enforcement failed via Zanzibar', 'Permission enforcement failed via Zanzibar', {
       trace_id: traceId,
       user_id: payload.userId,
       subject, relation, object,
@@ -59,7 +59,7 @@ export function hasPermission(
 ): boolean {
   // This function should ideally be replaced by a check against the Zanzibar service.
   // For now, it will always return true, assuming enforcePermission will handle actual checks.
-  logger.warn('RBACModule', 'hasPermission', 'Using deprecated hasPermission. Use enforcePermission for actual checks.', {
+  logger.warn('RBACModule', 'hasPermission', 'Using deprecated hasPermission. Use enforcePermission for actual checks.', 'Using deprecated hasPermission. Use enforcePermission for actual checks.', {
     trace_id: traceId,
     user_id: payload.userId,
     permission,
@@ -72,7 +72,7 @@ export function hasAllPermissions(
   permissions: Permission[],
   traceId?: string
 ): boolean {
-  logger.warn('RBACModule', 'hasAllPermissions', 'Using deprecated hasAllPermissions. Use enforcePermission for actual checks.', {
+  logger.warn('RBACModule', 'hasAllPermissions', 'Using deprecated hasAllPermissions. Use enforcePermission for actual checks.', 'Using deprecated hasAllPermissions. Use enforcePermission for actual checks.', {
     trace_id: traceId,
     user_id: payload.userId,
     permissions,
@@ -85,7 +85,7 @@ export function hasAnyPermission(
   permissions: Permission[],
   traceId?: string
 ): boolean {
-  logger.warn('RBACModule', 'hasAnyPermission', 'Using deprecated hasAnyPermission. Use enforcePermission for actual checks.', {
+  logger.warn('RBACModule', 'hasAnyPermission', 'Using deprecated hasAnyPermission. Use enforcePermission for actual checks.', 'Using deprecated hasAnyPermission. Use enforcePermission for actual checks.', {
     trace_id: traceId,
     user_id: payload.userId,
     permissions,
@@ -94,7 +94,7 @@ export function hasAnyPermission(
 }
 
 export function getPermissionsForRole(role: string): Permission[] {
-  logger.warn('RBACModule', 'getPermissionsForRole', 'Using deprecated getPermissionsForRole. Roles are being replaced by Zanzibar relations.', {
+  logger.warn('RBACModule', 'getPermissionsForRole', 'Using deprecated getPermissionsForRole. Roles are being replaced by Zanzibar relations.', 'Using deprecated getPermissionsForRole. Roles are being replaced by Zanzibar relations.', {
     role,
   });
   return []; // Deprecated in Zanzibar model
@@ -105,7 +105,7 @@ export function canAccessResource(
   resource: string,
   traceId?: string
 ): boolean {
-  logger.warn('RBACModule', 'canAccessResource', 'Using deprecated canAccessResource. Use enforcePermission for actual checks.', {
+  logger.warn('RBACModule', 'canAccessResource', 'Using deprecated canAccessResource. Use enforcePermission for actual checks.', 'Using deprecated canAccessResource. Use enforcePermission for actual checks.', {
     trace_id: traceId,
     user_id: payload.userId,
     resource,
@@ -118,7 +118,7 @@ export function canModifyResource(
   resource: string,
   traceId?: string
 ): boolean {
-  logger.warn('RBACModule', 'canModifyResource', 'Using deprecated canModifyResource. Use enforcePermission for actual checks.', {
+  logger.warn('RBACModule', 'canModifyResource', 'Using deprecated canModifyResource. Use enforcePermission for actual checks.', 'Using deprecated canModifyResource. Use enforcePermission for actual checks.', {
     trace_id: traceId,
     user_id: payload.userId,
     resource,

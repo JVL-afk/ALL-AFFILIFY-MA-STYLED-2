@@ -209,7 +209,7 @@ export class BackpressureHandler {
     const rejectionPoint = this.maxQueueDepth * this.rejectionThreshold;
 
     if (this.queueDepth > rejectionPoint) {
-      logger.warn('BackpressureHandler', 'enqueue', 'Backpressure threshold reached', {
+      logger.warn('BackpressureHandler', 'enqueue', 'Backpressure threshold reached', 'Backpressure threshold reached', {
         trace_id: traceId,
         queueDepth: this.queueDepth,
         maxQueueDepth: this.maxQueueDepth,
@@ -236,7 +236,7 @@ export class BackpressureHandler {
       this.queueDepth--;
     }
 
-    logger.debug('BackpressureHandler', 'dequeue', 'Item dequeued', {
+    logger.debug('BackpressureHandler', 'dequeue', 'Item dequeued', 'Item dequeued', {
       trace_id: traceId,
       queueDepth: this.queueDepth,
     });
@@ -253,7 +253,7 @@ export class BackpressureHandler {
    * Reset the queue depth
    */
   reset(traceId?: string): void {
-    logger.info('BackpressureHandler', 'reset', 'Backpressure handler reset', {
+    logger.info('BackpressureHandler', 'reset', 'Backpressure handler reset', 'Backpressure handler reset', {
       trace_id: traceId,
     });
     this.queueDepth = 0;

@@ -40,7 +40,7 @@ export async function initializeQuotaCounter(
 ): Promise<void> {
   const key = generateQuotaKey(userId, feature);
 
-  logger.info('AtomicQuotaEnforcement', 'initializeQuotaCounter', 'Initializing quota counter', {
+  logger.info('AtomicQuotaEnforcement', 'initializeQuotaCounter', 'Initializing quota counter', 'Initializing quota counter', {
     trace_id: traceId,
     userId,
     feature,
@@ -72,7 +72,7 @@ export async function atomicIncrementAndCheck(
 ): Promise<{ allowed: boolean; remaining: number; limit: number }> {
   const key = generateQuotaKey(userId, feature);
 
-  logger.debug('AtomicQuotaEnforcement', 'atomicIncrementAndCheck', 'Atomically incrementing and checking quota', {
+  logger.debug('AtomicQuotaEnforcement', 'atomicIncrementAndCheck', 'Atomically incrementing and checking quota', 'Atomically incrementing and checking quota', {
     trace_id: traceId,
     userId,
     feature,
@@ -81,7 +81,7 @@ export async function atomicIncrementAndCheck(
 
   // Ensure counter exists
   if (!QUOTA_COUNTERS.has(key)) {
-    logger.warn('AtomicQuotaEnforcement', 'atomicIncrementAndCheck', 'Quota counter not found', {
+    logger.warn('AtomicQuotaEnforcement', 'atomicIncrementAndCheck', 'Quota counter not found', 'Quota counter not found', {
       trace_id: traceId,
       userId,
       feature,
@@ -93,7 +93,7 @@ export async function atomicIncrementAndCheck(
 
   // Check if we've exceeded the limit
   if (counter.count + amount > counter.limit) {
-    logger.warn('AtomicQuotaEnforcement', 'atomicIncrementAndCheck', 'Quota limit exceeded', {
+    logger.warn('AtomicQuotaEnforcement', 'atomicIncrementAndCheck', 'Quota limit exceeded', 'Quota limit exceeded', {
       trace_id: traceId,
       userId,
       feature,
@@ -112,7 +112,7 @@ export async function atomicIncrementAndCheck(
   // Atomically increment the counter
   counter.count += amount;
 
-  logger.info('AtomicQuotaEnforcement', 'atomicIncrementAndCheck', 'Quota incremented successfully', {
+  logger.info('AtomicQuotaEnforcement', 'atomicIncrementAndCheck', 'Quota incremented successfully', 'Quota incremented successfully', {
     trace_id: traceId,
     userId,
     feature,
@@ -138,7 +138,7 @@ export async function atomicDecrement(
 ): Promise<{ newCount: number; limit: number }> {
   const key = generateQuotaKey(userId, feature);
 
-  logger.debug('AtomicQuotaEnforcement', 'atomicDecrement', 'Atomically decrementing quota', {
+  logger.debug('AtomicQuotaEnforcement', 'atomicDecrement', 'Atomically decrementing quota', 'Atomically decrementing quota', {
     trace_id: traceId,
     userId,
     feature,
@@ -147,7 +147,7 @@ export async function atomicDecrement(
 
   // Ensure counter exists
   if (!QUOTA_COUNTERS.has(key)) {
-    logger.warn('AtomicQuotaEnforcement', 'atomicDecrement', 'Quota counter not found', {
+    logger.warn('AtomicQuotaEnforcement', 'atomicDecrement', 'Quota counter not found', 'Quota counter not found', {
       trace_id: traceId,
       userId,
       feature,
@@ -160,7 +160,7 @@ export async function atomicDecrement(
   // Atomically decrement the counter (but not below 0)
   counter.count = Math.max(0, counter.count - amount);
 
-  logger.info('AtomicQuotaEnforcement', 'atomicDecrement', 'Quota decremented successfully', {
+  logger.info('AtomicQuotaEnforcement', 'atomicDecrement', 'Quota decremented successfully', 'Quota decremented successfully', {
     trace_id: traceId,
     userId,
     feature,
@@ -184,7 +184,7 @@ export async function getQuotaStatus(
 ): Promise<{ count: number; limit: number; remaining: number }> {
   const key = generateQuotaKey(userId, feature);
 
-  logger.debug('AtomicQuotaEnforcement', 'getQuotaStatus', 'Getting quota status', {
+  logger.debug('AtomicQuotaEnforcement', 'getQuotaStatus', 'Getting quota status', 'Getting quota status', {
     trace_id: traceId,
     userId,
     feature,
@@ -192,7 +192,7 @@ export async function getQuotaStatus(
 
   // Ensure counter exists
   if (!QUOTA_COUNTERS.has(key)) {
-    logger.warn('AtomicQuotaEnforcement', 'getQuotaStatus', 'Quota counter not found', {
+    logger.warn('AtomicQuotaEnforcement', 'getQuotaStatus', 'Quota counter not found', 'Quota counter not found', {
       trace_id: traceId,
       userId,
       feature,
@@ -219,7 +219,7 @@ export async function resetQuotaCounter(
 ): Promise<void> {
   const key = generateQuotaKey(userId, feature);
 
-  logger.info('AtomicQuotaEnforcement', 'resetQuotaCounter', 'Resetting quota counter', {
+  logger.info('AtomicQuotaEnforcement', 'resetQuotaCounter', 'Resetting quota counter', 'Resetting quota counter', {
     trace_id: traceId,
     userId,
     feature,
@@ -243,7 +243,7 @@ export async function detectSpendingAnomaly(
   thresholdPercentage: number = 300,
   traceId?: string
 ): Promise<{ isAnomaly: boolean; percentageIncrease: number }> {
-  logger.debug('AtomicQuotaEnforcement', 'detectSpendingAnomaly', 'Detecting spending anomaly', {
+  logger.debug('AtomicQuotaEnforcement', 'detectSpendingAnomaly', 'Detecting spending anomaly', 'Detecting spending anomaly', {
     trace_id: traceId,
     userId,
     feature,
@@ -264,7 +264,7 @@ export async function detectSpendingAnomaly(
   const isAnomaly = percentageIncrease > thresholdPercentage;
 
   if (isAnomaly) {
-    logger.warn('AtomicQuotaEnforcement', 'detectSpendingAnomaly', 'Spending anomaly detected', {
+    logger.warn('AtomicQuotaEnforcement', 'detectSpendingAnomaly', 'Spending anomaly detected', 'Spending anomaly detected', {
       trace_id: traceId,
       userId,
       feature,
@@ -286,14 +286,14 @@ export async function enforceHardCap(
 ): Promise<{ allowed: boolean; reason?: string }> {
   const key = generateQuotaKey(userId, feature);
 
-  logger.debug('AtomicQuotaEnforcement', 'enforceHardCap', 'Enforcing hard cap on quota', {
+  logger.debug('AtomicQuotaEnforcement', 'enforceHardCap', 'Enforcing hard cap on quota', 'Enforcing hard cap on quota', {
     trace_id: traceId,
     userId,
     feature,
   });
 
   if (!QUOTA_COUNTERS.has(key)) {
-    logger.warn('AtomicQuotaEnforcement', 'enforceHardCap', 'Quota counter not found', {
+    logger.warn('AtomicQuotaEnforcement', 'enforceHardCap', 'Quota counter not found', 'Quota counter not found', {
       trace_id: traceId,
       userId,
       feature,
@@ -305,7 +305,7 @@ export async function enforceHardCap(
 
   // Hard cap: if usage is at or above the limit, deny
   if (counter.count >= counter.limit) {
-    logger.warn('AtomicQuotaEnforcement', 'enforceHardCap', 'Hard cap reached', {
+    logger.warn('AtomicQuotaEnforcement', 'enforceHardCap', 'Hard cap reached', 'Hard cap reached', {
       trace_id: traceId,
       userId,
       feature,
@@ -329,7 +329,7 @@ export async function enforceSoftCap(
 ): Promise<{ allowed: boolean; warning?: string }> {
   const key = generateQuotaKey(userId, feature);
 
-  logger.debug('AtomicQuotaEnforcement', 'enforceSoftCap', 'Enforcing soft cap on quota', {
+  logger.debug('AtomicQuotaEnforcement', 'enforceSoftCap', 'Enforcing soft cap on quota', 'Enforcing soft cap on quota', {
     trace_id: traceId,
     userId,
     feature,
@@ -337,7 +337,7 @@ export async function enforceSoftCap(
   });
 
   if (!QUOTA_COUNTERS.has(key)) {
-    logger.warn('AtomicQuotaEnforcement', 'enforceSoftCap', 'Quota counter not found', {
+    logger.warn('AtomicQuotaEnforcement', 'enforceSoftCap', 'Quota counter not found', 'Quota counter not found', {
       trace_id: traceId,
       userId,
       feature,
@@ -349,7 +349,7 @@ export async function enforceSoftCap(
   const usagePercentage = (counter.count / counter.limit) * 100;
 
   if (usagePercentage >= softCapPercentage) {
-    logger.warn('AtomicQuotaEnforcement', 'enforceSoftCap', 'Soft cap warning', {
+    logger.warn('AtomicQuotaEnforcement', 'enforceSoftCap', 'Soft cap warning', 'Soft cap warning', {
       trace_id: traceId,
       userId,
       feature,

@@ -54,7 +54,7 @@ export async function enqueueMessage(
   maxRetries: number = 3,
   traceId?: string
 ): Promise<QueueMessage> {
-  logger.info('DLQAndIdempotency', 'enqueueMessage', 'Enqueueing message', {
+  logger.info('DLQAndIdempotency', 'enqueueMessage', 'Enqueueing message', 'Enqueueing message', {
     trace_id: traceId,
     messageId,
     maxRetries,
@@ -82,7 +82,7 @@ export async function markMessageProcessing(
   messageId: string,
   traceId?: string
 ): Promise<QueueMessage> {
-  logger.debug('DLQAndIdempotency', 'markMessageProcessing', 'Marking message as processing', {
+  logger.debug('DLQAndIdempotency', 'markMessageProcessing', 'Marking message as processing', 'Marking message as processing', {
     trace_id: traceId,
     messageId,
   });
@@ -106,7 +106,7 @@ export async function markMessageSuccess(
   messageId: string,
   traceId?: string
 ): Promise<QueueMessage> {
-  logger.info('DLQAndIdempotency', 'markMessageSuccess', 'Marking message as success', {
+  logger.info('DLQAndIdempotency', 'markMessageSuccess', 'Marking message as success', 'Marking message as success', {
     trace_id: traceId,
     messageId,
   });
@@ -131,7 +131,7 @@ export async function markMessageFailed(
   error: string,
   traceId?: string
 ): Promise<QueueMessage> {
-  logger.warn('DLQAndIdempotency', 'markMessageFailed', 'Marking message as failed', {
+  logger.warn('DLQAndIdempotency', 'markMessageFailed', 'Marking message as failed', 'Marking message as failed', {
     trace_id: traceId,
     messageId,
     error,
@@ -148,7 +148,7 @@ export async function markMessageFailed(
 
   // If max retries exceeded, move to DLQ
   if (message.retryCount >= message.maxRetries) {
-    logger.error('DLQAndIdempotency', 'markMessageFailed', 'Message moved to DLQ (max retries exceeded)', {
+    logger.error('DLQAndIdempotency', 'markMessageFailed', 'Message moved to DLQ (max retries exceeded)', 'Message moved to DLQ (max retries exceeded)', {
       trace_id: traceId,
       messageId,
       retryCount: message.retryCount,
@@ -170,7 +170,7 @@ export async function detectPoisonMessage(
   failureThreshold: number = 3,
   traceId?: string
 ): Promise<{ isPoison: boolean; failureCount: number }> {
-  logger.debug('DLQAndIdempotency', 'detectPoisonMessage', 'Detecting poison message', {
+  logger.debug('DLQAndIdempotency', 'detectPoisonMessage', 'Detecting poison message', 'Detecting poison message', {
     trace_id: traceId,
     messageId,
     failureThreshold,
@@ -184,7 +184,7 @@ export async function detectPoisonMessage(
   const isPoison = message.retryCount >= failureThreshold;
 
   if (isPoison) {
-    logger.warn('DLQAndIdempotency', 'detectPoisonMessage', 'Poison message detected', {
+    logger.warn('DLQAndIdempotency', 'detectPoisonMessage', 'Poison message detected', 'Poison message detected', {
       trace_id: traceId,
       messageId,
       failureCount: message.retryCount,
@@ -208,7 +208,7 @@ export async function storeIdempotencyRecord(
   ttlSeconds: number = 3600,
   traceId?: string
 ): Promise<IdempotencyRecord> {
-  logger.info('DLQAndIdempotency', 'storeIdempotencyRecord', 'Storing idempotency record', {
+  logger.info('DLQAndIdempotency', 'storeIdempotencyRecord', 'Storing idempotency record', 'Storing idempotency record', {
     trace_id: traceId,
     idempotencyKey,
   });
@@ -234,7 +234,7 @@ export async function getIdempotencyRecord(
   idempotencyKey: string,
   traceId?: string
 ): Promise<IdempotencyRecord | null> {
-  logger.debug('DLQAndIdempotency', 'getIdempotencyRecord', 'Retrieving idempotency record', {
+  logger.debug('DLQAndIdempotency', 'getIdempotencyRecord', 'Retrieving idempotency record', 'Retrieving idempotency record', {
     trace_id: traceId,
     idempotencyKey,
   });
@@ -258,7 +258,7 @@ export async function checkIdempotency(
   requestHash: string,
   traceId?: string
 ): Promise<{ isDuplicate: boolean; cachedResponse?: any }> {
-  logger.debug('DLQAndIdempotency', 'checkIdempotency', 'Checking idempotency', {
+  logger.debug('DLQAndIdempotency', 'checkIdempotency', 'Checking idempotency', 'Checking idempotency', {
     trace_id: traceId,
     idempotencyKey,
   });
@@ -271,14 +271,14 @@ export async function checkIdempotency(
 
   // Verify the request hash matches
   if (record.requestHash !== requestHash) {
-    logger.warn('DLQAndIdempotency', 'checkIdempotency', 'Idempotency key mismatch (different request)', {
+    logger.warn('DLQAndIdempotency', 'checkIdempotency', 'Idempotency key mismatch (different request)', 'Idempotency key mismatch (different request)', {
       trace_id: traceId,
       idempotencyKey,
     });
     return { isDuplicate: false };
   }
 
-  logger.debug('DLQAndIdempotency', 'checkIdempotency', 'Duplicate request detected', {
+  logger.debug('DLQAndIdempotency', 'checkIdempotency', 'Duplicate request detected', 'Duplicate request detected', {
     trace_id: traceId,
     idempotencyKey,
   });
@@ -293,7 +293,7 @@ export async function checkIdempotency(
  * Get all messages in the DLQ
  */
 export async function getDLQMessages(traceId?: string): Promise<QueueMessage[]> {
-  logger.info('DLQAndIdempotency', 'getDLQMessages', 'Retrieving DLQ messages', {
+  logger.info('DLQAndIdempotency', 'getDLQMessages', 'Retrieving DLQ messages', 'Retrieving DLQ messages', {
     trace_id: traceId,
   });
 
@@ -311,7 +311,7 @@ export async function replayDLQMessage(
   messageId: string,
   traceId?: string
 ): Promise<QueueMessage> {
-  logger.info('DLQAndIdempotency', 'replayDLQMessage', 'Replaying DLQ message', {
+  logger.info('DLQAndIdempotency', 'replayDLQMessage', 'Replaying DLQ message', 'Replaying DLQ message', {
     trace_id: traceId,
     messageId,
   });
@@ -338,7 +338,7 @@ export async function replayDLQMessage(
  * Clean up expired idempotency records
  */
 export async function cleanupExpiredIdempotencyRecords(traceId?: string): Promise<number> {
-  logger.info('DLQAndIdempotency', 'cleanupExpiredIdempotencyRecords', 'Cleaning up expired records', {
+  logger.info('DLQAndIdempotency', 'cleanupExpiredIdempotencyRecords', 'Cleaning up expired records', 'Cleaning up expired records', {
     trace_id: traceId,
   });
 
@@ -352,7 +352,7 @@ export async function cleanupExpiredIdempotencyRecords(traceId?: string): Promis
     }
   }
 
-  logger.info('DLQAndIdempotency', 'cleanupExpiredIdempotencyRecords', 'Cleanup completed', {
+  logger.info('DLQAndIdempotency', 'cleanupExpiredIdempotencyRecords', 'Cleanup completed', 'Cleanup completed', {
     trace_id: traceId,
     cleanedCount,
   });

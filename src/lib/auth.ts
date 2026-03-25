@@ -261,7 +261,7 @@ export async function verifyAuth(request: NextRequest) {
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    logger.debug('AUTH', 'verifyAuth_START', { requestId, url: request.url });
+    logger.debug('AUTH', 'verifyAuth_START', 'verifyAuth_START', { requestId, url: request.url });
 
     // STEP 1: Extract token from multiple sources
     let token: string | null = null;
@@ -269,17 +269,17 @@ export async function verifyAuth(request: NextRequest) {
 
     // Check Authorization header (Bearer token) - PRIMARY SOURCE
     const authHeader = request.headers.get('Authorization');
-    logger.debug('AUTH', 'CHECK_AUTH_HEADER', { requestId, authHeader: authHeader ? 'Present' : 'Missing' });
+    logger.debug('AUTH', 'CHECK_AUTH_HEADER', 'CHECK_AUTH_HEADER', { requestId, authHeader: authHeader ? 'Present' : 'Missing' });
     
     if (authHeader?.startsWith('Bearer ')) {
       token = authHeader.substring(7);
       tokenSource = 'AUTHORIZATION_HEADER';
-      logger.debug('AUTH', 'TOKEN_FOUND_IN_HEADER', { requestId, tokenLength: token.length });
+      logger.debug('AUTH', 'TOKEN_FOUND_IN_HEADER', 'TOKEN_FOUND_IN_HEADER', { requestId, tokenLength: token.length });
     }
 
     // Check cookies (multiple possible names) - FALLBACK SOURCES
     if (!token) {
-      logger.debug('AUTH', 'CHECKING_COOKIES', { requestId });
+      logger.debug('AUTH', 'CHECKING_COOKIES', 'CHECKING_COOKIES', { requestId });
       
       const cookieNames = ['token', 'auth-token', 'authToken', 'jwt'];
       for (const cookieName of cookieNames) {
@@ -300,50 +300,50 @@ export async function verifyAuth(request: NextRequest) {
         ? request.cookies.getAll().map(c => c.name) 
         : ['MOCK_REQUEST_NO_GETALL'];
         
-      logger.warn('AUTH', 'NO_TOKEN_FOUND', { requestId, authHeader: !!authHeader, cookies: cookiesList });
+      logger.warn('AUTH', 'NO_TOKEN_FOUND', 'NO_TOKEN_FOUND', { requestId, authHeader: !!authHeader, cookies: cookiesList });
       return { success: false, error: 'No token provided', details: { requestId, tokenSource } };
     }
 
-    logger.debug('AUTH', 'TOKEN_EXTRACTED', { requestId, tokenSource, tokenLength: token.length });
+    logger.debug('AUTH', 'TOKEN_EXTRACTED', 'TOKEN_EXTRACTED', { requestId, tokenSource, tokenLength: token.length });
 
     // STEP 3: Verify JWT signature
-    logger.debug('AUTH', 'VERIFYING_JWT_SIGNATURE', { requestId, tokenLength: token.length });
+    logger.debug('AUTH', 'VERIFYING_JWT_SIGNATURE', 'VERIFYING_JWT_SIGNATURE', { requestId, tokenLength: token.length });
     
     let decoded: any;
     try {
       decoded = jwt.verify(token, JWT_SECRET);
-      logger.debug('AUTH', 'JWT_SIGNATURE_VALID', { requestId, userId: decoded.userId });
+      logger.debug('AUTH', 'JWT_SIGNATURE_VALID', 'JWT_SIGNATURE_VALID', { requestId, userId: decoded.userId });
     } catch (jwtError: any) {
-      logger.error('AUTH', 'JWT_SIGNATURE_INVALID', { requestId, error: jwtError.message }, jwtError);
+      logger.error('AUTH', 'JWT_SIGNATURE_INVALID', 'JWT_SIGNATURE_INVALID', { requestId, error: jwtError.message }, jwtError);
       return { success: false, error: 'Invalid token', details: { requestId, tokenSource, jwtError: jwtError.message } };
     }
 
     // STEP 4: Extract userId from decoded token
     const userId = decoded.userId;
     if (!userId) {
-      logger.error('AUTH', 'NO_USER_ID_IN_TOKEN', { requestId, decodedKeys: Object.keys(decoded) });
+      logger.error('AUTH', 'NO_USER_ID_IN_TOKEN', 'NO_USER_ID_IN_TOKEN', { requestId, decodedKeys: Object.keys(decoded) });
       return { success: false, error: 'Invalid token structure', details: { requestId, tokenSource } };
     }
 
-    logger.debug('AUTH', 'USER_ID_EXTRACTED', { requestId, userId });
+    logger.debug('AUTH', 'USER_ID_EXTRACTED', 'USER_ID_EXTRACTED', { requestId, userId });
 
     // STEP 5: Fetch user from database
-    logger.debug('AUTH', 'FETCHING_USER_FROM_DB', { requestId, userId });
+    logger.debug('AUTH', 'FETCHING_USER_FROM_DB', 'FETCHING_USER_FROM_DB', { requestId, userId });
     
     const { db } = await connectToDatabase();
-    logger.debug('AUTH', 'MONGODB_CONNECTED', { requestId });
+    logger.debug('AUTH', 'MONGODB_CONNECTED', 'MONGODB_CONNECTED', { requestId });
 
     const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
     
     if (!user) {
-      logger.warn('AUTH', 'USER_NOT_FOUND_IN_DB', { requestId, userId });
+      logger.warn('AUTH', 'USER_NOT_FOUND_IN_DB', 'USER_NOT_FOUND_IN_DB', { requestId, userId });
       return { success: false, error: 'User not found', details: { requestId, tokenSource, userId } };
     }
 
-    logger.debug('AUTH', 'USER_FOUND_IN_DB', { requestId, userId, userEmail: user.email, userPlan: user.plan });
+    logger.debug('AUTH', 'USER_FOUND_IN_DB', 'USER_FOUND_IN_DB', { requestId, userId, userEmail: user.email, userPlan: user.plan });
 
     // STEP 6: Return authenticated user
-    logger.info('AUTH', 'AUTHENTICATION_SUCCESS', { requestId, userId, userEmail: user.email, tokenSource });
+    logger.info('AUTH', 'AUTHENTICATION_SUCCESS', 'AUTHENTICATION_SUCCESS', { requestId, userId, userEmail: user.email, tokenSource });
     
     return { 
       success: true, 
@@ -352,7 +352,7 @@ export async function verifyAuth(request: NextRequest) {
     };
 
   } catch (error: any) {
-    logger.error('AUTH', 'AUTHENTICATION_FAILED', { requestId, error: error.message }, error);
+    logger.error('AUTH', 'AUTHENTICATION_FAILED', 'AUTHENTICATION_FAILED', { requestId, error: error.message }, error);
     return { 
       success: false, 
       error: 'Authentication failed',

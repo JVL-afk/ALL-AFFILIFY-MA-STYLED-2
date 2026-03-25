@@ -52,7 +52,7 @@ export class TeamCollaborationService {
    * Enforces that a user can only own one team.
    */
   async createTeam(user: VerifiedJWTPayload, teamName: string, traceId?: string): Promise<{ team: Team; zookie: Zookie }> {
-    logger.info('TeamCollaborationService', 'createTeam', 'Creating new team', {
+    logger.info('TeamCollaborationService', 'createTeam', 'Creating new team', 'Creating new team', {
       trace_id: traceId,
       user_id: user.userId,
       teamName,
@@ -63,7 +63,7 @@ export class TeamCollaborationService {
     // Check if user already owns a team
     const existingTeam = await this.db.collection('teams').findOne({ ownerId: userId });
     if (existingTeam) {
-      logger.warn('TeamCollaborationService', 'createTeam', 'User already owns a team', {
+      logger.warn('TeamCollaborationService', 'createTeam', 'User already owns a team', 'User already owns a team', {
         trace_id: traceId,
         user_id: user.userId,
         existingTeamId: existingTeam._id.toString(),
@@ -100,7 +100,7 @@ export class TeamCollaborationService {
       traceId
     );
 
-    logger.info('TeamCollaborationService', 'createTeam', 'Team created successfully', {
+    logger.info('TeamCollaborationService', 'createTeam', 'Team created successfully', 'Team created successfully', {
       trace_id: traceId,
       teamId: result.insertedId.toString(),
       user_id: user.userId,
@@ -120,7 +120,7 @@ export class TeamCollaborationService {
     memberRole: 'admin' | 'editor' | 'viewer',
     traceId?: string
   ): Promise<{ member: TeamMember; zookie: Zookie }> {
-    logger.info('TeamCollaborationService', 'addTeamMember', 'Adding team member', {
+    logger.info('TeamCollaborationService', 'addTeamMember', 'Adding team member', 'Adding team member', {
       trace_id: traceId,
       user_id: user.userId,
       teamId,
@@ -134,7 +134,7 @@ export class TeamCollaborationService {
     // Fetch the team
     const team = await this.db.collection('teams').findOne({ _id: teamObjectId });
     if (!team) {
-      logger.warn('TeamCollaborationService', 'addTeamMember', 'Team not found', {
+      logger.warn('TeamCollaborationService', 'addTeamMember', 'Team not found', 'Team not found', {
         trace_id: traceId,
         teamId,
       });
@@ -144,7 +144,7 @@ export class TeamCollaborationService {
     // Check if the user is the owner or admin of the team
     const userMember = team.members.find((m: TeamMember) => m.userId.toString() === userId.toString());
     if (!userMember || (userMember.role !== 'owner' && userMember.role !== 'admin')) {
-      logger.warn('TeamCollaborationService', 'addTeamMember', 'User not authorized to add members', {
+      logger.warn('TeamCollaborationService', 'addTeamMember', 'User not authorized to add members', 'User not authorized to add members', {
         trace_id: traceId,
         user_id: user.userId,
         teamId,
@@ -155,7 +155,7 @@ export class TeamCollaborationService {
     // Check if member already exists
     const existingMember = team.members.find((m: TeamMember) => m.email === memberEmail);
     if (existingMember) {
-      logger.warn('TeamCollaborationService', 'addTeamMember', 'Member already exists in team', {
+      logger.warn('TeamCollaborationService', 'addTeamMember', 'Member already exists in team', 'Member already exists in team', {
         trace_id: traceId,
         teamId,
         memberEmail,
@@ -187,7 +187,7 @@ export class TeamCollaborationService {
       traceId
     );
 
-    logger.info('TeamCollaborationService', 'addTeamMember', 'Team member added successfully', {
+    logger.info('TeamCollaborationService', 'addTeamMember', 'Team member added successfully', 'Team member added successfully', {
       trace_id: traceId,
       teamId,
       memberEmail,
@@ -207,7 +207,7 @@ export class TeamCollaborationService {
     memberId: string,
     traceId?: string
   ): Promise<{ zookie: Zookie }> {
-    logger.info('TeamCollaborationService', 'removeTeamMember', 'Removing team member', {
+    logger.info('TeamCollaborationService', 'removeTeamMember', 'Removing team member', 'Removing team member', {
       trace_id: traceId,
       user_id: user.userId,
       teamId,
@@ -221,7 +221,7 @@ export class TeamCollaborationService {
     // Fetch the team
     const team = await this.db.collection('teams').findOne({ _id: teamObjectId });
     if (!team) {
-      logger.warn('TeamCollaborationService', 'removeTeamMember', 'Team not found', {
+      logger.warn('TeamCollaborationService', 'removeTeamMember', 'Team not found', 'Team not found', {
         trace_id: traceId,
         teamId,
       });
@@ -231,7 +231,7 @@ export class TeamCollaborationService {
     // Check if the user is the owner of the team
     const userMember = team.members.find((m: TeamMember) => m.userId.toString() === userId.toString());
     if (!userMember || userMember.role !== 'owner') {
-      logger.warn('TeamCollaborationService', 'removeTeamMember', 'User not authorized to remove members', {
+      logger.warn('TeamCollaborationService', 'removeTeamMember', 'User not authorized to remove members', 'User not authorized to remove members', {
         trace_id: traceId,
         user_id: user.userId,
         teamId,
@@ -242,7 +242,7 @@ export class TeamCollaborationService {
     // Find the member to remove
     const memberToRemove = team.members.find((m: TeamMember) => m.userId.toString() === memberObjectId.toString());
     if (!memberToRemove) {
-      logger.warn('TeamCollaborationService', 'removeTeamMember', 'Member not found in team', {
+      logger.warn('TeamCollaborationService', 'removeTeamMember', 'Member not found in team', 'Member not found in team', {
         trace_id: traceId,
         teamId,
         memberId,
@@ -266,7 +266,7 @@ export class TeamCollaborationService {
       traceId
     );
 
-    logger.info('TeamCollaborationService', 'removeTeamMember', 'Team member removed successfully', {
+    logger.info('TeamCollaborationService', 'removeTeamMember', 'Team member removed successfully', 'Team member removed successfully', {
       trace_id: traceId,
       teamId,
       memberId,
@@ -285,7 +285,7 @@ export class TeamCollaborationService {
     projectData: { name: string; description: string; dueDate?: Date },
     traceId?: string
   ): Promise<{ project: Project; zookie: Zookie }> {
-    logger.info('TeamCollaborationService', 'createProject', 'Creating new project', {
+    logger.info('TeamCollaborationService', 'createProject', 'Creating new project', 'Creating new project', {
       trace_id: traceId,
       user_id: user.userId,
       teamId,
@@ -298,7 +298,7 @@ export class TeamCollaborationService {
     // Fetch the team
     const team = await this.db.collection('teams').findOne({ _id: teamObjectId });
     if (!team) {
-      logger.warn('TeamCollaborationService', 'createProject', 'Team not found', {
+      logger.warn('TeamCollaborationService', 'createProject', 'Team not found', 'Team not found', {
         trace_id: traceId,
         teamId,
       });
@@ -308,7 +308,7 @@ export class TeamCollaborationService {
     // Check if the user is a member of the team
     const userMember = team.members.find((m: TeamMember) => m.userId.toString() === userId.toString());
     if (!userMember) {
-      logger.warn('TeamCollaborationService', 'createProject', 'User not a member of the team', {
+      logger.warn('TeamCollaborationService', 'createProject', 'User not a member of the team', 'User not a member of the team', {
         trace_id: traceId,
         user_id: user.userId,
         teamId,
@@ -341,7 +341,7 @@ export class TeamCollaborationService {
       traceId
     );
 
-    logger.info('TeamCollaborationService', 'createProject', 'Project created successfully', {
+    logger.info('TeamCollaborationService', 'createProject', 'Project created successfully', 'Project created successfully', {
       trace_id: traceId,
       projectId: result.insertedId.toString(),
       teamId,
@@ -356,7 +356,7 @@ export class TeamCollaborationService {
    * Enforces that only team members can view projects.
    */
   async getTeamProjects(user: VerifiedJWTPayload, teamId: string, traceId?: string): Promise<Project[]> {
-    logger.info('TeamCollaborationService', 'getTeamProjects', 'Fetching team projects', {
+    logger.info('TeamCollaborationService', 'getTeamProjects', 'Fetching team projects', 'Fetching team projects', {
       trace_id: traceId,
       user_id: user.userId,
       teamId,
@@ -368,7 +368,7 @@ export class TeamCollaborationService {
     // Fetch the team
     const team = await this.db.collection('teams').findOne({ _id: teamObjectId });
     if (!team) {
-      logger.warn('TeamCollaborationService', 'getTeamProjects', 'Team not found', {
+      logger.warn('TeamCollaborationService', 'getTeamProjects', 'Team not found', 'Team not found', {
         trace_id: traceId,
         teamId,
       });
@@ -378,7 +378,7 @@ export class TeamCollaborationService {
     // Check if the user is a member of the team
     const userMember = team.members.find((m: TeamMember) => m.userId.toString() === userId.toString());
     if (!userMember) {
-      logger.warn('TeamCollaborationService', 'getTeamProjects', 'User not a member of the team', {
+      logger.warn('TeamCollaborationService', 'getTeamProjects', 'User not a member of the team', 'User not a member of the team', {
         trace_id: traceId,
         user_id: user.userId,
         teamId,
@@ -388,7 +388,7 @@ export class TeamCollaborationService {
 
     const projects = await this.db.collection('projects').find({ teamId: teamObjectId }).toArray();
 
-    logger.info('TeamCollaborationService', 'getTeamProjects', 'Team projects fetched successfully', {
+    logger.info('TeamCollaborationService', 'getTeamProjects', 'Team projects fetched successfully', 'Team projects fetched successfully', {
       trace_id: traceId,
       teamId,
       projectCount: projects.length,

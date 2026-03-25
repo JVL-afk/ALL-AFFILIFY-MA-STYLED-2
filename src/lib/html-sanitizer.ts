@@ -113,7 +113,7 @@ export function sanitizeHTML(html: string, config?: SanitizationConfig, traceId?
       sanitized = sanitized.replace(regex, '');
     });
 
-    logger.info('HTML sanitization completed', {
+    logger.info('HTMLSanitizerModule', 'sanitizeHTML', 'HTML sanitized', 'HTML content sanitized successfully', {
       trace_id: traceId,
       service: 'HTMLSanitizerModule',
       component: 'sanitizeHTML',
@@ -129,7 +129,7 @@ export function sanitizeHTML(html: string, config?: SanitizationConfig, traceId?
     return sanitized;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logger.error('HTML sanitization failed', {
+    logger.error('HTMLSanitizerModule', 'sanitizeHTML', 'Sanitization error', 'Failed to sanitize HTML', {
       trace_id: traceId,
       service: 'HTMLSanitizerModule',
       component: 'sanitizeHTML',
@@ -190,7 +190,7 @@ export function isSafeURL(url: string, config?: SanitizationConfig): boolean {
       return false;
     }
   } catch (error) {
-    logger.warn('URL validation failed', {
+    logger.warn('HTMLSanitizerModule', 'isSafeURL', 'URL validation error', 'Failed to validate URL', {
       service: 'HTMLSanitizerModule',
       component: 'isSafeURL',
       action: 'URL validation error',

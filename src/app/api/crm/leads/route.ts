@@ -13,12 +13,12 @@ async function handleGET(request: NextRequest, user: PremiumUser): Promise<NextR
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    logger.info('CRM_LEADS_API', 'GET_REQUEST_START', { requestId, userId: user.id, tier: user.tier });
+    logger.info('CRM_LEADS_API', 'GET_REQUEST_START', 'GET_REQUEST_START', { requestId, userId: user.id, tier: user.tier });
     await connectMongoose();
     
     // Check if user has access to leads feature
     if (!user.crmFeatures.leads) {
-      logger.warn('CRM_LEADS_API', 'LEADS_FEATURE_NOT_AVAILABLE', { requestId, userId: user.id, tier: user.tier });
+      logger.warn('CRM_LEADS_API', 'LEADS_FEATURE_NOT_AVAILABLE', 'LEADS_FEATURE_NOT_AVAILABLE', { requestId, userId: user.id, tier: user.tier });
       return NextResponse.json(
         { message: 'Lead management is not available in your plan', requestId },
         { status: 403 }
@@ -36,7 +36,7 @@ async function handleGET(request: NextRequest, user: PremiumUser): Promise<NextR
 
     const skip = (page - 1) * limit;
 
-    logger.debug('CRM_LEADS_API', 'QUERY_PARAMS', { requestId, page, limit, status, source, sortBy, sortOrder });
+    logger.debug('CRM_LEADS_API', 'QUERY_PARAMS', 'QUERY_PARAMS', { requestId, page, limit, status, source, sortBy, sortOrder });
 
     // Build filter query
     const filter: any = { userId: new mongoose.Types.ObjectId(user.id) };
@@ -49,7 +49,7 @@ async function handleGET(request: NextRequest, user: PremiumUser): Promise<NextR
       filter.source = source;
     }
 
-    logger.debug('CRM_LEADS_API', 'FETCHING_LEADS', { requestId, filter });
+    logger.debug('CRM_LEADS_API', 'FETCHING_LEADS', 'FETCHING_LEADS', { requestId, filter });
 
     // Fetch total count for pagination
     const total = await Lead.countDocuments(filter);
@@ -60,7 +60,7 @@ async function handleGET(request: NextRequest, user: PremiumUser): Promise<NextR
       .skip(skip)
       .limit(limit);
 
-    logger.info('CRM_LEADS_API', 'LEADS_FETCHED_SUCCESS', { 
+    logger.info('CRM_LEADS_API', 'LEADS_FETCHED_SUCCESS', 'LEADS_FETCHED_SUCCESS', { 
       requestId, 
       leadCount: leads.length, 
       total,
@@ -78,7 +78,7 @@ async function handleGET(request: NextRequest, user: PremiumUser): Promise<NextR
       },
     });
   } catch (error: any) {
-    logger.error('CRM_LEADS_API', 'GET_REQUEST_ERROR', { requestId, error: error.message }, error);
+    logger.error('CRM_LEADS_API', 'GET_REQUEST_ERROR', 'GET_REQUEST_ERROR', { requestId, error: error.message }, error);
     return NextResponse.json(
       { message: 'Internal Server Error', requestId },
       { status: 500 }
@@ -93,12 +93,12 @@ async function handlePOST(request: NextRequest, user: PremiumUser): Promise<Next
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    logger.info('CRM_LEADS_API', 'POST_REQUEST_START', { requestId, userId: user.id });
+    logger.info('CRM_LEADS_API', 'POST_REQUEST_START', 'POST_REQUEST_START', { requestId, userId: user.id });
     await connectMongoose();
     
     // Check if user has access to leads feature
     if (!user.crmFeatures.leads) {
-      logger.warn('CRM_LEADS_API', 'LEADS_FEATURE_NOT_AVAILABLE_POST', { requestId, userId: user.id });
+      logger.warn('CRM_LEADS_API', 'LEADS_FEATURE_NOT_AVAILABLE_POST', 'LEADS_FEATURE_NOT_AVAILABLE_POST', { requestId, userId: user.id });
       return NextResponse.json(
         { message: 'Lead management is not available in your plan', requestId },
         { status: 403 }
@@ -109,7 +109,7 @@ async function handlePOST(request: NextRequest, user: PremiumUser): Promise<Next
     if (user.crmFeatures.maxClients > 0) {
       const leadCount = await Lead.countDocuments({ userId: new mongoose.Types.ObjectId(user.id) });
       if (leadCount >= user.crmFeatures.maxClients) {
-        logger.warn('CRM_LEADS_API', 'MAX_LEADS_REACHED', { requestId, userId: user.id, limit: user.crmFeatures.maxClients });
+        logger.warn('CRM_LEADS_API', 'MAX_LEADS_REACHED', 'MAX_LEADS_REACHED', { requestId, userId: user.id, limit: user.crmFeatures.maxClients });
         return NextResponse.json(
           { message: `You have reached the maximum number of leads (${user.crmFeatures.maxClients}) for your plan`, requestId },
           { status: 429 }
@@ -118,18 +118,18 @@ async function handlePOST(request: NextRequest, user: PremiumUser): Promise<Next
     }
     
     const body = await request.json();
-    logger.debug('CRM_LEADS_API', 'REQUEST_BODY_PARSED', { requestId, bodyKeys: Object.keys(body) });
+    logger.debug('CRM_LEADS_API', 'REQUEST_BODY_PARSED', 'REQUEST_BODY_PARSED', { requestId, bodyKeys: Object.keys(body) });
 
     // Validate required fields
     if (!body.name || !body.email) {
-      logger.warn('CRM_LEADS_API', 'MISSING_REQUIRED_FIELDS', { requestId });
+      logger.warn('CRM_LEADS_API', 'MISSING_REQUIRED_FIELDS', 'MISSING_REQUIRED_FIELDS', { requestId });
       return NextResponse.json(
         { message: 'Name and email are required' },
         { status: 400 }
       );
     }
 
-    logger.debug('CRM_LEADS_API', 'CREATING_LEAD_DOCUMENT', { requestId, name: body.name, email: body.email });
+    logger.debug('CRM_LEADS_API', 'CREATING_LEAD_DOCUMENT', 'CREATING_LEAD_DOCUMENT', { requestId, name: body.name, email: body.email });
 
     const newLead = new Lead({
       ...body,
@@ -138,10 +138,10 @@ async function handlePOST(request: NextRequest, user: PremiumUser): Promise<Next
       updatedAt: new Date(),
     });
 
-    logger.debug('CRM_LEADS_API', 'SAVING_LEAD_TO_DATABASE', { requestId, leadId: newLead._id });
+    logger.debug('CRM_LEADS_API', 'SAVING_LEAD_TO_DATABASE', 'SAVING_LEAD_TO_DATABASE', { requestId, leadId: newLead._id });
     await newLead.save();
 
-    logger.info('CRM_LEADS_API', 'LEAD_CREATED_SUCCESS', { 
+    logger.info('CRM_LEADS_API', 'LEAD_CREATED_SUCCESS', 'LEAD_CREATED_SUCCESS', { 
       requestId, 
       leadId: newLead._id, 
       userId: user.id,
@@ -150,7 +150,7 @@ async function handlePOST(request: NextRequest, user: PremiumUser): Promise<Next
 
     return NextResponse.json(newLead, { status: 201 });
   } catch (error: any) {
-    logger.error('CRM_LEADS_API', 'POST_REQUEST_ERROR', { requestId, error: error.message }, error);
+    logger.error('CRM_LEADS_API', 'POST_REQUEST_ERROR', 'POST_REQUEST_ERROR', { requestId, error: error.message }, error);
     return NextResponse.json(
       { message: 'Internal Server Error', requestId },
       { status: 500 }
@@ -165,12 +165,12 @@ async function handlePUT(request: NextRequest, user: PremiumUser): Promise<NextR
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    logger.info('CRM_LEADS_API', 'PUT_REQUEST_START', { requestId, userId: user.id });
+    logger.info('CRM_LEADS_API', 'PUT_REQUEST_START', 'PUT_REQUEST_START', { requestId, userId: user.id });
     await connectMongoose();
     
     // Check if user has access to leads feature
     if (!user.crmFeatures.leads) {
-      logger.warn('CRM_LEADS_API', 'LEADS_FEATURE_NOT_AVAILABLE_PUT', { requestId, userId: user.id });
+      logger.warn('CRM_LEADS_API', 'LEADS_FEATURE_NOT_AVAILABLE_PUT', 'LEADS_FEATURE_NOT_AVAILABLE_PUT', { requestId, userId: user.id });
       return NextResponse.json(
         { message: 'Lead management is not available in your plan', requestId },
         { status: 403 }
@@ -181,14 +181,14 @@ async function handlePUT(request: NextRequest, user: PremiumUser): Promise<NextR
     const { _id, ...updateData } = body;
 
     if (!_id) {
-      logger.warn('CRM_LEADS_API', 'MISSING_LEAD_ID', { requestId });
+      logger.warn('CRM_LEADS_API', 'MISSING_LEAD_ID', 'MISSING_LEAD_ID', { requestId });
       return NextResponse.json(
         { message: 'Lead ID is required for update' },
         { status: 400 }
       );
     }
 
-    logger.debug('CRM_LEADS_API', 'UPDATING_LEAD', { requestId, leadId: _id, updateKeys: Object.keys(updateData) });
+    logger.debug('CRM_LEADS_API', 'UPDATING_LEAD', 'UPDATING_LEAD', { requestId, leadId: _id, updateKeys: Object.keys(updateData) });
 
     // Add updatedAt timestamp
     updateData.updatedAt = new Date();
@@ -200,17 +200,17 @@ async function handlePUT(request: NextRequest, user: PremiumUser): Promise<NextR
     );
 
     if (!updatedLead) {
-      logger.warn('CRM_LEADS_API', 'LEAD_NOT_FOUND_OR_UNAUTHORIZED', { requestId, leadId: _id, userId: user.id });
+      logger.warn('CRM_LEADS_API', 'LEAD_NOT_FOUND_OR_UNAUTHORIZED', 'LEAD_NOT_FOUND_OR_UNAUTHORIZED', { requestId, leadId: _id, userId: user.id });
       return NextResponse.json(
         { message: 'Lead not found or unauthorized' },
         { status: 404 }
       );
     }
 
-    logger.info('CRM_LEADS_API', 'LEAD_UPDATED_SUCCESS', { requestId, leadId: _id, userId: user.id });
+    logger.info('CRM_LEADS_API', 'LEAD_UPDATED_SUCCESS', 'LEAD_UPDATED_SUCCESS', { requestId, leadId: _id, userId: user.id });
     return NextResponse.json(updatedLead);
   } catch (error: any) {
-    logger.error('CRM_LEADS_API', 'PUT_REQUEST_ERROR', { requestId, error: error.message }, error);
+    logger.error('CRM_LEADS_API', 'PUT_REQUEST_ERROR', 'PUT_REQUEST_ERROR', { requestId, error: error.message }, error);
     return NextResponse.json(
       { message: 'Internal Server Error', requestId },
       { status: 500 }
@@ -225,12 +225,12 @@ async function handleDELETE(request: NextRequest, user: PremiumUser): Promise<Ne
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    logger.info('CRM_LEADS_API', 'DELETE_REQUEST_START', { requestId, userId: user.id });
+    logger.info('CRM_LEADS_API', 'DELETE_REQUEST_START', 'DELETE_REQUEST_START', { requestId, userId: user.id });
     await connectMongoose();
     
     // Check if user has access to leads feature
     if (!user.crmFeatures.leads) {
-      logger.warn('CRM_LEADS_API', 'LEADS_FEATURE_NOT_AVAILABLE_DELETE', { requestId, userId: user.id });
+      logger.warn('CRM_LEADS_API', 'LEADS_FEATURE_NOT_AVAILABLE_DELETE', 'LEADS_FEATURE_NOT_AVAILABLE_DELETE', { requestId, userId: user.id });
       return NextResponse.json(
         { message: 'Lead management is not available in your plan', requestId },
         { status: 403 }
@@ -241,14 +241,14 @@ async function handleDELETE(request: NextRequest, user: PremiumUser): Promise<Ne
     const id = searchParams.get('id');
 
     if (!id) {
-      logger.warn('CRM_LEADS_API', 'MISSING_DELETE_ID', { requestId });
+      logger.warn('CRM_LEADS_API', 'MISSING_DELETE_ID', 'MISSING_DELETE_ID', { requestId });
       return NextResponse.json(
         { message: 'Lead ID is required for deletion' },
         { status: 400 }
       );
     }
 
-    logger.debug('CRM_LEADS_API', 'DELETING_LEAD', { requestId, leadId: id, userId: user.id });
+    logger.debug('CRM_LEADS_API', 'DELETING_LEAD', 'DELETING_LEAD', { requestId, leadId: id, userId: user.id });
 
     const deletedLead = await Lead.findOneAndDelete({
       _id: new mongoose.Types.ObjectId(id),
@@ -256,17 +256,17 @@ async function handleDELETE(request: NextRequest, user: PremiumUser): Promise<Ne
     });
 
     if (!deletedLead) {
-      logger.warn('CRM_LEADS_API', 'LEAD_NOT_FOUND_FOR_DELETE', { requestId, leadId: id, userId: user.id });
+      logger.warn('CRM_LEADS_API', 'LEAD_NOT_FOUND_FOR_DELETE', 'LEAD_NOT_FOUND_FOR_DELETE', { requestId, leadId: id, userId: user.id });
       return NextResponse.json(
         { message: 'Lead not found or unauthorized' },
         { status: 404 }
       );
     }
 
-    logger.info('CRM_LEADS_API', 'LEAD_DELETED_SUCCESS', { requestId, leadId: id, userId: user.id });
+    logger.info('CRM_LEADS_API', 'LEAD_DELETED_SUCCESS', 'LEAD_DELETED_SUCCESS', { requestId, leadId: id, userId: user.id });
     return NextResponse.json({ message: 'Lead deleted successfully' });
   } catch (error: any) {
-    logger.error('CRM_LEADS_API', 'DELETE_REQUEST_ERROR', { requestId, error: error.message }, error);
+    logger.error('CRM_LEADS_API', 'DELETE_REQUEST_ERROR', 'DELETE_REQUEST_ERROR', { requestId, error: error.message }, error);
     return NextResponse.json(
       { message: 'Internal Server Error', requestId },
       { status: 500 }
@@ -281,12 +281,12 @@ async function handlePATCH(request: NextRequest, user: PremiumUser): Promise<Nex
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    logger.info('CRM_LEADS_API', 'PATCH_REQUEST_START', { requestId, userId: user.id });
+    logger.info('CRM_LEADS_API', 'PATCH_REQUEST_START', 'PATCH_REQUEST_START', { requestId, userId: user.id });
     await connectMongoose();
     
     // Check if user has access to leads feature
     if (!user.crmFeatures.leads) {
-      logger.warn('CRM_LEADS_API', 'LEADS_FEATURE_NOT_AVAILABLE_PATCH', { requestId, userId: user.id });
+      logger.warn('CRM_LEADS_API', 'LEADS_FEATURE_NOT_AVAILABLE_PATCH', 'LEADS_FEATURE_NOT_AVAILABLE_PATCH', { requestId, userId: user.id });
       return NextResponse.json(
         { message: 'Lead management is not available in your plan', requestId },
         { status: 403 }
@@ -297,14 +297,14 @@ async function handlePATCH(request: NextRequest, user: PremiumUser): Promise<Nex
     const { leadIds, updateData } = body;
 
     if (!leadIds || !Array.isArray(leadIds) || leadIds.length === 0) {
-      logger.warn('CRM_LEADS_API', 'INVALID_LEAD_IDS', { requestId });
+      logger.warn('CRM_LEADS_API', 'INVALID_LEAD_IDS', 'INVALID_LEAD_IDS', { requestId });
       return NextResponse.json(
         { message: 'leadIds array is required' },
         { status: 400 }
       );
     }
 
-    logger.debug('CRM_LEADS_API', 'BULK_UPDATING_LEADS', { 
+    logger.debug('CRM_LEADS_API', 'BULK_UPDATING_LEADS', 'BULK_UPDATING_LEADS', { 
       requestId, 
       leadCount: leadIds.length, 
       updateKeys: Object.keys(updateData) 
@@ -322,7 +322,7 @@ async function handlePATCH(request: NextRequest, user: PremiumUser): Promise<Nex
       { runValidators: true }
     );
 
-    logger.info('CRM_LEADS_API', 'BULK_UPDATE_SUCCESS', { 
+    logger.info('CRM_LEADS_API', 'BULK_UPDATE_SUCCESS', 'BULK_UPDATE_SUCCESS', { 
       requestId, 
       modifiedCount: result.modifiedCount,
       matchedCount: result.matchedCount 
@@ -334,7 +334,7 @@ async function handlePATCH(request: NextRequest, user: PremiumUser): Promise<Nex
       matchedCount: result.matchedCount,
     });
   } catch (error: any) {
-    logger.error('CRM_LEADS_API', 'PATCH_REQUEST_ERROR', { requestId, error: error.message }, error);
+    logger.error('CRM_LEADS_API', 'PATCH_REQUEST_ERROR', 'PATCH_REQUEST_ERROR', { requestId, error: error.message }, error);
     return NextResponse.json(
       { message: 'Internal Server Error', requestId },
       { status: 500 }

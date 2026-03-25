@@ -61,7 +61,7 @@ export class JobQueueService {
     });
 
     if (existingJob) {
-      logger.warn('JobQueueService', 'enqueueJob', 'Job with same idempotency key already exists', {
+      logger.warn('JobQueueService', 'enqueueJob', 'Job with same idempotency key already exists', 'Job with same idempotency key already exists', {
         idempotencyKey: job.idempotencyKey,
         existingJobId: existingJob._id.toString(),
       });
@@ -80,7 +80,7 @@ export class JobQueueService {
 
     const result = await this.db.collection('email_jobs').insertOne(newJob);
 
-    logger.info('JobQueueService', 'enqueueJob', 'Email job enqueued', {
+    logger.info('JobQueueService', 'enqueueJob', 'Email job enqueued', 'Email job enqueued', {
       jobId: result.insertedId.toString(),
       userId: job.userId.toString(),
       campaignId: job.campaignId.toString(),
@@ -116,7 +116,7 @@ export class JobQueueService {
     );
 
     if (job.value) {
-      logger.debug('JobQueueService', 'dequeueJob', 'Job dequeued for processing', {
+      logger.debug('JobQueueService', 'dequeueJob', 'Job dequeued for processing', 'Job dequeued for processing', {
         jobId: job.value._id.toString(),
         recipient: job.value.recipient,
         attempts: job.value.attempts,
@@ -143,13 +143,13 @@ export class JobQueueService {
     );
 
     if (result.matchedCount === 0) {
-      logger.warn('JobQueueService', 'completeJob', 'Job not found for completion', {
+      logger.warn('JobQueueService', 'completeJob', 'Job not found for completion', 'Job not found for completion', {
         jobId: jobId.toString(),
       });
       return;
     }
 
-    logger.info('JobQueueService', 'completeJob', 'Job completed successfully', {
+    logger.info('JobQueueService', 'completeJob', 'Job completed successfully', 'Job completed successfully', {
       jobId: jobId.toString(),
       messageId,
     });
@@ -162,7 +162,7 @@ export class JobQueueService {
     const job = await this.db.collection('email_jobs').findOne({ _id: jobId });
 
     if (!job) {
-      logger.warn('JobQueueService', 'failJob', 'Job not found for failure handling', {
+      logger.warn('JobQueueService', 'failJob', 'Job not found for failure handling', 'Job not found for failure handling', {
         jobId: jobId.toString(),
       });
       return;
@@ -185,7 +185,7 @@ export class JobQueueService {
         }
       );
 
-      logger.warn('JobQueueService', 'failJob', 'Job scheduled for retry', {
+      logger.warn('JobQueueService', 'failJob', 'Job scheduled for retry', 'Job scheduled for retry', {
         jobId: jobId.toString(),
         attempts: job.attempts,
         maxAttempts: job.maxAttempts,
@@ -205,7 +205,7 @@ export class JobQueueService {
         }
       );
 
-      logger.error('JobQueueService', 'failJob', 'Job moved to DLQ after max retries', {
+      logger.error('JobQueueService', 'failJob', 'Job moved to DLQ after max retries', 'Job moved to DLQ after max retries', {
         jobId: jobId.toString(),
         attempts: job.attempts,
         maxAttempts: job.maxAttempts,
@@ -289,7 +289,7 @@ export class JobQueueService {
       }
     );
 
-    logger.info('JobQueueService', 'retryDLQJob', 'DLQ job retried', {
+    logger.info('JobQueueService', 'retryDLQJob', 'DLQ job retried', 'DLQ job retried', {
       jobId: jobId.toString(),
     });
   }

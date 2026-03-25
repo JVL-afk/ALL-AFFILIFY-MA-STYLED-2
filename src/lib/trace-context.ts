@@ -49,7 +49,7 @@ export function initializeTraceContext(
     startTime: Date.now(),
   };
 
-  logger.info('TraceContextManager', 'initializeTraceContext', 'Trace context initialized', {
+  logger.info('TraceContextManager', 'initializeTraceContext', 'Trace context initialized', 'Trace context initialized', {
     trace_id: traceContext.traceId,
     span_id: traceContext.spanId,
     user_id: userId,
@@ -148,7 +148,7 @@ export function updateTraceContext(updates: Partial<Omit<TraceContext, 'traceId'
   }
 
   Object.assign(context, updates);
-  logger.debug('TraceContextManager', 'updateTraceContext', 'Trace context updated', {
+  logger.debug('TraceContextManager', 'updateTraceContext', 'Trace context updated', 'Trace context updated', {
     trace_id: context.traceId,
     updates,
   });
@@ -181,7 +181,7 @@ export function createChildSpan(): string {
   }
 
   const childSpanId = crypto.randomUUID();
-  logger.debug('TraceContextManager', 'createChildSpan', 'Child span created', {
+  logger.debug('TraceContextManager', 'createChildSpan', 'Child span created', 'Child span created', {
     trace_id: context.traceId,
     parent_span_id: context.spanId,
     child_span_id: childSpanId,
@@ -206,7 +206,7 @@ export function traceContextMiddleware(req: any, res: any, next: any): void {
     return new Promise<void>((resolve) => {
       res.on('finish', () => {
         const elapsed = getElapsedTime();
-        logger.info('TraceContextManager', 'traceContextMiddleware', 'Request completed', {
+        logger.info('TraceContextManager', 'traceContextMiddleware', 'Request completed', 'Request completed', {
           trace_id: traceContext.traceId,
           method: req.method,
           path: req.path,

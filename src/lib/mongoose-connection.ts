@@ -27,14 +27,14 @@ export async function connectMongoose(): Promise<typeof mongoose> {
 
   // If already connected, return immediately
   if (mongoose.connection.readyState === 1) {
-    logger.debug('MONGOOSE', 'ALREADY_CONNECTED', { readyState: mongoose.connection.readyState });
+    logger.debug('MONGOOSE', 'ALREADY_CONNECTED', 'ALREADY_CONNECTED', { readyState: mongoose.connection.readyState });
     return mongoose;
   }
 
   // Create a new connection promise
   mongooseConnectionPromise = (async () => {
     try {
-      logger.info('MONGOOSE', 'CONNECTING_START', { uri: MONGODB_URI?.replace(/mongodb(\+srv)?:\/\/([^:]+):([^@]+)@/, 'mongodb$1://$2:****@') });
+      logger.info('MONGOOSE', 'CONNECTING_START', 'CONNECTING_START', { uri: MONGODB_URI?.replace(/mongodb(\+srv)?:\/\/([^:]+):([^@]+)@/, 'mongodb$1://$2:****@') });
 
       const connection = await mongoose.connect(MONGODB_URI!, {
         connectTimeoutMS: 100000,
@@ -48,7 +48,7 @@ export async function connectMongoose(): Promise<typeof mongoose> {
         autoIndex: process.env.NODE_ENV !== 'production',
       });
 
-      logger.info('MONGOOSE', 'CONNECTED_SUCCESS', {
+      logger.info('MONGOOSE', 'CONNECTED_SUCCESS', 'CONNECTED_SUCCESS', {
         readyState: connection.connection.readyState,
         host: connection.connection.host,
         name: connection.connection.name,
@@ -56,7 +56,7 @@ export async function connectMongoose(): Promise<typeof mongoose> {
 
       return connection;
     } catch (error: any) {
-      logger.error('MONGOOSE', 'CONNECTION_FAILED', { error: error.message }, error);
+      logger.error('MONGOOSE', 'CONNECTION_FAILED', 'CONNECTION_FAILED', { error: error.message }, error);
       mongooseConnectionPromise = null; // Reset for retry
       throw error;
     }
@@ -76,7 +76,7 @@ export async function disconnectMongoose(): Promise<void> {
       logger.info('MONGOOSE', 'DISCONNECTED_SUCCESS', {});
     }
   } catch (error: any) {
-    logger.error('MONGOOSE', 'DISCONNECT_ERROR', { error: error.message }, error);
+    logger.error('MONGOOSE', 'DISCONNECT_ERROR', 'DISCONNECT_ERROR', { error: error.message }, error);
     throw error;
   }
 }

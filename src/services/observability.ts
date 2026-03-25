@@ -115,13 +115,13 @@ export class ObservabilityService {
         timestamp: new Date(),
       });
 
-      logger.debug('ObservabilityService', 'recordMetric', 'Metric recorded', {
+      logger.debug('ObservabilityService', 'recordMetric', 'Metric recorded', 'Metric recorded', {
         service: metric.service,
         metric: metric.metric,
         value: metric.value,
       });
     } catch (error) {
-      logger.error('ObservabilityService', 'recordMetric', 'Failed to record metric', {
+      logger.error('ObservabilityService', 'recordMetric', 'Failed to record metric', 'Failed to record metric', {
         error: (error as Error).message,
         metric: metric.metric,
       });
@@ -138,12 +138,12 @@ export class ObservabilityService {
         timestamp: new Date(),
       });
 
-      logger.debug('ObservabilityService', 'recordError', 'Error event recorded', {
+      logger.debug('ObservabilityService', 'recordError', 'Error event recorded', 'Error event recorded', {
         service: error.service,
         error: error.error,
       });
     } catch (err) {
-      logger.error('ObservabilityService', 'recordError', 'Failed to record error event', {
+      logger.error('ObservabilityService', 'recordError', 'Failed to record error event', 'Failed to record error event', {
         error: (err as Error).message,
       });
     }
@@ -288,7 +288,7 @@ export class ObservabilityService {
         },
       };
     } catch (error) {
-      logger.error('ObservabilityService', 'getHealthStatus', 'Failed to get health status', {
+      logger.error('ObservabilityService', 'getHealthStatus', 'Failed to get health status', 'Failed to get health status', {
         error: (error as Error).message,
       });
 
@@ -309,7 +309,7 @@ export class ObservabilityService {
       const result = await this.db.admin().ping();
       return result.ok === 1;
     } catch (error) {
-      logger.error('ObservabilityService', 'checkDatabaseHealth', 'Database health check failed', {
+      logger.error('ObservabilityService', 'checkDatabaseHealth', 'Database health check failed', 'Database health check failed', {
         error: (error as Error).message,
       });
       return false;

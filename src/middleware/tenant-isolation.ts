@@ -29,7 +29,7 @@ export async function extractTenantContext(request: NextRequest): Promise<Tenant
     const authResult = await verifyAuth(request);
 
     if (!authResult.success || !authResult.user) {
-      logger.warn('TenantIsolation', 'extractTenantContext', 'Authentication failed', {
+      logger.warn('TenantIsolation', 'extractTenantContext', 'Authentication failed', 'Authentication failed', {
         path: request.nextUrl.pathname,
       });
       return null;
@@ -39,7 +39,7 @@ export async function extractTenantContext(request: NextRequest): Promise<Tenant
     const tenantId = user.id;
 
     if (!tenantId) {
-      logger.error('TenantIsolation', 'extractTenantContext', 'User ID missing from auth token', {
+      logger.error('TenantIsolation', 'extractTenantContext', 'User ID missing from auth token', 'User ID missing from auth token', {
         path: request.nextUrl.pathname,
       });
       return null;
@@ -51,7 +51,7 @@ export async function extractTenantContext(request: NextRequest): Promise<Tenant
       userPlan: user.plan || 'free',
     };
 
-    logger.debug('TenantIsolation', 'extractTenantContext', 'Tenant context extracted', {
+    logger.debug('TenantIsolation', 'extractTenantContext', 'Tenant context extracted', 'Tenant context extracted', {
       tenantId,
       userPlan: user.plan,
       path: request.nextUrl.pathname,
@@ -59,7 +59,7 @@ export async function extractTenantContext(request: NextRequest): Promise<Tenant
 
     return tenantContext;
   } catch (error) {
-    logger.error('TenantIsolation', 'extractTenantContext', 'Error extracting tenant context', {
+    logger.error('TenantIsolation', 'extractTenantContext', 'Error extracting tenant context', 'Error extracting tenant context', {
       error: (error as Error).message,
       path: request.nextUrl.pathname,
     });
@@ -80,7 +80,7 @@ export function validateTenantFilter(tenantId: string, filter: Record<string, an
   const hasUserIdFilter = 'userId' in filter;
 
   if (!hasUserIdFilter) {
-    logger.error('TenantIsolation', 'validateTenantFilter', 'Query missing tenant filter (userId)', {
+    logger.error('TenantIsolation', 'validateTenantFilter', 'Query missing tenant filter (userId)', 'Query missing tenant filter (userId)', {
       tenantId,
       filter: JSON.stringify(filter),
     });
@@ -102,7 +102,7 @@ export function enforceTenantFilter(tenantId: string, filter: Record<string, any
   // Always include userId in the filter
   filter.userId = tenantId;
 
-  logger.debug('TenantIsolation', 'enforceTenantFilter', 'Tenant filter enforced', {
+  logger.debug('TenantIsolation', 'enforceTenantFilter', 'Tenant filter enforced', 'Tenant filter enforced', {
     tenantId,
     filter: JSON.stringify(filter),
   });
@@ -120,7 +120,7 @@ export function withTenantIsolation(
     const tenantContext = await extractTenantContext(request);
 
     if (!tenantContext) {
-      logger.warn('TenantIsolation', 'withTenantIsolation', 'Tenant context extraction failed, rejecting request', {
+      logger.warn('TenantIsolation', 'withTenantIsolation', 'Tenant context extraction failed, rejecting request', 'Tenant context extraction failed, rejecting request', {
         path: request.nextUrl.pathname,
       });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -129,7 +129,7 @@ export function withTenantIsolation(
     try {
       return await handler(request, tenantContext);
     } catch (error) {
-      logger.error('TenantIsolation', 'withTenantIsolation', 'Error in tenant-isolated handler', {
+      logger.error('TenantIsolation', 'withTenantIsolation', 'Error in tenant-isolated handler', 'Error in tenant-isolated handler', {
         tenantId: tenantContext.tenantId,
         error: (error as Error).message,
         path: request.nextUrl.pathname,
@@ -146,7 +146,7 @@ export function withTenantIsolation(
 export function assertTenantFilter(tenantId: string, filter: Record<string, any>): void {
   if (!validateTenantFilter(tenantId, filter)) {
     const error = new Error(`CRITICAL: Query executed without tenant filter for tenant ${tenantId}`);
-    logger.error('TenantIsolation', 'assertTenantFilter', 'Tenant isolation violation detected', {
+    logger.error('TenantIsolation', 'assertTenantFilter', 'Tenant isolation violation detected', 'Tenant isolation violation detected', {
       tenantId,
       filter: JSON.stringify(filter),
       stack: error.stack,

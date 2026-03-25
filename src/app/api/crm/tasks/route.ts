@@ -13,7 +13,7 @@ async function handleGET(request: NextRequest, user: PremiumUser): Promise<NextR
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    logger.info('CRM_TASKS_API', 'GET_REQUEST_START', { requestId, userId: user.id, tier: user.tier });
+    logger.info('CRM_TASKS_API', 'GET_REQUEST_START', 'GET_REQUEST_START', { requestId, userId: user.id, tier: user.tier });
     await connectMongoose();
     
     // Extract query parameters for filtering and pagination
@@ -27,7 +27,7 @@ async function handleGET(request: NextRequest, user: PremiumUser): Promise<NextR
 
     const skip = (page - 1) * limit;
 
-    logger.debug('CRM_TASKS_API', 'QUERY_PARAMS', { requestId, page, limit, status, priority, sortBy, sortOrder });
+    logger.debug('CRM_TASKS_API', 'QUERY_PARAMS', 'QUERY_PARAMS', { requestId, page, limit, status, priority, sortBy, sortOrder });
 
     // Build filter query
     const filter: any = { userId: new mongoose.Types.ObjectId(user.id) };
@@ -40,7 +40,7 @@ async function handleGET(request: NextRequest, user: PremiumUser): Promise<NextR
       filter.priority = priority;
     }
 
-    logger.debug('CRM_TASKS_API', 'FETCHING_TASKS', { requestId, filter });
+    logger.debug('CRM_TASKS_API', 'FETCHING_TASKS', 'FETCHING_TASKS', { requestId, filter });
 
     // Fetch total count for pagination
     const total = await Task.countDocuments(filter);
@@ -51,7 +51,7 @@ async function handleGET(request: NextRequest, user: PremiumUser): Promise<NextR
       .skip(skip)
       .limit(limit);
 
-    logger.info('CRM_TASKS_API', 'TASKS_FETCHED_SUCCESS', { 
+    logger.info('CRM_TASKS_API', 'TASKS_FETCHED_SUCCESS', 'TASKS_FETCHED_SUCCESS', { 
       requestId, 
       taskCount: tasks.length, 
       total,
@@ -69,7 +69,7 @@ async function handleGET(request: NextRequest, user: PremiumUser): Promise<NextR
       },
     });
   } catch (error: any) {
-    logger.error('CRM_TASKS_API', 'GET_REQUEST_ERROR', { requestId, error: error.message }, error);
+    logger.error('CRM_TASKS_API', 'GET_REQUEST_ERROR', 'GET_REQUEST_ERROR', { requestId, error: error.message }, error);
     return NextResponse.json(
       { message: 'Internal Server Error', requestId },
       { status: 500 }
@@ -84,22 +84,22 @@ async function handlePOST(request: NextRequest, user: PremiumUser): Promise<Next
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    logger.info('CRM_TASKS_API', 'POST_REQUEST_START', { requestId, userId: user.id });
+    logger.info('CRM_TASKS_API', 'POST_REQUEST_START', 'POST_REQUEST_START', { requestId, userId: user.id });
     await connectMongoose();
     
     const body = await request.json();
-    logger.debug('CRM_TASKS_API', 'REQUEST_BODY_PARSED', { requestId, bodyKeys: Object.keys(body) });
+    logger.debug('CRM_TASKS_API', 'REQUEST_BODY_PARSED', 'REQUEST_BODY_PARSED', { requestId, bodyKeys: Object.keys(body) });
 
     // Validate required fields
     if (!body.title || !body.description) {
-      logger.warn('CRM_TASKS_API', 'MISSING_REQUIRED_FIELDS', { requestId });
+      logger.warn('CRM_TASKS_API', 'MISSING_REQUIRED_FIELDS', 'MISSING_REQUIRED_FIELDS', { requestId });
       return NextResponse.json(
         { message: 'Title and description are required' },
         { status: 400 }
       );
     }
 
-    logger.debug('CRM_TASKS_API', 'CREATING_TASK_DOCUMENT', { requestId, title: body.title });
+    logger.debug('CRM_TASKS_API', 'CREATING_TASK_DOCUMENT', 'CREATING_TASK_DOCUMENT', { requestId, title: body.title });
 
     const newTask = new Task({
       ...body,
@@ -108,10 +108,10 @@ async function handlePOST(request: NextRequest, user: PremiumUser): Promise<Next
       updatedAt: new Date(),
     });
 
-    logger.debug('CRM_TASKS_API', 'SAVING_TASK_TO_DATABASE', { requestId, taskId: newTask._id });
+    logger.debug('CRM_TASKS_API', 'SAVING_TASK_TO_DATABASE', 'SAVING_TASK_TO_DATABASE', { requestId, taskId: newTask._id });
     await newTask.save();
 
-    logger.info('CRM_TASKS_API', 'TASK_CREATED_SUCCESS', { 
+    logger.info('CRM_TASKS_API', 'TASK_CREATED_SUCCESS', 'TASK_CREATED_SUCCESS', { 
       requestId, 
       taskId: newTask._id, 
       userId: user.id,
@@ -120,7 +120,7 @@ async function handlePOST(request: NextRequest, user: PremiumUser): Promise<Next
 
     return NextResponse.json(newTask, { status: 201 });
   } catch (error: any) {
-    logger.error('CRM_TASKS_API', 'POST_REQUEST_ERROR', { requestId, error: error.message }, error);
+    logger.error('CRM_TASKS_API', 'POST_REQUEST_ERROR', 'POST_REQUEST_ERROR', { requestId, error: error.message }, error);
     return NextResponse.json(
       { message: 'Internal Server Error', requestId },
       { status: 500 }
@@ -135,21 +135,21 @@ async function handlePUT(request: NextRequest, user: PremiumUser): Promise<NextR
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    logger.info('CRM_TASKS_API', 'PUT_REQUEST_START', { requestId, userId: user.id });
+    logger.info('CRM_TASKS_API', 'PUT_REQUEST_START', 'PUT_REQUEST_START', { requestId, userId: user.id });
     await connectMongoose();
     
     const body = await request.json();
     const { _id, ...updateData } = body;
 
     if (!_id) {
-      logger.warn('CRM_TASKS_API', 'MISSING_TASK_ID', { requestId });
+      logger.warn('CRM_TASKS_API', 'MISSING_TASK_ID', 'MISSING_TASK_ID', { requestId });
       return NextResponse.json(
         { message: 'Task ID is required for update' },
         { status: 400 }
       );
     }
 
-    logger.debug('CRM_TASKS_API', 'UPDATING_TASK', { requestId, taskId: _id, updateKeys: Object.keys(updateData) });
+    logger.debug('CRM_TASKS_API', 'UPDATING_TASK', 'UPDATING_TASK', { requestId, taskId: _id, updateKeys: Object.keys(updateData) });
 
     // Add updatedAt timestamp
     updateData.updatedAt = new Date();
@@ -161,17 +161,17 @@ async function handlePUT(request: NextRequest, user: PremiumUser): Promise<NextR
     );
 
     if (!updatedTask) {
-      logger.warn('CRM_TASKS_API', 'TASK_NOT_FOUND_OR_UNAUTHORIZED', { requestId, taskId: _id, userId: user.id });
+      logger.warn('CRM_TASKS_API', 'TASK_NOT_FOUND_OR_UNAUTHORIZED', 'TASK_NOT_FOUND_OR_UNAUTHORIZED', { requestId, taskId: _id, userId: user.id });
       return NextResponse.json(
         { message: 'Task not found or unauthorized' },
         { status: 404 }
       );
     }
 
-    logger.info('CRM_TASKS_API', 'TASK_UPDATED_SUCCESS', { requestId, taskId: _id, userId: user.id });
+    logger.info('CRM_TASKS_API', 'TASK_UPDATED_SUCCESS', 'TASK_UPDATED_SUCCESS', { requestId, taskId: _id, userId: user.id });
     return NextResponse.json(updatedTask);
   } catch (error: any) {
-    logger.error('CRM_TASKS_API', 'PUT_REQUEST_ERROR', { requestId, error: error.message }, error);
+    logger.error('CRM_TASKS_API', 'PUT_REQUEST_ERROR', 'PUT_REQUEST_ERROR', { requestId, error: error.message }, error);
     return NextResponse.json(
       { message: 'Internal Server Error', requestId },
       { status: 500 }
@@ -186,21 +186,21 @@ async function handleDELETE(request: NextRequest, user: PremiumUser): Promise<Ne
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    logger.info('CRM_TASKS_API', 'DELETE_REQUEST_START', { requestId, userId: user.id });
+    logger.info('CRM_TASKS_API', 'DELETE_REQUEST_START', 'DELETE_REQUEST_START', { requestId, userId: user.id });
     await connectMongoose();
     
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     if (!id) {
-      logger.warn('CRM_TASKS_API', 'MISSING_DELETE_ID', { requestId });
+      logger.warn('CRM_TASKS_API', 'MISSING_DELETE_ID', 'MISSING_DELETE_ID', { requestId });
       return NextResponse.json(
         { message: 'Task ID is required for deletion' },
         { status: 400 }
       );
     }
 
-    logger.debug('CRM_TASKS_API', 'DELETING_TASK', { requestId, taskId: id, userId: user.id });
+    logger.debug('CRM_TASKS_API', 'DELETING_TASK', 'DELETING_TASK', { requestId, taskId: id, userId: user.id });
 
     const deletedTask = await Task.findOneAndDelete({
       _id: new mongoose.Types.ObjectId(id),
@@ -208,17 +208,17 @@ async function handleDELETE(request: NextRequest, user: PremiumUser): Promise<Ne
     });
 
     if (!deletedTask) {
-      logger.warn('CRM_TASKS_API', 'TASK_NOT_FOUND_FOR_DELETE', { requestId, taskId: id, userId: user.id });
+      logger.warn('CRM_TASKS_API', 'TASK_NOT_FOUND_FOR_DELETE', 'TASK_NOT_FOUND_FOR_DELETE', { requestId, taskId: id, userId: user.id });
       return NextResponse.json(
         { message: 'Task not found or unauthorized' },
         { status: 404 }
       );
     }
 
-    logger.info('CRM_TASKS_API', 'TASK_DELETED_SUCCESS', { requestId, taskId: id, userId: user.id });
+    logger.info('CRM_TASKS_API', 'TASK_DELETED_SUCCESS', 'TASK_DELETED_SUCCESS', { requestId, taskId: id, userId: user.id });
     return NextResponse.json({ message: 'Task deleted successfully' });
   } catch (error: any) {
-    logger.error('CRM_TASKS_API', 'DELETE_REQUEST_ERROR', { requestId, error: error.message }, error);
+    logger.error('CRM_TASKS_API', 'DELETE_REQUEST_ERROR', 'DELETE_REQUEST_ERROR', { requestId, error: error.message }, error);
     return NextResponse.json(
       { message: 'Internal Server Error', requestId },
       { status: 500 }
@@ -233,21 +233,21 @@ async function handlePATCH(request: NextRequest, user: PremiumUser): Promise<Nex
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    logger.info('CRM_TASKS_API', 'PATCH_REQUEST_START', { requestId, userId: user.id });
+    logger.info('CRM_TASKS_API', 'PATCH_REQUEST_START', 'PATCH_REQUEST_START', { requestId, userId: user.id });
     await connectMongoose();
     
     const body = await request.json();
     const { taskIds, updateData } = body;
 
     if (!taskIds || !Array.isArray(taskIds) || taskIds.length === 0) {
-      logger.warn('CRM_TASKS_API', 'INVALID_TASK_IDS', { requestId });
+      logger.warn('CRM_TASKS_API', 'INVALID_TASK_IDS', 'INVALID_TASK_IDS', { requestId });
       return NextResponse.json(
         { message: 'taskIds array is required' },
         { status: 400 }
       );
     }
 
-    logger.debug('CRM_TASKS_API', 'BULK_UPDATING_TASKS', { 
+    logger.debug('CRM_TASKS_API', 'BULK_UPDATING_TASKS', 'BULK_UPDATING_TASKS', { 
       requestId, 
       taskCount: taskIds.length, 
       updateKeys: Object.keys(updateData) 
@@ -265,7 +265,7 @@ async function handlePATCH(request: NextRequest, user: PremiumUser): Promise<Nex
       { runValidators: true }
     );
 
-    logger.info('CRM_TASKS_API', 'BULK_UPDATE_SUCCESS', { 
+    logger.info('CRM_TASKS_API', 'BULK_UPDATE_SUCCESS', 'BULK_UPDATE_SUCCESS', { 
       requestId, 
       modifiedCount: result.modifiedCount,
       matchedCount: result.matchedCount 
@@ -277,7 +277,7 @@ async function handlePATCH(request: NextRequest, user: PremiumUser): Promise<Nex
       matchedCount: result.matchedCount,
     });
   } catch (error: any) {
-    logger.error('CRM_TASKS_API', 'PATCH_REQUEST_ERROR', { requestId, error: error.message }, error);
+    logger.error('CRM_TASKS_API', 'PATCH_REQUEST_ERROR', 'PATCH_REQUEST_ERROR', { requestId, error: error.message }, error);
     return NextResponse.json(
       { message: 'Internal Server Error', requestId },
       { status: 500 }

@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       // Extract and verify JWT with strict validation
       const authHeader = request.headers.get('Authorization');
       if (!authHeader) {
-        logger.warn('EmailMarketingAPI', 'POST /campaigns', 'Missing Authorization header', undefined, {
+        logger.warn('EmailMarketingAPI', 'POST /campaigns', 'Missing Authorization header', 'Missing Authorization header', {
           trace_id: traceContext.traceId,
           service: 'EmailMarketingAPI',
         });
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       const jwtSecret = process.env.JWT_SECRET || 'your-secret-key';
       const payload = verifyAuthStrict(authHeader, jwtSecret);
       if (!payload) {
-        logger.warn('EmailMarketingAPI', 'POST /campaigns', 'JWT verification failed', undefined, {
+        logger.warn('EmailMarketingAPI', 'POST /campaigns', 'JWT verification failed', 'JWT verification failed', {
           trace_id: traceContext.traceId,
           service: 'EmailMarketingAPI',
         });
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       try {
         enforcePermission(payload, { action: 'create', resource: 'campaign' }, traceContext.traceId);
       } catch (error) {
-        logger.warn('EmailMarketingAPI', 'POST /campaigns', 'Permission denied', undefined, {
+        logger.warn('EmailMarketingAPI', 'POST /campaigns', 'Permission denied', 'Permission denied', {
           trace_id: traceContext.traceId,
           user_id: payload.userId,
           service: 'EmailMarketingAPI',
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       const validationResult = EmailCampaignSchema.safeParse(body);
 
       if (!validationResult.success) {
-        logger.warn('EmailMarketingAPI', 'POST /campaigns', 'Invalid campaign creation payload', undefined, {
+        logger.warn('EmailMarketingAPI', 'POST /campaigns', 'Invalid campaign creation payload', 'Invalid campaign creation payload', {
           trace_id: traceContext.traceId,
           user_id: payload.userId,
           service: 'EmailMarketingAPI',
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
 
       const result = await db.collection('email_campaigns').insertOne(newCampaign);
 
-      logger.info('EmailMarketingAPI', 'POST /campaigns', 'Campaign created successfully', undefined, {
+      logger.info('EmailMarketingAPI', 'POST /campaigns', 'Campaign created successfully', 'Campaign created successfully', {
         trace_id: traceContext.traceId,
         user_id: payload.userId,
         campaign_id: result.insertedId.toString(),
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, id: result.insertedId.toString() }, { status: 201 });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('EmailMarketingAPI', 'POST /campaigns', 'Failed to create campaign', undefined, {
+      logger.error('EmailMarketingAPI', 'POST /campaigns', 'Failed to create campaign', 'Failed to create campaign', {
         trace_id: traceContext.traceId,
         service: 'EmailMarketingAPI',
         error: errorMessage,
@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
       // Extract and verify JWT
       const authHeader = request.headers.get('Authorization');
       if (!authHeader) {
-        logger.warn('EmailMarketingAPI', 'GET /campaigns', 'Missing Authorization header', undefined, {
+        logger.warn('EmailMarketingAPI', 'GET /campaigns', 'Missing Authorization header', 'Missing Authorization header', {
           trace_id: traceContext.traceId,
           service: 'EmailMarketingAPI',
         });
@@ -150,7 +150,7 @@ export async function GET(request: NextRequest) {
       const jwtSecret = process.env.JWT_SECRET || 'your-secret-key';
       const payload = verifyAuthStrict(authHeader, jwtSecret);
       if (!payload) {
-        logger.warn('EmailMarketingAPI', 'GET /campaigns', 'JWT verification failed', undefined, {
+        logger.warn('EmailMarketingAPI', 'GET /campaigns', 'JWT verification failed', 'JWT verification failed', {
           trace_id: traceContext.traceId,
           service: 'EmailMarketingAPI',
         });
@@ -161,7 +161,7 @@ export async function GET(request: NextRequest) {
       try {
         enforcePermission(payload, { action: 'read', resource: 'campaign' }, traceContext.traceId);
       } catch (error) {
-        logger.warn('EmailMarketingAPI', 'GET /campaigns', 'Permission denied', undefined, {
+        logger.warn('EmailMarketingAPI', 'GET /campaigns', 'Permission denied', 'Permission denied', {
           trace_id: traceContext.traceId,
           user_id: payload.userId,
           service: 'EmailMarketingAPI',
@@ -176,7 +176,7 @@ export async function GET(request: NextRequest) {
 
       const paginationParams = parsePaginationParams(limit, cursor || undefined);
       if (!validatePaginationParams(paginationParams)) {
-        logger.warn('EmailMarketingAPI', 'GET /campaigns', 'Invalid pagination parameters', undefined, {
+        logger.warn('EmailMarketingAPI', 'GET /campaigns', 'Invalid pagination parameters', 'Invalid pagination parameters', {
           trace_id: traceContext.traceId,
           user_id: payload.userId,
           service: 'EmailMarketingAPI',
@@ -202,7 +202,7 @@ export async function GET(request: NextRequest) {
 
       const paginatedResult = createPaginatedResult(campaigns, paginationParams.limit);
 
-      logger.info('EmailMarketingAPI', 'GET /campaigns', 'Campaigns retrieved successfully', undefined, {
+      logger.info('EmailMarketingAPI', 'GET /campaigns', 'Campaigns retrieved successfully', 'Campaigns retrieved successfully', {
         trace_id: traceContext.traceId,
         user_id: payload.userId,
         service: 'EmailMarketingAPI',
@@ -217,7 +217,7 @@ export async function GET(request: NextRequest) {
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('EmailMarketingAPI', 'GET /campaigns', 'Failed to retrieve campaigns', undefined, {
+      logger.error('EmailMarketingAPI', 'GET /campaigns', 'Failed to retrieve campaigns', 'Failed to retrieve campaigns', {
         trace_id: traceContext.traceId,
         service: 'EmailMarketingAPI',
         error: errorMessage,

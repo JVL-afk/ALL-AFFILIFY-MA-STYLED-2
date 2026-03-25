@@ -35,11 +35,11 @@ class SendGridService {
 
   private initialize() {
     if (!process.env.SENDGRID_API_KEY) {
-      logger.error('SendGridService', 'initialize', 'SendGrid API key not configured. Email functionality will be disabled.', { error: 'SENDGRID_API_KEY is missing' });
+      logger.error('SendGridService', 'initialize', 'SendGrid API key not configured. Email functionality will be disabled.', 'SendGrid API key not configured. Email functionality will be disabled.', { error: 'SENDGRID_API_KEY is missing' });
       return;
     }
     if (!process.env.SENDGRID_FROM_EMAIL) {
-      logger.error('SendGridService', 'initialize', 'SendGrid FROM email not configured. Email functionality will be disabled.', { error: 'SENDGRID_FROM_EMAIL is missing' });
+      logger.error('SendGridService', 'initialize', 'SendGrid FROM email not configured. Email functionality will be disabled.', 'SendGrid FROM email not configured. Email functionality will be disabled.', { error: 'SENDGRID_FROM_EMAIL is missing' });
       return;
     }
 
@@ -49,7 +49,7 @@ class SendGridService {
 
   async sendEmail(emailData: EmailTemplate): Promise<boolean> {
     if (!this.initialized) {
-      logger.error('SendGridService', 'sendEmail', 'SendGrid not initialized. Cannot send email.', { subject: emailData.subject });
+      logger.error('SendGridService', 'sendEmail', 'SendGrid not initialized. Cannot send email.', 'SendGrid not initialized. Cannot send email.', { subject: emailData.subject });
       return false; // Return failure if not initialized
     }
 
@@ -66,10 +66,10 @@ class SendGridService {
       };
 
       await sgMail.send(msg);
-      logger.info('SendGridService', 'sendEmail', 'Email sent successfully', { to: emailData.to, subject: emailData.subject });
+      logger.info('SendGridService', 'sendEmail', 'Email sent successfully', 'Email sent successfully', { to: emailData.to, subject: emailData.subject });
       return true;
     } catch (error) {
-      logger.error('SendGridService', 'sendEmail', 'SendGrid email error', { to: emailData.to, subject: emailData.subject, error: (error as Error).message, stack: (error as Error).stack }, error as Error);
+      logger.error('SendGridService', 'sendEmail', 'SendGrid email error', 'SendGrid email error', { to: emailData.to, subject: emailData.subject, error: (error as Error).message, stack: (error as Error).stack }, error as Error);
       return false;
     }
   }

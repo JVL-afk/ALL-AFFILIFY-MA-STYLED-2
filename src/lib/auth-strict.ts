@@ -50,7 +50,7 @@ export function verifyAuthStrict(token: string, secret: string): VerifiedJWTPayl
 
     // Validate required claims
     if (!decoded.sub || !decoded.userId || !decoded.email) {
-      logger.warn('JWT missing required claims', {
+      logger.warn('AuthStrictModule', 'verifyAuthStrict', 'JWT validation failed', 'Missing required claims', {
         trace_id: traceId,
         service: 'AuthStrictModule',
         component: 'verifyAuthStrict',
@@ -68,7 +68,7 @@ export function verifyAuthStrict(token: string, secret: string): VerifiedJWTPayl
     // Validate user plan
     const validPlans = ['free', 'pro', 'enterprise'];
     if (!validPlans.includes(decoded.userPlan)) {
-      logger.warn('JWT invalid user plan', {
+      logger.warn('AuthStrictModule', 'verifyAuthStrict', 'JWT validation failed', 'Invalid user plan', {
         trace_id: traceId,
         service: 'AuthStrictModule',
         component: 'verifyAuthStrict',
@@ -82,7 +82,7 @@ export function verifyAuthStrict(token: string, secret: string): VerifiedJWTPayl
     // Validate role
     const validRoles = ['user', 'admin'];
     if (!validRoles.includes(decoded.role)) {
-      logger.warn('JWT invalid role', {
+      logger.warn('AuthStrictModule', 'verifyAuthStrict', 'JWT validation failed', 'Invalid role', {
         trace_id: traceId,
         service: 'AuthStrictModule',
         component: 'verifyAuthStrict',
@@ -96,7 +96,7 @@ export function verifyAuthStrict(token: string, secret: string): VerifiedJWTPayl
     // Validate expiration (jwt.verify already checks this, but explicit validation for clarity)
     const now = Math.floor(Date.now() / 1000);
     if (decoded.exp <= now) {
-      logger.warn('JWT expired', {
+      logger.warn('AuthStrictModule', 'verifyAuthStrict', 'JWT validation failed', 'Token has expired', {
         trace_id: traceId,
         service: 'AuthStrictModule',
         component: 'verifyAuthStrict',
@@ -108,7 +108,7 @@ export function verifyAuthStrict(token: string, secret: string): VerifiedJWTPayl
       return null;
     }
 
-    logger.info('JWT verification successful', {
+    logger.info('AuthStrictModule', 'verifyAuthStrict', 'JWT verified', 'JWT token verified successfully', {
       trace_id: traceId,
       service: 'AuthStrictModule',
       component: 'verifyAuthStrict',
@@ -120,7 +120,7 @@ export function verifyAuthStrict(token: string, secret: string): VerifiedJWTPayl
     return decoded;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logger.error('JWT verification failed', {
+    logger.error('AuthStrictModule', 'verifyAuthStrict', 'JWT verification error', 'JWT verification failed', {
       trace_id: traceId,
       service: 'AuthStrictModule',
       component: 'verifyAuthStrict',
@@ -141,7 +141,7 @@ export function verifyAuthStrict(token: string, secret: string): VerifiedJWTPayl
  */
 export function extractAndVerifyJWT(authHeader: string | undefined, secret: string): VerifiedJWTPayload | null {
   if (!authHeader) {
-    logger.warn('Missing Authorization header', {
+    logger.warn('AuthStrictModule', 'extractAndVerifyJWT', 'Authorization header missing', 'No Authorization header provided', {
       service: 'AuthStrictModule',
       component: 'extractAndVerifyJWT',
       action: 'Authorization header missing',
@@ -163,7 +163,7 @@ export function extractAndVerifyJWT(authHeader: string | undefined, secret: stri
 export function verifyUserIdMatch(payload: VerifiedJWTPayload, expectedUserId: string): boolean {
   const matches = payload.userId === expectedUserId;
   if (!matches) {
-    logger.warn('User ID mismatch in JWT', {
+    logger.warn('AuthStrictModule', 'verifyUserIdMatch', 'User ID mismatch', 'JWT user ID does not match expected user ID', {
       service: 'AuthStrictModule',
       component: 'verifyUserIdMatch',
       action: 'User ID mismatch',

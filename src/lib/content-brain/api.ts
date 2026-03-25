@@ -9,7 +9,7 @@ import { logger } from '@/lib/debug-logger';
  */
 export async function getAffiliateDNA(projectId: string): Promise<AffiliateContentDNA> {
   try {
-    logger.debug('CONTENT_BRAIN', 'FETCHING_DNA_CLIENT', { projectId });
+    logger.debug('CONTENT_BRAIN', 'FETCHING_DNA_CLIENT', 'FETCHING_DNA_CLIENT', { projectId });
     
     // In a real app, this would be an API call to avoid direct DB access on client
     const response = await fetch(`/api/content-brain/dna?projectId=${projectId}`);
@@ -40,7 +40,7 @@ export async function getAffiliateDNA(projectId: string): Promise<AffiliateConte
       performanceMetrics: {},
     } as AffiliateContentDNA;
   } catch (error: any) {
-    logger.error('CONTENT_BRAIN', 'FETCH_DNA_CLIENT_FAILED', { error: error.message });
+    logger.error('CONTENT_BRAIN', 'FETCH_DNA_CLIENT_FAILED', 'FETCH_DNA_CLIENT_FAILED', { error: error.message });
     // Return default instead of throwing to keep UI stable
     return {
       affiliateId: 'user-123',
@@ -76,7 +76,7 @@ export async function generateContent(
   userInput: string
 ): Promise<GeneratedContent> {
   try {
-    logger.info('CONTENT_BRAIN', 'GENERATING_CONTENT_START', { agentId: agent.id });
+    logger.info('CONTENT_BRAIN', 'GENERATING_CONTENT_START', 'GENERATING_CONTENT_START', { agentId: agent.id });
 
     // In a real production environment, this would call our /api/ai/generate-from-link 
     // or a specialized /api/content-brain/generate endpoint.
@@ -118,7 +118,7 @@ export async function generateContent(
       createdAt: new Date(),
     };
   } catch (error: any) {
-    logger.error('CONTENT_BRAIN', 'GENERATION_FAILED', { error: error.message });
+    logger.error('CONTENT_BRAIN', 'GENERATION_FAILED', 'GENERATION_FAILED', { error: error.message });
     
     // Fallback for demo purposes if API is not fully ready
     return {
@@ -152,7 +152,7 @@ export async function runSeoAuditor(
   content: string
 ): Promise<{ score: number; recommendations: string }> {
   try {
-    logger.info('CONTENT_BRAIN', 'RUNNING_SEO_AUDIT', { contentLength: content.length });
+    logger.info('CONTENT_BRAIN', 'RUNNING_SEO_AUDIT', 'RUNNING_SEO_AUDIT', { contentLength: content.length });
 
     const response = await fetch('/api/analyze', {
       method: 'POST',
@@ -170,7 +170,7 @@ export async function runSeoAuditor(
         'Increase keyword density. Add more LSI terms. Improve readability.',
     };
   } catch (error: any) {
-    logger.error('CONTENT_BRAIN', 'SEO_AUDIT_FAILED', { error: error.message });
+    logger.error('CONTENT_BRAIN', 'SEO_AUDIT_FAILED', 'SEO_AUDIT_FAILED', { error: error.message });
     return {
       score: 78,
       recommendations: 'Ensure primary keywords appear in the first 100 words. Use more transition words. Add a clear call-to-action.',

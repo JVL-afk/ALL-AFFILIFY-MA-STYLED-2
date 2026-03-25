@@ -13,12 +13,12 @@ async function handleGET(request: NextRequest, user: PremiumUser): Promise<NextR
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    logger.info('CRM_PROPOSALS_API', 'GET_REQUEST_START', { requestId, userId: user.id, tier: user.tier });
+    logger.info('CRM_PROPOSALS_API', 'GET_REQUEST_START', 'GET_REQUEST_START', { requestId, userId: user.id, tier: user.tier });
     await connectMongoose();
     
     // Check if user has access to proposals feature
     if (!user.crmFeatures.proposals) {
-      logger.warn('CRM_PROPOSALS_API', 'PROPOSALS_FEATURE_NOT_AVAILABLE', { requestId, userId: user.id, tier: user.tier });
+      logger.warn('CRM_PROPOSALS_API', 'PROPOSALS_FEATURE_NOT_AVAILABLE', 'PROPOSALS_FEATURE_NOT_AVAILABLE', { requestId, userId: user.id, tier: user.tier });
       return NextResponse.json(
         { message: 'Proposal management is not available in your plan', requestId },
         { status: 403 }
@@ -35,7 +35,7 @@ async function handleGET(request: NextRequest, user: PremiumUser): Promise<NextR
 
     const skip = (page - 1) * limit;
 
-    logger.debug('CRM_PROPOSALS_API', 'QUERY_PARAMS', { requestId, page, limit, status, sortBy, sortOrder });
+    logger.debug('CRM_PROPOSALS_API', 'QUERY_PARAMS', 'QUERY_PARAMS', { requestId, page, limit, status, sortBy, sortOrder });
 
     // Build filter query
     const filter: any = { userId: new mongoose.Types.ObjectId(user.id) };
@@ -44,7 +44,7 @@ async function handleGET(request: NextRequest, user: PremiumUser): Promise<NextR
       filter.status = status;
     }
 
-    logger.debug('CRM_PROPOSALS_API', 'FETCHING_PROPOSALS', { requestId, filter });
+    logger.debug('CRM_PROPOSALS_API', 'FETCHING_PROPOSALS', 'FETCHING_PROPOSALS', { requestId, filter });
 
     // Fetch total count for pagination
     const total = await Proposal.countDocuments(filter);
@@ -55,7 +55,7 @@ async function handleGET(request: NextRequest, user: PremiumUser): Promise<NextR
       .skip(skip)
       .limit(limit);
 
-    logger.info('CRM_PROPOSALS_API', 'PROPOSALS_FETCHED_SUCCESS', { 
+    logger.info('CRM_PROPOSALS_API', 'PROPOSALS_FETCHED_SUCCESS', 'PROPOSALS_FETCHED_SUCCESS', { 
       requestId, 
       proposalCount: proposals.length, 
       total,
@@ -73,7 +73,7 @@ async function handleGET(request: NextRequest, user: PremiumUser): Promise<NextR
       },
     });
   } catch (error: any) {
-    logger.error('CRM_PROPOSALS_API', 'GET_REQUEST_ERROR', { requestId, error: error.message }, error);
+    logger.error('CRM_PROPOSALS_API', 'GET_REQUEST_ERROR', 'GET_REQUEST_ERROR', { requestId, error: error.message }, error);
     return NextResponse.json(
       { message: 'Internal Server Error', requestId },
       { status: 500 }
@@ -88,12 +88,12 @@ async function handlePOST(request: NextRequest, user: PremiumUser): Promise<Next
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    logger.info('CRM_PROPOSALS_API', 'POST_REQUEST_START', { requestId, userId: user.id });
+    logger.info('CRM_PROPOSALS_API', 'POST_REQUEST_START', 'POST_REQUEST_START', { requestId, userId: user.id });
     await connectMongoose();
     
     // Check if user has access to proposals feature
     if (!user.crmFeatures.proposals) {
-      logger.warn('CRM_PROPOSALS_API', 'PROPOSALS_FEATURE_NOT_AVAILABLE_POST', { requestId, userId: user.id });
+      logger.warn('CRM_PROPOSALS_API', 'PROPOSALS_FEATURE_NOT_AVAILABLE_POST', 'PROPOSALS_FEATURE_NOT_AVAILABLE_POST', { requestId, userId: user.id });
       return NextResponse.json(
         { message: 'Proposal management is not available in your plan', requestId },
         { status: 403 }
@@ -104,7 +104,7 @@ async function handlePOST(request: NextRequest, user: PremiumUser): Promise<Next
     if (user.crmFeatures.maxProposals > 0) {
       const proposalCount = await Proposal.countDocuments({ userId: new mongoose.Types.ObjectId(user.id) });
       if (proposalCount >= user.crmFeatures.maxProposals) {
-        logger.warn('CRM_PROPOSALS_API', 'MAX_PROPOSALS_REACHED', { requestId, userId: user.id, limit: user.crmFeatures.maxProposals });
+        logger.warn('CRM_PROPOSALS_API', 'MAX_PROPOSALS_REACHED', 'MAX_PROPOSALS_REACHED', { requestId, userId: user.id, limit: user.crmFeatures.maxProposals });
         return NextResponse.json(
           { message: `You have reached the maximum number of proposals (${user.crmFeatures.maxProposals}) for your plan`, requestId },
           { status: 429 }
@@ -113,18 +113,18 @@ async function handlePOST(request: NextRequest, user: PremiumUser): Promise<Next
     }
     
     const body = await request.json();
-    logger.debug('CRM_PROPOSALS_API', 'REQUEST_BODY_PARSED', { requestId, bodyKeys: Object.keys(body) });
+    logger.debug('CRM_PROPOSALS_API', 'REQUEST_BODY_PARSED', 'REQUEST_BODY_PARSED', { requestId, bodyKeys: Object.keys(body) });
 
     // Validate required fields
     if (!body.title || !body.content) {
-      logger.warn('CRM_PROPOSALS_API', 'MISSING_REQUIRED_FIELDS', { requestId });
+      logger.warn('CRM_PROPOSALS_API', 'MISSING_REQUIRED_FIELDS', 'MISSING_REQUIRED_FIELDS', { requestId });
       return NextResponse.json(
         { message: 'Title and content are required' },
         { status: 400 }
       );
     }
 
-    logger.debug('CRM_PROPOSALS_API', 'CREATING_PROPOSAL_DOCUMENT', { requestId, title: body.title });
+    logger.debug('CRM_PROPOSALS_API', 'CREATING_PROPOSAL_DOCUMENT', 'CREATING_PROPOSAL_DOCUMENT', { requestId, title: body.title });
 
     const newProposal = new Proposal({
       ...body,
@@ -133,10 +133,10 @@ async function handlePOST(request: NextRequest, user: PremiumUser): Promise<Next
       updatedAt: new Date(),
     });
 
-    logger.debug('CRM_PROPOSALS_API', 'SAVING_PROPOSAL_TO_DATABASE', { requestId, proposalId: newProposal._id });
+    logger.debug('CRM_PROPOSALS_API', 'SAVING_PROPOSAL_TO_DATABASE', 'SAVING_PROPOSAL_TO_DATABASE', { requestId, proposalId: newProposal._id });
     await newProposal.save();
 
-    logger.info('CRM_PROPOSALS_API', 'PROPOSAL_CREATED_SUCCESS', { 
+    logger.info('CRM_PROPOSALS_API', 'PROPOSAL_CREATED_SUCCESS', 'PROPOSAL_CREATED_SUCCESS', { 
       requestId, 
       proposalId: newProposal._id, 
       userId: user.id,
@@ -145,7 +145,7 @@ async function handlePOST(request: NextRequest, user: PremiumUser): Promise<Next
 
     return NextResponse.json(newProposal, { status: 201 });
   } catch (error: any) {
-    logger.error('CRM_PROPOSALS_API', 'POST_REQUEST_ERROR', { requestId, error: error.message }, error);
+    logger.error('CRM_PROPOSALS_API', 'POST_REQUEST_ERROR', 'POST_REQUEST_ERROR', { requestId, error: error.message }, error);
     return NextResponse.json(
       { message: 'Internal Server Error', requestId },
       { status: 500 }
@@ -160,12 +160,12 @@ async function handlePUT(request: NextRequest, user: PremiumUser): Promise<NextR
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    logger.info('CRM_PROPOSALS_API', 'PUT_REQUEST_START', { requestId, userId: user.id });
+    logger.info('CRM_PROPOSALS_API', 'PUT_REQUEST_START', 'PUT_REQUEST_START', { requestId, userId: user.id });
     await connectMongoose();
     
     // Check if user has access to proposals feature
     if (!user.crmFeatures.proposals) {
-      logger.warn('CRM_PROPOSALS_API', 'PROPOSALS_FEATURE_NOT_AVAILABLE_PUT', { requestId, userId: user.id });
+      logger.warn('CRM_PROPOSALS_API', 'PROPOSALS_FEATURE_NOT_AVAILABLE_PUT', 'PROPOSALS_FEATURE_NOT_AVAILABLE_PUT', { requestId, userId: user.id });
       return NextResponse.json(
         { message: 'Proposal management is not available in your plan', requestId },
         { status: 403 }
@@ -176,14 +176,14 @@ async function handlePUT(request: NextRequest, user: PremiumUser): Promise<NextR
     const { _id, ...updateData } = body;
 
     if (!_id) {
-      logger.warn('CRM_PROPOSALS_API', 'MISSING_PROPOSAL_ID', { requestId });
+      logger.warn('CRM_PROPOSALS_API', 'MISSING_PROPOSAL_ID', 'MISSING_PROPOSAL_ID', { requestId });
       return NextResponse.json(
         { message: 'Proposal ID is required for update' },
         { status: 400 }
       );
     }
 
-    logger.debug('CRM_PROPOSALS_API', 'UPDATING_PROPOSAL', { requestId, proposalId: _id, updateKeys: Object.keys(updateData) });
+    logger.debug('CRM_PROPOSALS_API', 'UPDATING_PROPOSAL', 'UPDATING_PROPOSAL', { requestId, proposalId: _id, updateKeys: Object.keys(updateData) });
 
     // Add updatedAt timestamp
     updateData.updatedAt = new Date();
@@ -195,17 +195,17 @@ async function handlePUT(request: NextRequest, user: PremiumUser): Promise<NextR
     );
 
     if (!updatedProposal) {
-      logger.warn('CRM_PROPOSALS_API', 'PROPOSAL_NOT_FOUND_OR_UNAUTHORIZED', { requestId, proposalId: _id, userId: user.id });
+      logger.warn('CRM_PROPOSALS_API', 'PROPOSAL_NOT_FOUND_OR_UNAUTHORIZED', 'PROPOSAL_NOT_FOUND_OR_UNAUTHORIZED', { requestId, proposalId: _id, userId: user.id });
       return NextResponse.json(
         { message: 'Proposal not found or unauthorized' },
         { status: 404 }
       );
     }
 
-    logger.info('CRM_PROPOSALS_API', 'PROPOSAL_UPDATED_SUCCESS', { requestId, proposalId: _id, userId: user.id });
+    logger.info('CRM_PROPOSALS_API', 'PROPOSAL_UPDATED_SUCCESS', 'PROPOSAL_UPDATED_SUCCESS', { requestId, proposalId: _id, userId: user.id });
     return NextResponse.json(updatedProposal);
   } catch (error: any) {
-    logger.error('CRM_PROPOSALS_API', 'PUT_REQUEST_ERROR', { requestId, error: error.message }, error);
+    logger.error('CRM_PROPOSALS_API', 'PUT_REQUEST_ERROR', 'PUT_REQUEST_ERROR', { requestId, error: error.message }, error);
     return NextResponse.json(
       { message: 'Internal Server Error', requestId },
       { status: 500 }
@@ -220,12 +220,12 @@ async function handleDELETE(request: NextRequest, user: PremiumUser): Promise<Ne
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    logger.info('CRM_PROPOSALS_API', 'DELETE_REQUEST_START', { requestId, userId: user.id });
+    logger.info('CRM_PROPOSALS_API', 'DELETE_REQUEST_START', 'DELETE_REQUEST_START', { requestId, userId: user.id });
     await connectMongoose();
     
     // Check if user has access to proposals feature
     if (!user.crmFeatures.proposals) {
-      logger.warn('CRM_PROPOSALS_API', 'PROPOSALS_FEATURE_NOT_AVAILABLE_DELETE', { requestId, userId: user.id });
+      logger.warn('CRM_PROPOSALS_API', 'PROPOSALS_FEATURE_NOT_AVAILABLE_DELETE', 'PROPOSALS_FEATURE_NOT_AVAILABLE_DELETE', { requestId, userId: user.id });
       return NextResponse.json(
         { message: 'Proposal management is not available in your plan', requestId },
         { status: 403 }
@@ -236,14 +236,14 @@ async function handleDELETE(request: NextRequest, user: PremiumUser): Promise<Ne
     const id = searchParams.get('id');
 
     if (!id) {
-      logger.warn('CRM_PROPOSALS_API', 'MISSING_DELETE_ID', { requestId });
+      logger.warn('CRM_PROPOSALS_API', 'MISSING_DELETE_ID', 'MISSING_DELETE_ID', { requestId });
       return NextResponse.json(
         { message: 'Proposal ID is required for deletion' },
         { status: 400 }
       );
     }
 
-    logger.debug('CRM_PROPOSALS_API', 'DELETING_PROPOSAL', { requestId, proposalId: id, userId: user.id });
+    logger.debug('CRM_PROPOSALS_API', 'DELETING_PROPOSAL', 'DELETING_PROPOSAL', { requestId, proposalId: id, userId: user.id });
 
     const deletedProposal = await Proposal.findOneAndDelete({
       _id: new mongoose.Types.ObjectId(id),
@@ -251,17 +251,17 @@ async function handleDELETE(request: NextRequest, user: PremiumUser): Promise<Ne
     });
 
     if (!deletedProposal) {
-      logger.warn('CRM_PROPOSALS_API', 'PROPOSAL_NOT_FOUND_FOR_DELETE', { requestId, proposalId: id, userId: user.id });
+      logger.warn('CRM_PROPOSALS_API', 'PROPOSAL_NOT_FOUND_FOR_DELETE', 'PROPOSAL_NOT_FOUND_FOR_DELETE', { requestId, proposalId: id, userId: user.id });
       return NextResponse.json(
         { message: 'Proposal not found or unauthorized' },
         { status: 404 }
       );
     }
 
-    logger.info('CRM_PROPOSALS_API', 'PROPOSAL_DELETED_SUCCESS', { requestId, proposalId: id, userId: user.id });
+    logger.info('CRM_PROPOSALS_API', 'PROPOSAL_DELETED_SUCCESS', 'PROPOSAL_DELETED_SUCCESS', { requestId, proposalId: id, userId: user.id });
     return NextResponse.json({ message: 'Proposal deleted successfully' });
   } catch (error: any) {
-    logger.error('CRM_PROPOSALS_API', 'DELETE_REQUEST_ERROR', { requestId, error: error.message }, error);
+    logger.error('CRM_PROPOSALS_API', 'DELETE_REQUEST_ERROR', 'DELETE_REQUEST_ERROR', { requestId, error: error.message }, error);
     return NextResponse.json(
       { message: 'Internal Server Error', requestId },
       { status: 500 }

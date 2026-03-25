@@ -26,7 +26,7 @@ export async function addRelationship(tuple: RelationshipTuple, traceId?: string
 
   const zookie = generateZookie(); // Generate a new Zookie on write
 
-  logger.info('ZanzibarReBAC', 'addRelationship', 'Relationship tuple added', {
+  logger.info('ZanzibarReBAC', 'addRelationship', 'Relationship tuple added', 'Relationship tuple added', {
     trace_id: traceId,
     tuple: newTuple,
     zookie,
@@ -44,7 +44,7 @@ export async function deleteRelationship(tuple: RelationshipTuple, traceId?: str
 
   const zookie = generateZookie(); // Generate a new Zookie on write
 
-  logger.info('ZanzibarReBAC', 'deleteRelationship', 'Relationship tuple deleted', {
+  logger.info('ZanzibarReBAC', 'deleteRelationship', 'Relationship tuple deleted', 'Relationship tuple deleted', {
     trace_id: traceId,
     tuple,
     zookie,
@@ -60,7 +60,7 @@ export async function checkPermission(
   zookie?: Zookie, // Optional Zookie for consistency
   traceId?: string
 ): Promise<boolean> {
-  logger.debug('ZanzibarReBAC', 'checkPermission', 'Checking permission', {
+  logger.debug('ZanzibarReBAC', 'checkPermission', 'Checking permission', 'Checking permission', {
     trace_id: traceId,
     subject, relation, object, zookie
   });
@@ -73,7 +73,7 @@ export async function checkPermission(
   });
 
   if (directMatch) {
-    logger.debug('ZanzibarReBAC', 'checkPermission', 'Direct relationship found', { trace_id: traceId, subject, relation, object });
+    logger.debug('ZanzibarReBAC', 'checkPermission', 'Direct relationship found', 'Direct relationship found', { trace_id: traceId, subject, relation, object });
     return true;
   }
 
@@ -99,13 +99,13 @@ export async function checkPermission(
       });
 
       if (groupPermission) {
-        logger.debug('ZanzibarReBAC', 'checkPermission', 'Indirect relationship found via group membership', { trace_id: traceId, subject, relation, object });
+        logger.debug('ZanzibarReBAC', 'checkPermission', 'Indirect relationship found via group membership', 'Indirect relationship found via group membership', { trace_id: traceId, subject, relation, object });
         return true;
       }
     }
   }
 
-  logger.warn('ZanzibarReBAC', 'checkPermission', 'Permission denied', { trace_id: traceId, subject, relation, object });
+  logger.warn('ZanzibarReBAC', 'checkPermission', 'Permission denied', 'Permission denied', { trace_id: traceId, subject, relation, object });
   return false;
 }
 
@@ -134,7 +134,7 @@ export async function enforceZanzibarPermission(
   const hasAccess = await checkPermission(subject, requiredRelation, object, zookie, traceId);
 
   if (!hasAccess) {
-    logger.error('ZanzibarReBAC', 'enforceZanzibarPermission', 'Permission enforcement failed', {
+    logger.error('ZanzibarReBAC', 'enforceZanzibarPermission', 'Permission enforcement failed', 'Permission enforcement failed', {
       trace_id: traceId,
       user_id: user.userId,
       subject, requiredRelation, object,

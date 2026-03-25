@@ -50,7 +50,7 @@ export function translateYjsOperationToCIR(
   clientOrigin: string,
   traceId?: string
 ): CIROperation {
-  logger.debug('CRDT-CIR', 'translateYjsOperationToCIR', 'Translating Yjs operation to CIR', {
+  logger.debug('CRDT-CIR', 'translateYjsOperationToCIR', 'Translating Yjs operation to CIR', 'Translating Yjs operation to CIR', {
     trace_id: traceId,
     yjsOp,
   });
@@ -74,7 +74,7 @@ export function translateYjsOperationToCIR(
     },
   };
 
-  logger.debug('CRDT-CIR', 'translateYjsOperationToCIR', 'Yjs operation translated to CIR', {
+  logger.debug('CRDT-CIR', 'translateYjsOperationToCIR', 'Yjs operation translated to CIR', 'Yjs operation translated to CIR', {
     trace_id: traceId,
     cirOp,
   });
@@ -91,7 +91,7 @@ export function translateAutomergeOperationToCIR(
   clientOrigin: string,
   traceId?: string
 ): CIROperation {
-  logger.debug('CRDT-CIR', 'translateAutomergeOperationToCIR', 'Translating Automerge operation to CIR', {
+  logger.debug('CRDT-CIR', 'translateAutomergeOperationToCIR', 'Translating Automerge operation to CIR', 'Translating Automerge operation to CIR', {
     trace_id: traceId,
     automergeOp,
   });
@@ -115,7 +115,7 @@ export function translateAutomergeOperationToCIR(
     },
   };
 
-  logger.debug('CRDT-CIR', 'translateAutomergeOperationToCIR', 'Automerge operation translated to CIR', {
+  logger.debug('CRDT-CIR', 'translateAutomergeOperationToCIR', 'Automerge operation translated to CIR', 'Automerge operation translated to CIR', {
     trace_id: traceId,
     cirOp,
   });
@@ -127,7 +127,7 @@ export function translateAutomergeOperationToCIR(
  * Translate a CIR operation to Yjs format
  */
 export function translateCIRToYjsOperation(cirOp: CIROperation, traceId?: string): any {
-  logger.debug('CRDT-CIR', 'translateCIRToYjsOperation', 'Translating CIR operation to Yjs', {
+  logger.debug('CRDT-CIR', 'translateCIRToYjsOperation', 'Translating CIR operation to Yjs', 'Translating CIR operation to Yjs', {
     trace_id: traceId,
     cirOp,
   });
@@ -143,7 +143,7 @@ export function translateCIRToYjsOperation(cirOp: CIROperation, traceId?: string
     causality: cirOp.metadata.causality,
   };
 
-  logger.debug('CRDT-CIR', 'translateCIRToYjsOperation', 'CIR operation translated to Yjs', {
+  logger.debug('CRDT-CIR', 'translateCIRToYjsOperation', 'CIR operation translated to Yjs', 'CIR operation translated to Yjs', {
     trace_id: traceId,
     yjsOp,
   });
@@ -155,7 +155,7 @@ export function translateCIRToYjsOperation(cirOp: CIROperation, traceId?: string
  * Translate a CIR operation to Automerge format
  */
 export function translateCIRToAutomergeOperation(cirOp: CIROperation, traceId?: string): any {
-  logger.debug('CRDT-CIR', 'translateCIRToAutomergeOperation', 'Translating CIR operation to Automerge', {
+  logger.debug('CRDT-CIR', 'translateCIRToAutomergeOperation', 'Translating CIR operation to Automerge', 'Translating CIR operation to Automerge', {
     trace_id: traceId,
     cirOp,
   });
@@ -171,7 +171,7 @@ export function translateCIRToAutomergeOperation(cirOp: CIROperation, traceId?: 
     causality: cirOp.metadata.causality,
   };
 
-  logger.debug('CRDT-CIR', 'translateCIRToAutomergeOperation', 'CIR operation translated to Automerge', {
+  logger.debug('CRDT-CIR', 'translateCIRToAutomergeOperation', 'CIR operation translated to Automerge', 'CIR operation translated to Automerge', {
     trace_id: traceId,
     automergeOp,
   });
@@ -183,7 +183,7 @@ export function translateCIRToAutomergeOperation(cirOp: CIROperation, traceId?: 
  * Apply a CIR operation to a document state
  */
 export function applyCIROperation(state: any, operation: CIROperation, traceId?: string): any {
-  logger.debug('CRDT-CIR', 'applyCIROperation', 'Applying CIR operation to document state', {
+  logger.debug('CRDT-CIR', 'applyCIROperation', 'Applying CIR operation to document state', 'Applying CIR operation to document state', {
     trace_id: traceId,
     operation,
   });
@@ -222,7 +222,7 @@ export function applyCIROperation(state: any, operation: CIROperation, traceId?:
       break;
   }
 
-  logger.debug('CRDT-CIR', 'applyCIROperation', 'CIR operation applied successfully', {
+  logger.debug('CRDT-CIR', 'applyCIROperation', 'CIR operation applied successfully', 'CIR operation applied successfully', {
     trace_id: traceId,
     newState,
   });
@@ -234,7 +234,7 @@ export function applyCIROperation(state: any, operation: CIROperation, traceId?:
  * Check if two operations can be merged (i.e., they don't conflict)
  */
 export function canMergeOperations(op1: CIROperation, op2: CIROperation, traceId?: string): boolean {
-  logger.debug('CRDT-CIR', 'canMergeOperations', 'Checking if operations can be merged', {
+  logger.debug('CRDT-CIR', 'canMergeOperations', 'Checking if operations can be merged', 'Checking if operations can be merged', {
     trace_id: traceId,
     op1Path: op1.path,
     op2Path: op2.path,
@@ -297,7 +297,7 @@ export function validateCIROperation(operation: CIROperation, traceId?: string):
   const valid = errors.length === 0;
 
   if (!valid) {
-    logger.warn('CRDT-CIR', 'validateCIROperation', 'CIR operation validation failed', {
+    logger.warn('CRDT-CIR', 'validateCIROperation', 'CIR operation validation failed', 'CIR operation validation failed', {
       trace_id: traceId,
       errors,
     });

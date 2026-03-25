@@ -41,7 +41,7 @@ class EmailWorker {
       // Start processing jobs
       this.processJobs();
     } catch (error) {
-      logger.error('EmailWorker', 'start', 'Failed to start email worker', {
+      logger.error('EmailWorker', 'start', 'Failed to start email worker', 'Failed to start email worker', {
         error: (error as Error).message,
       });
       this.isRunning = false;
@@ -90,7 +90,7 @@ class EmailWorker {
               // Mark job as completed
               await this.jobQueueService.completeJob(job._id!, sendResult.messageId);
 
-              logger.info('EmailWorker', 'processJobs', 'Email job completed', {
+              logger.info('EmailWorker', 'processJobs', 'Email job completed', 'Email job completed', {
                 jobId: job._id!.toString(),
                 recipient: job.recipient,
                 messageId: sendResult.messageId,
@@ -99,7 +99,7 @@ class EmailWorker {
               // Mark job as failed (will retry or move to DLQ)
               await this.jobQueueService.failJob(job._id!, sendResult.error || 'Unknown error');
 
-              logger.warn('EmailWorker', 'processJobs', 'Email job failed', {
+              logger.warn('EmailWorker', 'processJobs', 'Email job failed', 'Email job failed', {
                 jobId: job._id!.toString(),
                 recipient: job.recipient,
                 error: sendResult.error,
@@ -109,7 +109,7 @@ class EmailWorker {
             // Handle unexpected errors
             await this.jobQueueService.failJob(job._id!, (error as Error).message);
 
-            logger.error('EmailWorker', 'processJobs', 'Exception processing email job', {
+            logger.error('EmailWorker', 'processJobs', 'Exception processing email job', 'Exception processing email job', {
               jobId: job._id!.toString(),
               recipient: job.recipient,
               error: (error as Error).message,
@@ -126,7 +126,7 @@ class EmailWorker {
         // Wait before next poll
         await this.sleep(this.pollInterval);
       } catch (error) {
-        logger.error('EmailWorker', 'processJobs', 'Error in job processing loop', {
+        logger.error('EmailWorker', 'processJobs', 'Error in job processing loop', 'Error in job processing loop', {
           error: (error as Error).message,
         });
 
@@ -150,7 +150,7 @@ export const emailWorker = new EmailWorker();
 // If this file is run directly, start the worker
 if (require.main === module) {
   emailWorker.start().catch((error) => {
-    logger.error('EmailWorker', 'main', 'Failed to start email worker', {
+    logger.error('EmailWorker', 'main', 'Failed to start email worker', 'Failed to start email worker', {
       error: (error as Error).message,
     });
     process.exit(1);

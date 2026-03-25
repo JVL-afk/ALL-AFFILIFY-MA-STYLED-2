@@ -49,7 +49,7 @@ export class EmailSendingService {
     const campaignId = new ObjectId(request.campaignId);
     const traceId = crypto.randomUUID();
 
-    logger.info('EmailSendingService', 'sendCampaign', 'Starting campaign send', {
+    logger.info('EmailSendingService', 'sendCampaign', 'Starting campaign send', 'Starting campaign send', {
       trace_id: traceId,
       campaignId: request.campaignId,
       user_id: request.userId,
@@ -74,7 +74,7 @@ export class EmailSendingService {
     const quotaCheck = await this.quotaService.checkAndDecrementQuota(userId, request.recipients.length);
 
     if (!quotaCheck.allowed) {
-      logger.error('EmailSendingService', 'sendCampaign', 'Quota check failed', {
+      logger.error('EmailSendingService', 'sendCampaign', 'Quota check failed', 'Quota check failed', {
         campaignId: request.campaignId,
         userId: request.userId,
         reason: quotaCheck.reason,
@@ -116,7 +116,7 @@ export class EmailSendingService {
             timestamp: new Date(),
           });
 
-          logger.debug('EmailSendingService', 'sendCampaign', 'Email sent successfully', {
+          logger.debug('EmailSendingService', 'sendCampaign', 'Email sent successfully', 'Email sent successfully', {
             campaignId: request.campaignId,
             recipient,
             messageId: sendResult.messageId,
@@ -128,7 +128,7 @@ export class EmailSendingService {
             error: sendResult.error || 'Unknown error',
           });
 
-          logger.warn('EmailSendingService', 'sendCampaign', 'Email send failed', {
+          logger.warn('EmailSendingService', 'sendCampaign', 'Email send failed', 'Email send failed', {
             campaignId: request.campaignId,
             recipient,
             error: sendResult.error,
@@ -142,7 +142,7 @@ export class EmailSendingService {
           error: errorMessage,
         });
 
-        logger.error('EmailSendingService', 'sendCampaign', 'Exception during email send', {
+        logger.error('EmailSendingService', 'sendCampaign', 'Exception during email send', 'Exception during email send', {
           campaignId: request.campaignId,
           recipient,
           error: errorMessage,
@@ -163,7 +163,7 @@ export class EmailSendingService {
       }
     );
 
-    logger.info('EmailSendingService', 'sendCampaign', 'Campaign send completed', {
+    logger.info('EmailSendingService', 'sendCampaign', 'Campaign send completed', 'Campaign send completed', {
       campaignId: request.campaignId,
       userId: request.userId,
       successfulSends: result.successfulSends,

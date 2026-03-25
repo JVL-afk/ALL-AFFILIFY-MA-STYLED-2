@@ -35,7 +35,7 @@ export class TenantAwareCollection<T extends Document = Document> {
    */
   async find(filter: Filter<T> = {}): Promise<T[]> {
     const enhancedFilter = this.enhanceFilter(filter);
-    logger.debug('TenantAwareCollection', 'find', 'Executing find with tenant filter', {
+    logger.debug('TenantAwareCollection', 'find', 'Executing find with tenant filter', 'Executing find with tenant filter', {
       user_id: this.tenantContext.userId.toString(),
       filter: enhancedFilter,
     });
@@ -47,7 +47,7 @@ export class TenantAwareCollection<T extends Document = Document> {
    */
   async findOne(filter: Filter<T> = {}): Promise<T | null> {
     const enhancedFilter = this.enhanceFilter(filter);
-    logger.debug('TenantAwareCollection', 'findOne', 'Executing findOne with tenant filter', {
+    logger.debug('TenantAwareCollection', 'findOne', 'Executing findOne with tenant filter', 'Executing findOne with tenant filter', {
       user_id: this.tenantContext.userId.toString(),
       filter: enhancedFilter,
     });
@@ -59,7 +59,7 @@ export class TenantAwareCollection<T extends Document = Document> {
    */
   async insertOne(document: Omit<T, '_id'>): Promise<ObjectId> {
     const enhancedDoc = this.enhanceDocument(document);
-    logger.debug('TenantAwareCollection', 'insertOne', 'Inserting document with tenant context', {
+    logger.debug('TenantAwareCollection', 'insertOne', 'Inserting document with tenant context', 'Inserting document with tenant context', {
       user_id: this.tenantContext.userId.toString(),
     });
     const result = await this.collection.insertOne(enhancedDoc as T);
@@ -71,7 +71,7 @@ export class TenantAwareCollection<T extends Document = Document> {
    */
   async updateOne(filter: Filter<T>, update: any): Promise<number> {
     const enhancedFilter = this.enhanceFilter(filter);
-    logger.debug('TenantAwareCollection', 'updateOne', 'Updating document with tenant filter', {
+    logger.debug('TenantAwareCollection', 'updateOne', 'Updating document with tenant filter', 'Updating document with tenant filter', {
       user_id: this.tenantContext.userId.toString(),
       filter: enhancedFilter,
     });
@@ -84,7 +84,7 @@ export class TenantAwareCollection<T extends Document = Document> {
    */
   async deleteOne(filter: Filter<T>): Promise<number> {
     const enhancedFilter = this.enhanceFilter(filter);
-    logger.debug('TenantAwareCollection', 'deleteOne', 'Deleting document with tenant filter', {
+    logger.debug('TenantAwareCollection', 'deleteOne', 'Deleting document with tenant filter', 'Deleting document with tenant filter', {
       user_id: this.tenantContext.userId.toString(),
       filter: enhancedFilter,
     });
@@ -97,7 +97,7 @@ export class TenantAwareCollection<T extends Document = Document> {
    */
   async countDocuments(filter: Filter<T> = {}): Promise<number> {
     const enhancedFilter = this.enhanceFilter(filter);
-    logger.debug('TenantAwareCollection', 'countDocuments', 'Counting documents with tenant filter', {
+    logger.debug('TenantAwareCollection', 'countDocuments', 'Counting documents with tenant filter', 'Counting documents with tenant filter', {
       user_id: this.tenantContext.userId.toString(),
       filter: enhancedFilter,
     });
@@ -112,7 +112,7 @@ export class TenantAwareCollection<T extends Document = Document> {
     const userIdField = 'userId';
     // Ensure userId is always present in the tenant context
     if (!this.tenantContext.userId) {
-      logger.error('TenantAwareCollection', 'enhanceFilter', 'TenantContext missing userId', {
+      logger.error('TenantAwareCollection', 'enhanceFilter', 'TenantContext missing userId', 'TenantContext missing userId', {
         filter: filter,
       });
       throw new Error('TenantContext missing userId: Cannot perform tenant-aware operation without a valid tenant ID.');
@@ -128,7 +128,7 @@ export class TenantAwareCollection<T extends Document = Document> {
     if ((newFilter as any)[userIdField]) {
       const filterUserId = (newFilter as any)[userIdField];
       if (filterUserId.toString() !== userIdValue.toString()) {
-        logger.error('TenantAwareCollection', 'enhanceFilter', 'Tenant isolation violation detected: Mismatched userId in filter', {
+        logger.error('TenantAwareCollection', 'enhanceFilter', 'Tenant isolation violation detected: Mismatched userId in filter', 'Tenant isolation violation detected: Mismatched userId in filter', {
           user_id: this.tenantContext.userId.toString(),
           attemptedUserId: filterUserId.toString(),
         });
@@ -165,7 +165,7 @@ export class TenantAwareCollection<T extends Document = Document> {
    */
   getUnderlying(): Collection<T> {
     if (this.tenantContext.role !== 'admin') {
-      logger.error('TenantAwareCollection', 'getUnderlying', 'Non-admin attempted to access underlying collection', {
+      logger.error('TenantAwareCollection', 'getUnderlying', 'Non-admin attempted to access underlying collection', 'Non-admin attempted to access underlying collection', {
         user_id: this.tenantContext.userId.toString(),
         role: this.tenantContext.role,
       });
@@ -200,7 +200,7 @@ export class TenantAwareDb {
    */
   getUnderlying(): Db {
     if (this.tenantContext.role !== 'admin') {
-      logger.error('TenantAwareDb', 'getUnderlying', 'Non-admin attempted to access underlying database', {
+      logger.error('TenantAwareDb', 'getUnderlying', 'Non-admin attempted to access underlying database', 'Non-admin attempted to access underlying database', {
         user_id: this.tenantContext.userId.toString(),
         role: this.tenantContext.role,
       });
