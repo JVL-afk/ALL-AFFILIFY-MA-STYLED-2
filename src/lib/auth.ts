@@ -287,7 +287,7 @@ export async function verifyAuth(request: NextRequest) {
         if (cookieValue) {
           token = cookieValue;
           tokenSource = `COOKIE_${cookieName.toUpperCase()}`;
-          logger.debug('AUTH', `TOKEN_FOUND_IN_COOKIE_${cookieName.toUpperCase()}`, { requestId, tokenLength: token.length });
+          logger.debug('AUTH', `TOKEN_FOUND_IN_COOKIE_${cookieName.toUpperCase()}`, 'TOKEN_FOUND', `Token found in cookie ${cookieName}`, { requestId, tokenLength: token.length });
           break;
         }
       }

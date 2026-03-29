@@ -87,18 +87,12 @@ export class ConfigService {
     this.alertThresholds = this.loadAlertThresholds();
     this.featureFlags = this.loadFeatureFlags();
 
-    logger.info('Configuration service initialized', {
-      service: 'ConfigService',
-      component: 'constructor',
-      action: 'Configuration loaded',
-      message: 'Configuration service initialized with environment settings',
-      details: {
-        planLimits: this.planLimits,
-        retryConfig: this.retryConfig,
-        circuitBreakerConfig: this.circuitBreakerConfig,
-        workerConfig: this.workerConfig,
-        alertThresholds: this.alertThresholds,
-      },
+    logger.info('ConfigService', 'constructor', 'Configuration loaded', 'Configuration service initialized with environment settings', {
+      planLimits: this.planLimits,
+      retryConfig: this.retryConfig,
+      circuitBreakerConfig: this.circuitBreakerConfig,
+      workerConfig: this.workerConfig,
+      alertThresholds: this.alertThresholds,
     });
   }
 
@@ -250,12 +244,7 @@ export class ConfigService {
     this.alertThresholds = this.loadAlertThresholds();
     this.featureFlags = this.loadFeatureFlags();
 
-    logger.info('Configuration reloaded', {
-      service: 'ConfigService',
-      component: 'reload',
-      action: 'Configuration reloaded',
-      message: 'Configuration service reloaded from environment variables',
-    });
+    logger.info('ConfigService', 'reload', 'Configuration reloaded', 'Configuration service reloaded from environment variables', {});
   }
 
   /**

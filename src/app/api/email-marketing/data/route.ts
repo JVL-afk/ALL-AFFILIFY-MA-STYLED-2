@@ -65,8 +65,8 @@ export async function GET(request: NextRequest) {
       const subscriberLimit = searchParams.get('subscriberLimit');
       const subscriberCursor = searchParams.get('subscriberCursor');
 
-      const campaignPaginationParams = parsePaginationParams(campaignLimit, campaignCursor || undefined);
-      const subscriberPaginationParams = parsePaginationParams(subscriberLimit, subscriberCursor || undefined);
+      const campaignPaginationParams = parsePaginationParams(campaignLimit ?? undefined, campaignCursor ?? undefined);
+      const subscriberPaginationParams = parsePaginationParams(subscriberLimit ?? undefined, subscriberCursor ?? undefined);
 
       if (!validatePaginationParams(campaignPaginationParams) || !validatePaginationParams(subscriberPaginationParams)) {
         logger.warn('EmailMarketingAPI', 'GET /data', 'Invalid pagination parameters', 'Invalid pagination parameters', {

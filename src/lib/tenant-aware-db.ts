@@ -39,7 +39,7 @@ export class TenantAwareCollection<T extends Document = Document> {
       user_id: this.tenantContext.userId.toString(),
       filter: enhancedFilter,
     });
-    return this.collection.find(enhancedFilter).toArray();
+    return this.collection.find(enhancedFilter).toArray() as unknown as Promise<T[]>;
   }
 
   /**
@@ -51,7 +51,7 @@ export class TenantAwareCollection<T extends Document = Document> {
       user_id: this.tenantContext.userId.toString(),
       filter: enhancedFilter,
     });
-    return this.collection.findOne(enhancedFilter);
+    return this.collection.findOne(enhancedFilter) as unknown as Promise<T | null>;
   }
 
   /**
@@ -62,7 +62,7 @@ export class TenantAwareCollection<T extends Document = Document> {
     logger.debug('TenantAwareCollection', 'insertOne', 'Inserting document with tenant context', 'Inserting document with tenant context', {
       user_id: this.tenantContext.userId.toString(),
     });
-    const result = await this.collection.insertOne(enhancedDoc as T);
+    const result = await this.collection.insertOne(enhancedDoc as any);
     return result.insertedId;
   }
 

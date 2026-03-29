@@ -14,7 +14,7 @@ export const VariantSchema = z.object({
   description: z.string().optional(),
   trafficAllocation: z.number().int().min(0).max(10000), // Basis points (0-100%)
   isControl: z.boolean().default(false),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export type Variant = z.infer<typeof VariantSchema>;
@@ -83,7 +83,7 @@ export const ExperimentEventSchema = z.object({
   metricName: z.string().optional(),
   metricValue: z.number().optional(),
   timestamp: z.date().default(() => new Date()),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
   traceId: z.string().optional(),
 });
 

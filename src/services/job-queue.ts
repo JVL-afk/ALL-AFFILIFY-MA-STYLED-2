@@ -115,15 +115,15 @@ export class JobQueueService {
       { returnDocument: 'after' }
     );
 
-    if (job.value) {
+    if (job) {
       logger.debug('JobQueueService', 'dequeueJob', 'Job dequeued for processing', 'Job dequeued for processing', {
-        jobId: job.value._id.toString(),
-        recipient: job.value.recipient,
-        attempts: job.value.attempts,
+        jobId: (job as any)._id?.toString(),
+        recipient: (job as any).recipient,
+        attempts: (job as any).attempts,
       });
     }
 
-    return job.value as EmailJob | null;
+    return job as unknown as EmailJob | null;
   }
 
   /**

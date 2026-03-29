@@ -71,9 +71,9 @@ export async function connectMongoose(): Promise<typeof mongoose> {
 export async function disconnectMongoose(): Promise<void> {
   try {
     if (mongoose.connection.readyState === 1) {
-      logger.info('MONGOOSE', 'DISCONNECTING', {});
+      logger.info('MONGOOSE', 'DISCONNECTING', 'DISCONNECTING', {});
       await mongoose.disconnect();
-      logger.info('MONGOOSE', 'DISCONNECTED_SUCCESS', {});
+      logger.info('MONGOOSE', 'DISCONNECTED_SUCCESS', 'DISCONNECTED_SUCCESS', {});
     }
   } catch (error: any) {
     logger.error('MONGOOSE', 'DISCONNECT_ERROR', 'DISCONNECT_ERROR', { error: error.message }, error);

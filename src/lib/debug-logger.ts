@@ -103,7 +103,7 @@ class DebugLogger {
   /**
    * Add a log entry
    */
-  private addLog(level: 'DEBUG' | 'INFO' | 'WARN' | 'ERROR', service: string, component: string, action: string, message?: string, details: Record<string, any>, stack?: string) {
+  private addLog(level: 'DEBUG' | 'INFO' | 'WARN' | 'ERROR', service: string, component: string, action: string, message?: string, details: Record<string, any> = {}, stack?: string) {
     const entry: LogEntry = {
       timestamp: new Date().toISOString(),
       level,

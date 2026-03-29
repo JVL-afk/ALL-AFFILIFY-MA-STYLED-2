@@ -54,7 +54,7 @@ export class QuotaService {
       { upsert: true, returnDocument: 'after' }
     );
 
-    if (!result.value) {
+    if (!result) {
       throw new Error(`Failed to initialize quota for user ${userId.toString()}`);
     }
 
@@ -65,7 +65,7 @@ export class QuotaService {
       dailyLimit: quotaLimits.daily,
     });
 
-    return result.value as UserQuota;
+    return result as unknown as UserQuota;
   }
 
   /**
@@ -158,7 +158,7 @@ export class QuotaService {
       { returnDocument: 'after' }
     );
 
-    if (!updateResult.value) {
+    if (!updateResult) {
       // This should rarely happen as we checked quotas above, but it's possible in high-concurrency scenarios
       logger.error('QuotaService', 'checkAndDecrementQuota', 'Atomic quota decrement failed due to race condition', 'Atomic quota decrement failed due to race condition', {
         userId: userId.toString(),
@@ -171,16 +171,17 @@ export class QuotaService {
       };
     }
 
+    const updatedDoc = updateResult as unknown as UserQuota;
     logger.info('QuotaService', 'checkAndDecrementQuota', 'Quota decremented successfully', 'Quota decremented successfully', {
       userId: userId.toString(),
       emailCount,
-      newMonthlyUsage: updateResult.value.emailsSentThisMonth,
-      newDailyUsage: updateResult.value.emailsSentToday,
+      newMonthlyUsage: updatedDoc.emailsSentThisMonth,
+      newDailyUsage: updatedDoc.emailsSentToday,
     });
 
     return {
       allowed: true,
-      remaining: updateResult.value.emailsAllowedPerMonth - updateResult.value.emailsSentThisMonth,
+      remaining: updatedDoc.emailsAllowedPerMonth - updatedDoc.emailsSentThisMonth,
     };
   }
 

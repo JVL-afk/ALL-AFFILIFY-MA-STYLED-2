@@ -174,7 +174,7 @@ export async function GET(request: NextRequest) {
       const limit = searchParams.get('limit');
       const cursor = searchParams.get('cursor');
 
-      const paginationParams = parsePaginationParams(limit, cursor || undefined);
+      const paginationParams = parsePaginationParams(limit ?? undefined, cursor ?? undefined);
       if (!validatePaginationParams(paginationParams)) {
         logger.warn('EmailMarketingAPI', 'GET /campaigns', 'Invalid pagination parameters', 'Invalid pagination parameters', {
           trace_id: traceContext.traceId,

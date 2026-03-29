@@ -126,9 +126,9 @@ export async function connectToDatabase(): Promise<{ client: MongoClient; db: Db
     const db = client.db(dbName);
     
     // Test the connection with a simple command
-    logger.debug('MONGODB', 'TESTING_CONNECTION', {});
+    logger.debug('MONGODB', 'TESTING_CONNECTION', 'TESTING_CONNECTION', {});
     await db.command({ ping: 1 });
-    logger.debug('MONGODB', 'CONNECTION_TEST_PASSED', {});
+    logger.debug('MONGODB', 'CONNECTION_TEST_PASSED', 'CONNECTION_TEST_PASSED', {});
     
     // Initialize CRM collections if needed
     await initializeCRMCollections(db);
@@ -141,7 +141,7 @@ export async function connectToDatabase(): Promise<{ client: MongoClient; db: Db
     
     // Attempt to reconnect once
     try {
-      logger.info('MONGODB', 'ATTEMPTING_RECONNECTION', {});
+      logger.info('MONGODB', 'ATTEMPTING_RECONNECTION', 'ATTEMPTING_RECONNECTION', {});
       console.log('Attempting to reconnect...');
       client = new MongoClient(uri, options);
       const reconnectPromise = client.connect();
@@ -176,10 +176,10 @@ export async function connectToDatabase(): Promise<{ client: MongoClient; db: Db
 // Function to check database connectivity
 export async function checkDatabaseConnection(): Promise<boolean> {
   try {
-    logger.debug('MONGODB', 'CHECKING_CONNECTION', {});
+    logger.debug('MONGODB', 'CHECKING_CONNECTION', 'CHECKING_CONNECTION', {});
     const { db } = await connectToDatabase();
     await db.command({ ping: 1 });
-    logger.info('MONGODB', 'CONNECTION_CHECK_PASSED', {});
+    logger.info('MONGODB', 'CONNECTION_CHECK_PASSED', 'CONNECTION_CHECK_PASSED', {});
     return true;
   } catch (error: any) {
     logger.error('MONGODB', 'CONNECTION_CHECK_FAILED', 'CONNECTION_CHECK_FAILED', { error: error.message }, error);

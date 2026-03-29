@@ -114,11 +114,6 @@ class SendGridService {
     return this.sendEmail(emailTemplate);
   }
 
-  // Helper to strip HTML tags for text content
-  private stripHtml(html: string): string {
-    return html.replace(/<[^>]*>?/gm, "");
-  }
-
   private getWelcomeEmailTemplate(data: WelcomeEmailData): string {
     return `
       <!DOCTYPE html>

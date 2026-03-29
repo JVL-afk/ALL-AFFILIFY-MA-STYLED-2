@@ -102,7 +102,7 @@ export class ObservabilityService {
     return this.db.collection('metrics').find({
       service,
       timestamp: { $gte: cutoffTime },
-    }).toArray();
+    }).toArray() as unknown as Promise<MetricEvent[]>;
   }
 
   /**
