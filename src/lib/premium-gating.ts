@@ -54,7 +54,9 @@ export async function checkPremiumStatus(userId: string): Promise<PremiumUser | 
       'basic': 'basic',
     };
 
-    const tier = planTierMap[user.subscription?.plan] || 'basic';
+    // Support both nested Mongoose schema and flat native MongoDB schema
+    const userPlan = user.subscription?.plan || (user as any).plan || 'basic';
+    const tier = planTierMap[userPlan] || 'basic';
 
     // All plans receive full CRM feature access
     const fullCrmAccess: PremiumUser['crmFeatures'] = {
@@ -71,10 +73,10 @@ export async function checkPremiumStatus(userId: string): Promise<PremiumUser | 
       email: user.email,
       tier,
       subscription: {
-        status: (user.subscription?.status as 'active' | 'inactive' | 'cancelled') || 'active',
+        status: (user.subscription?.status || (user as any).subscriptionStatus || 'active') as 'active' | 'inactive' | 'cancelled',
         startDate: user.subscription?.startDate ? new Date(user.subscription.startDate) : new Date(),
         endDate: user.subscription?.endDate ? new Date(user.subscription.endDate) : null,
-        plan: (user.subscription?.plan as 'basic' | 'pro' | 'enterprise') || 'basic',
+        plan: userPlan as 'basic' | 'pro' | 'enterprise',
       },
       crmFeatures: fullCrmAccess,
     };
