@@ -203,7 +203,7 @@ export default function CodeEditorPage() {
               </div>
               <h3 className="text-2xl font-bold mb-4 text-white">One-Click Deployment</h3>
               <p className="text-white/70">
-                Deploy to Netlify with a single click. Real-time build status tracking and live URL generation.
+                Deploy to affilify.eu with a single click. Real-time build status tracking and live URL generation.
               </p>
             </div>
             
@@ -314,7 +314,7 @@ export default function CodeEditorPage() {
                 
                 <h3 className="text-2xl font-bold mb-4 text-white">🚀 Full-Stack Integration</h3>
                 <p className="text-white/80 mb-6">
-                  Real GitHub integration, Netlify deployment, MongoDB storage, and AI assistance—all working together seamlessly.
+                  Real GitHub integration, affilify.eu deployment, MongoDB storage, and AI assistance—all working together seamlessly.
                 </p>
                 
                 <h3 className="text-2xl font-bold mb-4 text-white">🎯 For Everyone</h3>

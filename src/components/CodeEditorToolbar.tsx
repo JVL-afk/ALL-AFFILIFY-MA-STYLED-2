@@ -23,7 +23,7 @@ interface CodeEditorToolbarProps {
   currentFile: FileItem | null
   saveFile: () => Promise<void>
   isSaving: boolean
-  deployToNetlify: () => Promise<void>
+  deployToAffilify: () => Promise<void>
   isDeploying: boolean
   editorMode: 'code' | 'visual'
   setEditorMode: Dispatch<SetStateAction<'code' | 'visual'>>
@@ -36,7 +36,7 @@ export default function CodeEditorToolbar({
   currentFile,
   saveFile,
   isSaving,
-  deployToNetlify,
+  deployToAffilify,
   isDeploying,
   editorMode,
   setEditorMode,
@@ -102,7 +102,7 @@ export default function CodeEditorToolbar({
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={deployToNetlify}
+          onClick={deployToAffilify}
           disabled={isDeploying}
           className="p-2 rounded-md bg-green-500 text-black font-bold hover:bg-green-400 transition-all flex items-center space-x-2 disabled:opacity-50 shadow-[0_0_15px_rgba(34,197,94,0.3)]"
         >

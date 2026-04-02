@@ -318,7 +318,7 @@ export default function CodeEditorPage() {
     }
   }
 
-  const deployToNetlify = async () => {
+  const deployToAffilify = async () => {
     setIsDeploying(true)
     try {
       const response = await fetch('/api/code-editor/deploy', {
@@ -619,7 +619,7 @@ export default function CodeEditorPage() {
               currentFile={currentFile}
               saveFile={saveFile}
               isSaving={isSaving}
-              deployToNetlify={deployToNetlify}
+              deployToAffilify={deployToAffilify}
               isDeploying={isDeploying}
               editorMode={editorMode}
               setEditorMode={setEditorMode}

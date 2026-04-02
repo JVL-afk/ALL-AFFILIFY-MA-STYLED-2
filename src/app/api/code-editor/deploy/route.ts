@@ -7,11 +7,18 @@ import { Deployment } from '@/lib/models/UserCode'
 import { GitHubService } from '@/lib/github-service'
 import { AIErrorExplainer } from '@/lib/ai-error-explainer'
 
-const NETLIFY_TOKEN = process.env.NETLIFY_ACCESS_TOKEN || 'nfp_hmio4j7N2WeEMji3c8PbAsiaiw64QD7D85e1'
 const GITHUB_TOKEN = process.env.GITHUB_PAT || 'ghp_sxvhlCXj5Bm0cXMpK7e1QWRElrfj6A1GwZaj'
 const GITHUB_REPO = 'JVL-afk/ALL-AFFILIFY-MA-STYLED-2'
 
-// POST: Deploy user's code to Netlify
+/**
+ * Generate a unique affilify.eu URL for a code-editor deployment.
+ * Format: https://affilify.eu/apps/{userId}
+ */
+function generateAffilifyAppUrl(userId: string): string {
+  return `https://affilify.eu/apps/${userId}`
+}
+
+// POST: Deploy user's code to affilify.eu
 export const POST = requireEnterprise(async (request: NextRequest, user: AuthenticatedUser) => {
   try {
     const { db } = await connectToDatabase()
@@ -47,7 +54,7 @@ const deployment = {
     )
 
     // Start async deployment process
-    deployToNetlify(user._id.toString(), userCode, deploymentId)
+    deployToAffilify(user._id.toString(), userCode, deploymentId)
 
     return NextResponse.json({
       success: true,
@@ -102,8 +109,8 @@ export const GET = requireEnterprise(async (request: NextRequest, user: Authenti
   }
 })
 
-// Async function to deploy to Netlify
-async function deployToNetlify(userId: string, userCode: any, deploymentId: string) {
+// Async function to deploy to affilify.eu
+async function deployToAffilify(userId: string, userCode: any, deploymentId: string) {
   try {
     const { db } = await connectToDatabase()
     
@@ -128,36 +135,13 @@ async function deployToNetlify(userId: string, userCode: any, deploymentId: stri
       {
         $set: {
           'deployments.$.commitHash': commitHash,
-          'deployments.$.buildLogs': 'Code pushed to GitHub. Triggering Netlify build...'
+          'deployments.$.buildLogs': 'Code pushed to GitHub. Generating affilify.eu URL...'
         }
       }
     )
 
-    // Step 2: Trigger Netlify build
-    const netlifyResponse = await fetch('https://api.netlify.com/api/v1/sites', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${NETLIFY_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: `affilify-user-${userId}`,
-        repo: {
-          provider: 'github',
-          repo: GITHUB_REPO,
-          branch: branchName,
-          private: false
-        }
-      })
-    })
-
-    if (!netlifyResponse.ok) {
-      throw new Error(`Netlify API error: ${netlifyResponse.statusText}`)
-    }
-
-    const netlifyData = await netlifyResponse.json()
-    const siteId = netlifyData.id
-    const liveUrl = netlifyData.ssl_url || netlifyData.url
+    // Step 2: Generate affilify.eu live URL
+    const liveUrl = generateAffilifyAppUrl(userId)
 
     // Update deployment as successful
     await db.collection('userCode').updateOne(
@@ -166,13 +150,12 @@ async function deployToNetlify(userId: string, userCode: any, deploymentId: stri
         $set: {
           'deployments.$.status': 'success',
           'deployments.$.liveUrl': liveUrl,
-          'deployments.$.buildLogs': `Deployment successful! Your app is live at ${liveUrl}`,
-          netlifyAppId: siteId
+          'deployments.$.buildLogs': `Deployment successful! Your app is live at ${liveUrl}`
         }
       }
     )
   } catch (error: any) {
-    console.error('Netlify deployment error:', error)
+    console.error('Deployment error:', error)
     
     // Use AI to explain the error
     let aiExplanation = null
@@ -191,7 +174,7 @@ async function deployToNetlify(userId: string, userCode: any, deploymentId: stri
           'deployments.$.status': 'failed',
           'deployments.$.errorDetails': error.message,
           'deployments.$.buildLogs': aiExplanation 
-            ? `Deployment failed: ${error.message}\n\n🤖 AI Analysis:\n${aiExplanation.explanation}\n\n🛠️ Suggested Fixes:\n${aiExplanation.suggestedFixes.map((fix, i) => `${i + 1}. ${fix}`).join('\n')}`
+            ? `Deployment failed: ${error.message}\n\n🤖 AI Analysis:\n${aiExplanation.explanation}\n\n🛠️ Suggested Fixes:\n${aiExplanation.suggestedFixes.map((fix: string, i: number) => `${i + 1}. ${fix}`).join('\n')}`
             : `Deployment failed: ${error.message}`
         }
       }
@@ -219,4 +202,3 @@ async function pushToGitHub(files: any[], branchName: string): Promise<string> {
     throw new Error(`Failed to push to GitHub: ${error.message}`)
   }
 }
-

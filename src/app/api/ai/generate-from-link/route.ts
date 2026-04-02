@@ -3,7 +3,6 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { connectToDatabase } from '../../../../lib/mongodb';
 import { ObjectId } from 'mongodb';
 import * as cheerio from 'cheerio';
-import JSZip from 'jszip';
 import jwt from 'jsonwebtoken';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
@@ -240,105 +239,12 @@ function generatePlaceholderImages(query: string, count: number) {
   return images
 }
 
-// Deploy website to Netlify
-async function deployToNetlify(websiteHTML: string, siteName: string) {
-  try {
-    const netlifyToken = process.env.NETLIFY_ACCESS_TOKEN
-    if (!netlifyToken) {
-      console.log('Netlify token not found, returning local URL')
-      return null
-    }
-
-    // ✅ FIX 1: Clean the site name to meet Netlify requirements
-    // Site names must be lowercase, alphanumeric, and can contain hyphens
-    const cleanSiteName = siteName
-      .toLowerCase()
-      .replace(/[^a-z0-9-]/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .substring(0, 63) // Max 63 characters
-
-    console.log('Creating Netlify site with name:', cleanSiteName)
-
-    // ✅ FIX 2: Don't specify site name in creation (let Netlify generate it)
-    const siteResponse = await fetch('https://api.netlify.com/api/v1/sites', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${netlifyToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        // Don't specify name - let Netlify auto-generate
-        // name: cleanSiteName,
-      })
-    })
-
-    if (!siteResponse.ok) {
-      const errorText = await siteResponse.text()
-      console.error(`Netlify site creation error: ${siteResponse.status}`, errorText)
-      throw new Error(`Netlify site creation error: ${siteResponse.status}`)
-    }
-
-    const siteData = await siteResponse.json()
-    const siteId = siteData.id
-
-    console.log('Netlify site created:', siteId)
-
-    // ✅ FIX 3: Convert Buffer to Uint8Array, then to Blob
-    const zipBuffer = await createZipFromHTML(websiteHTML)
-    const zipUint8Array = new Uint8Array(zipBuffer)
-    const zipBlob = new Blob([zipUint8Array], { type: 'application/zip' })
-
-    console.log('Deploying to Netlify site:', siteId)
-
-    // Deploy the HTML content
-    const deployResponse = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}/deploys`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${netlifyToken}`,
-        'Content-Type': 'application/zip'
-      },
-      body: zipBlob
-    })
-
-    if (!deployResponse.ok) {
-      const errorText = await deployResponse.text()
-      console.error(`Netlify deploy error: ${deployResponse.status}`, errorText)
-      throw new Error(`Netlify deploy error: ${deployResponse.status}`)
-    }
-
-    const deployData = await deployResponse.json()
-    
-    console.log('Netlify deployment successful:', deployData.id)
-
-    return {
-      url: siteData.ssl_url || siteData.url,
-      deploy_id: deployData.id,
-      site_id: siteId,
-      admin_url: siteData.admin_url
-    }
-  } catch (error) {
-    console.error('Netlify deployment error:', error)
-    // Return null so the system falls back to local URL
-    return null
-  }
-}
-
-async function createZipFromHTML(html: string): Promise<Buffer> {
-  const zip = new JSZip();
-  
-  // Add the main index.html file
-  zip.file('index.html', html);
-
-  // Add a _headers file to force Netlify to serve index.html as text/html
-  const headersContent = `
-/*
-  Content-Type: text/html
-`;
-  zip.file('_headers', headersContent);
-
-  // Generate the zip file as a Buffer
-  const content = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
-  return content;
+/**
+ * Generate a unique affilify.eu URL for the website.
+ * Format: https://affilify.eu/sites/{slug}
+ */
+function generateAffilifyUrl(slug: string): string {
+  return `https://affilify.eu/sites/${slug}`
 }
 
 // Generate REAL website content using Gemini AI with Unsplash images
@@ -678,15 +584,12 @@ export async function POST(request: NextRequest) {
     const uniqueId = Math.random().toString(36).substring(2, 8); // 6-character random hash
     const slug = `${baseSlug}-${uniqueId}`;
 
-    // Deploy to Netlify for live URL
-    console.log('Deploying website to Netlify...');
-    const netlifyDeployment = await deployToNetlify(websiteHTML, slug);
+    // Generate affilify.eu URL
+    console.log('Generating affilify.eu URL...');
+    const liveUrl = generateAffilifyUrl(slug);
 
     // Save website to database
     const { db } = await connectToDatabase();
-    
-    // Determine the live URL
-    const liveUrl = netlifyDeployment?.url || `${process.env.NEXT_PUBLIC_APP_URL || 'https://affilify.eu'}/websites/${slug}`;
     
     const websiteData = {
       _id: new ObjectId(),
@@ -697,7 +600,6 @@ export async function POST(request: NextRequest) {
       productUrl,
       url: liveUrl,
       productInfo,
-      netlifyDeployment,
       status: 'draft',
       template: 'modern',
       content: { html: websiteHTML }, // Save the full HTML inside the content object
@@ -731,15 +633,13 @@ export async function POST(request: NextRequest) {
         title: productInfo.title,
         description: productInfo.description,
         url: liveUrl,
-        previewUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://affilify.eu'}/preview/${slug}`,
-        netlifyUrl: netlifyDeployment?.url || null,
-        adminUrl: netlifyDeployment?.admin_url || null
+        previewUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://affilify.eu'}/preview/${slug}`
       },
       message: 'Professional affiliate website created and deployed successfully!',
       remainingWebsites: limits.websites - currentWebsiteCount - 1,
       deployment: {
-        status: netlifyDeployment ? 'deployed' : 'local',
-        platform: netlifyDeployment ? 'netlify' : 'affilify'
+        status: 'deployed',
+        platform: 'affilify'
       }
     });
 

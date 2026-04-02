@@ -4,7 +4,7 @@ import { AuthenticatedUser } from '@/lib/types'
 import { connectToDatabase } from '@/lib/mongodb'
 import { ObjectId } from 'mongodb'
 
-// POST: Setup a new A/B test (best-in-class with Netlify integration)
+// POST: Setup a new A/B test (best-in-class with affilify.eu integration)
 export const POST = requireEnterprise(async (request: NextRequest, user: AuthenticatedUser) => {
   try {
     const { name, siteId, branchA, branchB, trafficSplit } = await request.json()
@@ -17,8 +17,8 @@ export const POST = requireEnterprise(async (request: NextRequest, user: Authent
     }
     
     // Best-in-Class: In a real application, this would:
-    // 1. Authenticate with Netlify using a stored token.
-    // 2. Call the Netlify API to set up the split test for the given site ID.
+    // 1. Look up the website by siteId on affilify.eu.
+    // 2. Configure the split test for the given site.
     // 3. Store the test configuration in MongoDB for tracking.
 
     const { db } = await connectToDatabase()
@@ -48,7 +48,7 @@ export const POST = requireEnterprise(async (request: NextRequest, user: Authent
 
     return NextResponse.json({
       success: true,
-      message: `A/B Test "${name}" successfully set up on Netlify.`,
+      message: `A/B Test "${name}" successfully set up on affilify.eu.`,
       test: {
         id: result.insertedId.toHexString(),
         name,

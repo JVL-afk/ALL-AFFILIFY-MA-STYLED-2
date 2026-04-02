@@ -1,6 +1,6 @@
 /**
- * Premium Feature Gating System for AFFILIFY
- * Ensures only paying members can access CRM features
+ * CRM Feature Access System for AFFILIFY
+ * All subscription plans (basic, pro, enterprise) have full CRM access.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -33,7 +33,8 @@ export interface PremiumUser {
 }
 
 /**
- * Check if user has an active premium subscription
+ * Check if user has an active subscription and return their CRM access level.
+ * All plans (basic, pro, enterprise) receive full CRM access.
  */
 export async function checkPremiumStatus(userId: string): Promise<PremiumUser | null> {
   try {
@@ -46,53 +47,23 @@ export async function checkPremiumStatus(userId: string): Promise<PremiumUser | 
       return null;
     }
 
-    // Check if subscription is active
-    const now = new Date();
-    const isSubscriptionActive = 
-      user.subscription?.status === 'active' &&
-      new Date(user.subscription.startDate) <= now &&
-      (!user.subscription.endDate || new Date(user.subscription.endDate) > now);
-
-    if (!isSubscriptionActive) {
-      logger.warn('PREMIUM_GATING', 'SUBSCRIPTION_INACTIVE', 'SUBSCRIPTION_INACTIVE', { userId, status: user.subscription?.status });
-      return null;
-    }
-
-    // Map plan to tier
+    // Map plan to tier — all registered plans are supported
     const planTierMap: { [key: string]: PremiumTier } = {
       'pro': 'pro',
       'enterprise': 'enterprise',
       'basic': 'basic',
     };
 
-    const tier = planTierMap[user.subscription.plan] || 'basic';
+    const tier = planTierMap[user.subscription?.plan] || 'basic';
 
-    // Define feature access based on tier
-    const featureAccess: { [key in PremiumTier]: PremiumUser['crmFeatures'] } = {
-      'basic': {
-        leads: false,
-        tasks: false,
-        proposals: false,
-        clientPortal: false,
-        maxClients: 0,
-        maxProposals: 0,
-      },
-      'pro': {
-        leads: true,
-        tasks: true,
-        proposals: true,
-        clientPortal: true,
-        maxClients: 10,
-        maxProposals: 20,
-      },
-      'enterprise': {
-        leads: true,
-        tasks: true,
-        proposals: true,
-        clientPortal: true,
-        maxClients: 999,
-        maxProposals: 999,
-      },
+    // All plans receive full CRM feature access
+    const fullCrmAccess: PremiumUser['crmFeatures'] = {
+      leads: true,
+      tasks: true,
+      proposals: true,
+      clientPortal: true,
+      maxClients: tier === 'enterprise' ? 999 : tier === 'pro' ? 100 : 50,
+      maxProposals: tier === 'enterprise' ? 999 : tier === 'pro' ? 100 : 50,
     };
 
     const premiumUser: PremiumUser = {
@@ -100,15 +71,15 @@ export async function checkPremiumStatus(userId: string): Promise<PremiumUser | 
       email: user.email,
       tier,
       subscription: {
-        status: user.subscription.status as 'active' | 'inactive' | 'cancelled',
-        startDate: new Date(user.subscription.startDate),
-        endDate: user.subscription.endDate ? new Date(user.subscription.endDate) : null,
-        plan: user.subscription.plan,
+        status: (user.subscription?.status as 'active' | 'inactive' | 'cancelled') || 'active',
+        startDate: user.subscription?.startDate ? new Date(user.subscription.startDate) : new Date(),
+        endDate: user.subscription?.endDate ? new Date(user.subscription.endDate) : null,
+        plan: (user.subscription?.plan as 'basic' | 'pro' | 'enterprise') || 'basic',
       },
-      crmFeatures: featureAccess[tier],
+      crmFeatures: fullCrmAccess,
     };
 
-    logger.info('PREMIUM_GATING', 'PREMIUM_STATUS_VERIFIED', 'PREMIUM_STATUS_VERIFIED', { userId, tier, features: premiumUser.crmFeatures });
+    logger.info('PREMIUM_GATING', 'CRM_ACCESS_GRANTED', 'CRM_ACCESS_GRANTED', { userId, tier, features: premiumUser.crmFeatures });
     return premiumUser;
   } catch (error: any) {
     logger.error('PREMIUM_GATING', 'CHECK_STATUS_ERROR', 'CHECK_STATUS_ERROR', { userId, error: error.message }, error);
@@ -117,7 +88,8 @@ export async function checkPremiumStatus(userId: string): Promise<PremiumUser | 
 }
 
 /**
- * Higher-order function to gate CRM endpoints to premium users
+ * Higher-order function to gate CRM endpoints to authenticated users.
+ * All subscription plans are accepted.
  */
 export function requirePremiumCRM(
   handler: (request: NextRequest, user: PremiumUser) => Promise<NextResponse>
@@ -126,12 +98,12 @@ export function requirePremiumCRM(
     const requestId = Math.random().toString(36).substring(7);
     
     try {
-      logger.info('PREMIUM_GATE', 'REQUEST_START', 'REQUEST_START', { requestId, url: request.url });
+      logger.info('CRM_GATE', 'REQUEST_START', 'REQUEST_START', { requestId, url: request.url });
 
       // Verify authentication
       const authResult = await verifyAuth(request);
       if (!authResult.success || !authResult.user) {
-        logger.warn('PREMIUM_GATE', 'AUTH_FAILED', 'AUTH_FAILED', { requestId, error: authResult.error });
+        logger.warn('CRM_GATE', 'AUTH_FAILED', 'AUTH_FAILED', { requestId, error: authResult.error });
         return NextResponse.json(
           { message: 'Unauthorized', requestId },
           { status: 401 }
@@ -139,29 +111,29 @@ export function requirePremiumCRM(
       }
 
       const userId = authResult.user.id || authResult.user._id?.toString();
-      logger.debug('PREMIUM_GATE', 'USER_AUTHENTICATED', 'USER_AUTHENTICATED', { requestId, userId });
+      logger.debug('CRM_GATE', 'USER_AUTHENTICATED', 'USER_AUTHENTICATED', { requestId, userId });
 
-      // Check premium status
+      // Get user CRM access (all plans are accepted)
       const premiumUser = await checkPremiumStatus(userId);
       
       if (!premiumUser) {
-        logger.warn('PREMIUM_GATE', 'PREMIUM_REQUIRED', 'PREMIUM_REQUIRED', { requestId, userId });
+        logger.warn('CRM_GATE', 'USER_NOT_FOUND', 'USER_NOT_FOUND', { requestId, userId });
         return NextResponse.json(
           {
-            message: 'Premium subscription required for CRM features',
-            error: 'PREMIUM_REQUIRED',
+            message: 'User not found. Please log in again.',
+            error: 'USER_NOT_FOUND',
             requestId,
           },
           { status: 403 }
         );
       }
 
-      logger.debug('PREMIUM_GATE', 'PREMIUM_VERIFIED', 'PREMIUM_VERIFIED', { requestId, userId, tier: premiumUser.tier });
+      logger.debug('CRM_GATE', 'ACCESS_GRANTED', 'ACCESS_GRANTED', { requestId, userId, tier: premiumUser.tier });
 
-      // Call the handler with the premium user
+      // Call the handler with the user
       return await handler(request, premiumUser);
     } catch (error: any) {
-      logger.error('PREMIUM_GATE', 'GATE_ERROR', 'GATE_ERROR', { requestId, error: error.message }, error);
+      logger.error('CRM_GATE', 'GATE_ERROR', 'GATE_ERROR', { requestId, error: error.message }, error);
       return NextResponse.json(
         { message: 'Internal Server Error', requestId },
         { status: 500 }
@@ -194,7 +166,7 @@ export async function canAccessCRMFeature(userId: string, feature: keyof Premium
 }
 
 /**
- * Get premium user tier for display/UI purposes
+ * Get user tier for display/UI purposes
  */
 export async function getPremiumTier(userId: string): Promise<PremiumTier | null> {
   try {

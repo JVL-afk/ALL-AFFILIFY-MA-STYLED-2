@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, getUserById } from '@/lib/auth'
 import { getWebsiteById, updateWebsite } from '@/lib/database'
-import { deployWebsiteToNetlify } from '@/lib/netlify'
 import { selectImagesForWebsite } from '@/lib/unsplash'
+
+/**
+ * Generate a unique affilify.eu URL for the website.
+ * Format: https://affilify.eu/sites/{slug}-{shortId}
+ */
+function generateAffilifyUrl(websiteId: string, title: string): string {
+  const slug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+  return `https://affilify.eu/sites/${slug}-${websiteId.slice(-8)}`
+}
 
 export async function POST(
   request: NextRequest,
@@ -48,17 +59,6 @@ export async function POST(
       )
     }
 
-    // Check if deployment is allowed for user's plan
-    if (user.plan === 'basic' && website.status === 'published') {
-      return NextResponse.json(
-        { 
-          error: 'Deployment limit reached',
-          message: 'Basic plan allows only draft websites. Upgrade to Pro or Enterprise to deploy websites.'
-        },
-        { status: 403 }
-      )
-    }
-
     // Select appropriate images for the website
     let websiteWithImages = { ...website }
     
@@ -75,18 +75,8 @@ export async function POST(
       // Continue without images if Unsplash fails
     }
 
-    // Deploy to Netlify
-    let deploymentUrl: string
-    
-    try {
-      deploymentUrl = await deployWebsiteToNetlify(website.id, websiteWithImages)
-    } catch (error) {
-      console.error('Netlify deployment error:', error)
-      return NextResponse.json(
-        { error: 'Failed to deploy website' },
-        { status: 500 }
-      )
-    }
+    // Generate affilify.eu deployment URL
+    const deploymentUrl = generateAffilifyUrl(website.id, website.title || 'website')
 
     // Update website with deployment URL
     const updateSuccess = await updateWebsite(id, user.id, {
@@ -116,4 +106,3 @@ export async function POST(
     )
   }
 }
-
