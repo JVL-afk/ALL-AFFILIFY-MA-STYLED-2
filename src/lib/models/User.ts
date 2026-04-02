@@ -24,7 +24,7 @@ export interface IUser extends Document {
 }
 
 const UserSchema: Schema = new Schema({
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true, index: true },
   password: { type: String, required: true },
   name: { type: String, default: '' },
   avatar: { type: String, default: '' },
@@ -52,8 +52,7 @@ const UserSchema: Schema = new Schema({
   },
 }, { timestamps: true });
 
-// Index for email lookups
-UserSchema.index({ email: 1 });
+// Index for email lookups (already defined in schema)
 // Index for subscription status queries
 UserSchema.index({ 'subscription.status': 1 });
 
