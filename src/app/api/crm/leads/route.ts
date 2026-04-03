@@ -13,14 +13,33 @@ async function handleGET(request: NextRequest, user: PremiumUser): Promise<NextR
   const requestId = Math.random().toString(36).substring(7);
   
   try {
-    logger.info('CRM_LEADS_API', 'GET_REQUEST_START', 'GET_REQUEST_START', { requestId, userId: user.id, tier: user.tier });
+    logger.info('CRM_LEADS_API', 'GET_REQUEST_START', 'GET_REQUEST_START', { 
+      requestId, 
+      userId: user.id, 
+      tier: user.tier,
+      email: user.email,
+      crmFeatures: user.crmFeatures 
+    });
     await connectMongoose();
     
     // Check if user has access to leads feature
     if (!user.crmFeatures.leads) {
-      logger.warn('CRM_LEADS_API', 'LEADS_FEATURE_NOT_AVAILABLE', 'LEADS_FEATURE_NOT_AVAILABLE', { requestId, userId: user.id, tier: user.tier });
+      logger.warn('CRM_LEADS_API', 'LEADS_FEATURE_NOT_AVAILABLE', 'LEADS_FEATURE_NOT_AVAILABLE', { 
+        requestId, 
+        userId: user.id, 
+        tier: user.tier,
+        crmFeatures: user.crmFeatures 
+      });
       return NextResponse.json(
-        { message: 'Lead management is not available in your plan', requestId },
+        { 
+          message: 'Lead management is not available in your plan', 
+          requestId,
+          debug: {
+            userId: user.id,
+            tier: user.tier,
+            crmFeatures: user.crmFeatures
+          }
+        },
         { status: 403 }
       );
     }
