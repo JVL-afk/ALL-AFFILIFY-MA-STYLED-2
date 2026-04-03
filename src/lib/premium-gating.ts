@@ -43,7 +43,15 @@ export async function checkPremiumStatus(userId: string): Promise<PremiumUser | 
     await connectMongoose();
     
     // Log the search attempt
-    logger.debug('PREMIUM_GATING', 'SEARCHING_USER', 'SEARCHING_USER', { requestId, userId });
+    const collectionName = User.collection.name;
+    const dbName = mongoose.connection.db?.databaseName;
+    logger.debug('PREMIUM_GATING', 'SEARCHING_USER', 'SEARCHING_USER', { 
+      requestId, 
+      userId, 
+      collectionName, 
+      dbName,
+      readyState: mongoose.connection.readyState 
+    });
     
     const user = await User.findById(new mongoose.Types.ObjectId(userId));
     

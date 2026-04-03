@@ -56,6 +56,6 @@ const UserSchema: Schema = new Schema({
 // Index for subscription status queries
 UserSchema.index({ 'subscription.status': 1 });
 
-const User = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+const User = mongoose.models.User || mongoose.model<IUser>('User', UserSchema, 'users');
 
 export default User;
