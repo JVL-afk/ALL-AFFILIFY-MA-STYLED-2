@@ -10,10 +10,11 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 // ---------------------------------------------------------------------------
 // Resilient fetch helper
 // ---------------------------------------------------------------------------
-// Wraps the native fetch with:
-//   • An AbortController-based hard timeout (default 30 s)
-//   • Automatic retry with exponential back-off (default 2 retries)
-//   • Full error surfacing so callers can decide on fallback behaviour
+// Every outbound fetch in this file goes through this helper, which provides:
+//   • A hard AbortController-based timeout (default 30 s)
+//   • Automatic retry with exponential back-off for transient network errors
+//     (ETIMEDOUT, ECONNRESET, ECONNREFUSED, ENOTFOUND, AbortError)
+//   • Clean error propagation so callers can decide on fallback behaviour
 // ---------------------------------------------------------------------------
 async function fetchWithTimeout(
   url: string,
@@ -28,10 +29,7 @@ async function fetchWithTimeout(
     const timer = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal,
-      });
+      const response = await fetch(url, { ...options, signal: controller.signal });
       clearTimeout(timer);
       return response;
     } catch (err: any) {
@@ -39,29 +37,122 @@ async function fetchWithTimeout(
       lastError = err;
 
       const isAbort = err?.name === 'AbortError';
-      const isNetworkError =
+      const isTransient =
+        isAbort ||
         err?.code === 'ETIMEDOUT' ||
         err?.code === 'ECONNRESET' ||
         err?.code === 'ECONNREFUSED' ||
-        err?.code === 'ENOTFOUND' ||
-        isAbort;
+        err?.code === 'ENOTFOUND';
 
-      // Only retry on transient network-level errors
-      if (!isNetworkError || attempt === retries) {
-        break;
-      }
+      if (!isTransient || attempt === retries) break;
 
-      // Exponential back-off: 1 s, 2 s, 4 s …
       const backoffMs = Math.pow(2, attempt) * 1_000;
       console.warn(
-        `[fetchWithTimeout] Attempt ${attempt + 1} failed for ${url} (${err?.code || err?.name}). ` +
-        `Retrying in ${backoffMs}ms…`
+        `[fetchWithTimeout] Attempt ${attempt + 1} failed for ${url} ` +
+        `(${err?.code || err?.name}). Retrying in ${backoffMs}ms…`
       );
       await new Promise((resolve) => setTimeout(resolve, backoffMs));
     }
   }
 
   throw lastError;
+}
+
+// ---------------------------------------------------------------------------
+// Smart URL-to-product-info parser
+// ---------------------------------------------------------------------------
+// When direct scraping is blocked or fails, this function extracts as much
+// product context as possible from the URL structure itself (hostname, path
+// segments, query params) and returns a rich, human-readable product info
+// object that Gemini can use to generate an accurate affiliate website.
+// ---------------------------------------------------------------------------
+function extractProductInfoFromUrl(url: string): {
+  title: string;
+  description: string;
+  price: string;
+  originalUrl: string;
+  brand: string;
+  inferredFromUrl: boolean;
+} {
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.replace(/^www\./, '');
+    const pathSegments = parsed.pathname
+      .split('/')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    // Humanise a slug segment: "bmw-m5-sedan" → "BMW M5 Sedan"
+    const humanise = (slug: string): string =>
+      slug
+        .replace(/[-_]/g, ' ')
+        .replace(/\b(\d{4})\b/g, '$1') // keep years as-is
+        .replace(/\b\w/g, (c) => c.toUpperCase())
+        .trim();
+
+    // Extract brand from hostname: "bmw-m.com" → "BMW M", "amazon.com" → "Amazon"
+    const brandRaw = hostname.split('.')[0];
+    const brand = humanise(brandRaw);
+
+    // Find the most descriptive path segment (longest non-year, non-generic slug)
+    const genericSegments = new Set([
+      'en', 'us', 'uk', 'de', 'fr', 'all-models', 'products', 'product',
+      'shop', 'store', 'catalog', 'category', 'overview', 'detail', 'item',
+      'dp', 'gp', 'b', 'p', 'index', 'html', 'htm',
+    ]);
+
+    const candidateSegments = pathSegments.filter((seg) => {
+      const lower = seg.toLowerCase().replace(/\.(html?|php|aspx?)$/, '');
+      return (
+        lower.length > 3 &&
+        !genericSegments.has(lower) &&
+        !/^\d{4}$/.test(lower) // skip bare year segments
+      );
+    });
+
+    // The last meaningful segment is usually the product name
+    const productSlug =
+      candidateSegments[candidateSegments.length - 1] ||
+      candidateSegments[0] ||
+      pathSegments[pathSegments.length - 1] ||
+      'product';
+
+    // Strip file extensions
+    const cleanSlug = productSlug.replace(/\.(html?|php|aspx?)$/i, '');
+    const productName = humanise(cleanSlug);
+
+    // Try to find a year in the path (useful for cars, electronics, etc.)
+    const yearMatch = pathSegments.join('/').match(/\b(20\d{2}|19\d{2})\b/);
+    const year = yearMatch ? yearMatch[1] : '';
+
+    // Build a rich title: "BMW M5 Sedan (2024) – BMW M"
+    const title = year
+      ? `${productName} (${year}) – ${brand}`
+      : `${productName} – ${brand}`;
+
+    // Build a descriptive fallback description
+    const description =
+      `Discover the ${productName}${year ? ` ${year}` : ''} by ${brand}. ` +
+      `Explore its features, specifications, and find the best deal through our affiliate link.`;
+
+    return {
+      title: title.substring(0, 120),
+      description: description.substring(0, 300),
+      price: '',
+      originalUrl: url,
+      brand,
+      inferredFromUrl: true,
+    };
+  } catch {
+    return {
+      title: 'Premium Product',
+      description: 'An exceptional product that delivers outstanding value and performance.',
+      price: '',
+      originalUrl: url,
+      brand: 'Unknown Brand',
+      inferredFromUrl: true,
+    };
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -74,18 +165,15 @@ async function validateImageUrl(imageUrl: string): Promise<boolean> {
       {
         method: 'HEAD',
         headers: {
-          'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         },
       },
-      5_000, // 5-second hard timeout per image
-      0      // no retries for image validation (speed matters here)
+      5_000,
+      0 // no retries for image validation — speed matters
     );
-
     const contentType = response.headers.get('content-type');
     return response.ok && (contentType?.startsWith('image/') || false);
-  } catch (error) {
-    console.log('Image validation failed for:', imageUrl, error);
+  } catch {
     return false;
   }
 }
@@ -109,14 +197,13 @@ async function scrapeProductData(url: string) {
           'Cache-Control': 'no-cache',
         },
       },
-      30_000, // 30-second hard timeout
-      2       // up to 2 retries
+      30_000,
+      2
     );
 
     const html = await response.text();
     const $ = cheerio.load(html);
 
-    // Extract key information
     const title = $('h1').first().text().trim();
     const description =
       $('meta[name="description"]').attr('content') ||
@@ -125,29 +212,19 @@ async function scrapeProductData(url: string) {
       $('.price').first().text().trim() ||
       $('.product-price').first().text().trim();
 
-    // Extract images from img tags with filtering
     const images = Array.from($('img'))
       .map((img) => {
         const src = $(img).attr('src');
         const alt = $(img).attr('alt') || '';
         const className = $(img).attr('class') || '';
         const id = $(img).attr('id') || '';
-
         if (src) {
           try {
             const fullUrl = new URL(src, url).href;
-
-            const isLogo =
-              /logo|icon|favicon|sprite|badge|button/i.test(
-                fullUrl + alt + className + id
-              );
+            const isLogo = /logo|icon|favicon|sprite|badge|button/i.test(fullUrl + alt + className + id);
             const isSvg = fullUrl.toLowerCase().endsWith('.svg');
-            const isSmall =
-              $(img).attr('width') &&
-              parseInt($(img).attr('width')!) < 200;
-
+            const isSmall = $(img).attr('width') && parseInt($(img).attr('width')!) < 200;
             if (isLogo || isSvg || isSmall) return null;
-
             return fullUrl;
           } catch {
             return src;
@@ -158,26 +235,16 @@ async function scrapeProductData(url: string) {
       .filter((src): src is string => !!src && src.startsWith('http'));
 
     console.log('Total images found:', images.length);
-    console.log('Sample images:', images.slice(0, 3));
 
-    // Extract video thumbnails / poster images
     const videoThumbnails = Array.from($('video'))
       .map((video) => {
         const poster = $(video).attr('poster');
         if (poster) {
-          try {
-            return new URL(poster, url).href;
-          } catch {
-            return poster;
-          }
+          try { return new URL(poster, url).href; } catch { return poster; }
         }
         const source = $(video).find('source').first().attr('src');
         if (source) {
-          try {
-            return new URL(source, url).href;
-          } catch {
-            return source;
-          }
+          try { return new URL(source, url).href; } catch { return source; }
         }
         return null;
       })
@@ -185,38 +252,22 @@ async function scrapeProductData(url: string) {
 
     const allMedia = [...images, ...videoThumbnails];
 
-    // Validate images in parallel — limit concurrency to avoid flooding
-    console.log(
-      'Validating',
-      Math.min(allMedia.length, 20),
-      'scraped images…'
-    );
-    const imagesToValidate = allMedia.slice(0, 20);
-
-    // Process in batches of 5 to avoid overwhelming the network
+    // Validate images in batches of 5 to avoid connection-pool exhaustion
     const BATCH_SIZE = 5;
+    const imagesToValidate = allMedia.slice(0, 20);
     const validImages: string[] = [];
     for (let i = 0; i < imagesToValidate.length; i += BATCH_SIZE) {
       const batch = imagesToValidate.slice(i, i + BATCH_SIZE);
       const results = await Promise.all(
-        batch.map(async (imgUrl) => ({
-          url: imgUrl,
-          valid: await validateImageUrl(imgUrl),
-        }))
+        batch.map(async (imgUrl) => ({ url: imgUrl, valid: await validateImageUrl(imgUrl) }))
       );
       results.filter((r) => r.valid).forEach((r) => validImages.push(r.url));
     }
 
     console.log('Valid images:', validImages.length, '/', imagesToValidate.length);
 
-    const finalImages =
-      allMedia.length > 20
-        ? [...validImages, ...allMedia.slice(20)]
-        : validImages;
-
-    const features = Array.from($('ul.features li')).map((li) =>
-      $(li).text().trim()
-    );
+    const finalImages = allMedia.length > 20 ? [...validImages, ...allMedia.slice(20)] : validImages;
+    const features = Array.from($('ul.features li')).map((li) => $(li).text().trim());
     const specs: { [key: string]: string } = {};
     $('table.specs tr').each((_, row) => {
       const key = $(row).find('th').text().trim();
@@ -248,9 +299,6 @@ async function getUnsplashImages(query: string, count: number = 10) {
 
   try {
     const unsplashApiKey = process.env.UNSPLASH_ACCESS_KEY;
-    console.log('🖼️ [IMAGE] API Key exists:', !!unsplashApiKey);
-    console.log('🖼️ [IMAGE] API Key length:', unsplashApiKey?.length || 0);
-
     if (!unsplashApiKey) {
       console.log('🖼️ [IMAGE] ❌ No API key - using placeholders');
       return generatePlaceholderImages(query, count);
@@ -261,17 +309,10 @@ async function getUnsplashImages(query: string, count: number = 10) {
 
     const response = await fetchWithTimeout(
       apiUrl,
-      {
-        headers: {
-          Authorization: `Client-ID ${unsplashApiKey}`,
-        },
-      },
-      15_000, // 15-second timeout for Unsplash API
-      1       // 1 retry
+      { headers: { Authorization: `Client-ID ${unsplashApiKey}` } },
+      15_000,
+      1
     );
-
-    console.log('🖼️ [IMAGE] Response status:', response.status);
-    console.log('🖼️ [IMAGE] Response OK:', response.ok);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -281,7 +322,6 @@ async function getUnsplashImages(query: string, count: number = 10) {
 
     const data = await response.json();
     console.log('🖼️ [IMAGE] Results found:', data.results?.length || 0);
-    console.log('🖼️ [IMAGE] Total available:', data.total || 0);
 
     const images = data.results.map((photo: any, index: number) => {
       const imageData = {
@@ -291,15 +331,7 @@ async function getUnsplashImages(query: string, count: number = 10) {
         credit: `Photo by ${photo.user.name} on Unsplash`,
         download_url: photo.links.download_location,
       };
-      console.log(
-        `🖼️ [IMAGE] [${index + 1}/${data.results.length}] URL: ${imageData.url}`
-      );
-      console.log(
-        `🖼️ [IMAGE] [${index + 1}/${data.results.length}] Alt: ${imageData.alt}`
-      );
-      console.log(
-        `🖼️ [IMAGE] [${index + 1}/${data.results.length}] By: ${photo.user.name}`
-      );
+      console.log(`🖼️ [IMAGE] [${index + 1}/${data.results.length}] URL: ${imageData.url}`);
       return imageData;
     });
 
@@ -308,21 +340,14 @@ async function getUnsplashImages(query: string, count: number = 10) {
     return images;
   } catch (error) {
     console.error('🖼️ [IMAGE] ❌ EXCEPTION in getUnsplashImages:', error);
-    console.log('🖼️ [IMAGE] Falling back to placeholders');
     return generatePlaceholderImages(query, count);
   }
 }
 
 // ---------------------------------------------------------------------------
-// Placeholder image generator (fallback)
+// Placeholder image generator (last-resort fallback)
 // ---------------------------------------------------------------------------
 function generatePlaceholderImages(query: string, count: number) {
-  console.log(
-    '🖼️ [IMAGE] 🎨 Generating',
-    count,
-    'placeholder images for:',
-    query
-  );
   const images = [];
   for (let i = 0; i < count; i++) {
     images.push({
@@ -333,7 +358,6 @@ function generatePlaceholderImages(query: string, count: number) {
       download_url: null,
     });
   }
-  console.log('🖼️ [IMAGE] ✅ Generated', images.length, 'placeholders');
   return images;
 }
 
@@ -353,88 +377,59 @@ async function generateWebsiteContent(
   affiliateId: string,
   affiliateType: string
 ) {
-  console.log(
-    '🌐 [WEBSITE] ========== STARTING WEBSITE GENERATION =========='
-  );
+  console.log('🌐 [WEBSITE] ========== STARTING WEBSITE GENERATION ==========');
   console.log('🌐 [WEBSITE] Product title:', productInfo.title);
   console.log('🌐 [WEBSITE] Product URL:', productInfo.originalUrl);
+  console.log('🌐 [WEBSITE] Info inferred from URL:', productInfo.inferredFromUrl || false);
 
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
 
   const scrapedImages = scrapedData?.images || [];
   console.log('🖼️ [IMAGE] Scraped images available:', scrapedImages.length);
-  if (scrapedImages.length > 0) {
-    console.log('🖼️ [IMAGE] Sample scraped image:', scrapedImages[0]);
-  } else {
-    console.log(
-      '🖼️ [IMAGE] ⚠️ No valid scraped images - will use Unsplash for all images'
-    );
-  }
+
+  // Build a smart Unsplash search query based on available product context
+  const imageSearchQuery = productInfo.inferredFromUrl
+    ? `${productInfo.brand} ${productInfo.title.split('–')[0].trim()} product`
+    : `${productInfo.title} product lifestyle`;
 
   console.log('🖼️ [IMAGE] ========== FETCHING HERO IMAGE ==========');
   const heroImages =
     scrapedImages.length > 0
-      ? [
-          {
-            url: scrapedImages[0],
-            alt: `${productInfo.title} hero image`,
-            credit: 'Scraped from product page',
-            download_url: null,
-          },
-        ]
-      : await getUnsplashImages(`${productInfo.title} product lifestyle`, 1);
-
+      ? [{ url: scrapedImages[0], alt: `${productInfo.title} hero image`, credit: 'Scraped from product page', download_url: null }]
+      : await getUnsplashImages(imageSearchQuery, 1);
   console.log('🖼️ [IMAGE] Hero image selected:', heroImages[0]?.url);
 
   console.log('🖼️ [IMAGE] ========== FETCHING FEATURE IMAGES ==========');
   const featureImages =
     scrapedImages.length > 1
-      ? scrapedImages
-          .slice(1)
-          .map((url: string) => ({
-            url,
-            alt: `${productInfo.title} feature image`,
-            credit: 'Scraped from product page',
-            download_url: null,
-          }))
-      : await getUnsplashImages(
-          `${productInfo.title} benefits features`,
-          10
-        );
-
+      ? scrapedImages.slice(1).map((url: string) => ({ url, alt: `${productInfo.title} feature image`, credit: 'Scraped from product page', download_url: null }))
+      : await getUnsplashImages(`${imageSearchQuery} features`, 10);
   console.log('🖼️ [IMAGE] Feature image 1:', featureImages[0]?.url);
   console.log('🖼️ [IMAGE] Feature image 2:', featureImages[1]?.url);
 
-  console.log(
-    '🖼️ [IMAGE] ========== FETCHING TESTIMONIAL IMAGE =========='
-  );
-  const testimonialImages = await getUnsplashImages(
-    'happy customer testimonial',
-    1
-  );
+  console.log('🖼️ [IMAGE] ========== FETCHING TESTIMONIAL IMAGE ==========');
+  const testimonialImages = await getUnsplashImages('happy customer testimonial', 1);
   console.log('🖼️ [IMAGE] Testimonial image:', testimonialImages[0]?.url);
 
   console.log('🖼️ [IMAGE] ========== IMAGE SUMMARY ==========');
-  console.log(
-    '🖼️ [IMAGE] Hero:',
-    heroImages[0]?.url ? '✅ VALID' : '❌ MISSING'
-  );
-  console.log(
-    '🖼️ [IMAGE] Feature 1:',
-    featureImages[0]?.url ? '✅ VALID' : '❌ MISSING'
-  );
-  console.log(
-    '🖼️ [IMAGE] Feature 2:',
-    featureImages[1]?.url ? '✅ VALID' : '❌ MISSING'
-  );
-  console.log(
-    '🖼️ [IMAGE] Testimonial:',
-    testimonialImages[0]?.url ? '✅ VALID' : '❌ MISSING'
-  );
+  console.log('🖼️ [IMAGE] Hero:', heroImages[0]?.url ? '✅ VALID' : '❌ MISSING');
+  console.log('🖼️ [IMAGE] Feature 1:', featureImages[0]?.url ? '✅ VALID' : '❌ MISSING');
+  console.log('🖼️ [IMAGE] Feature 2:', featureImages[1]?.url ? '✅ VALID' : '❌ MISSING');
+  console.log('🖼️ [IMAGE] Testimonial:', testimonialImages[0]?.url ? '✅ VALID' : '❌ MISSING');
+
+  // If scraping was blocked, tell Gemini explicitly so it can research the product itself
+  const scrapedDataNote = productInfo.inferredFromUrl
+    ? `NOTE: Direct scraping of the product page was blocked by the target website. ` +
+      `The product details below were inferred from the URL structure. ` +
+      `You MUST use your own knowledge and internet research to fill in accurate product details, ` +
+      `specifications, pricing, reviews, and competitor comparisons for: "${productInfo.title}" by ${productInfo.brand}.`
+    : '';
 
   const prompt = `You are the world's most elite product marketing expert and conversion optimization copywriter. Your mission is to create a highly compelling, conversion-optimized website to promote and sell the specific product described in the data. The website MUST be focused entirely on the product's features, benefits, and value proposition to the end consumer. DO NOT mention affiliate marketing, making money, or any business opportunity. Your goal is to drive the user to click the affiliate link to purchase the product.
 
-Here is the product data you have to work with: ${JSON.stringify(scrapedData)}.
+${scrapedDataNote}
+
+Here is the product data you have to work with: ${JSON.stringify({ ...scrapedData, ...productInfo })}.
 
 Here are the high-quality image URLs you MUST use in the generated HTML for the hero section and features:
 Hero Image: ${heroImages[0]?.url || 'NO_HERO_IMAGE'}
@@ -449,32 +444,18 @@ Do NOT use placeholder links like "#" or relative links. Every CTA button must h
 
 Now, create a unique, creative, conversion-optimized website with over 1000 lines of code. Do not use a restrictive output structure. Be creative. Include a competitor comparison section. Use niche-specific language. Include unique sections that competitors don't have. The primary call-to-action (CTA) should be a prominent button with the affiliate link. Do NOT insert any prices if you don't know the price exactly. Make each website unique (DON'T USE the same colors, if the scraped data and the website in general has a specific color that's recognizable, make that color the color of the writing)! Compare with REAL COMPETITORS of the product and specify the competitors names. Also don't only get your info from the scraped data, research blogs, reviews, articles everything on this internet about the product, make ONLY THE BEST WEBSITE that promotes the specific product! Make ABSOLUTELY SURE that the website can't be interpratated in any kind of way as a copy of the original website (the one fro  where you have the affiliate link). Make each WEBSITE UNIQUE, DO NOT use any generic templates. MAKE SURE each single word or piece of info in the website is REAL and verifiable! Before you even think about creating the website please find at least 1 (max 3) youtube videos to put into the website at the proof (don't use the word proof everytime, use some synonimes if possible) section (make sure the link and thumbnail is visible)!!!!! Insert ONLY real, VERIFIABLE reviews in testimonials page!!!! Make sure to put different backgrounds in the different sections of the website but just make sure the contrast isn't too powerful!!! Respond ONLY with the full code! Here is the affiliate information: affiliateId: ${affiliateId}, affiliateType: ${affiliateType};.`;
 
-  console.log(
-    '🤖 [AI] Sending to Gemini, prompt length:',
-    prompt.length,
-    'chars'
-  );
+  console.log('🤖 [AI] Sending to Gemini, prompt length:', prompt.length, 'chars');
 
   try {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     let websiteHTML = response.text();
 
-    console.log(
-      '🤖 [AI] ✅ Received response, length:',
-      websiteHTML.length,
-      'chars'
-    );
+    console.log('🤖 [AI] ✅ Received response, length:', websiteHTML.length, 'chars');
 
-    websiteHTML = websiteHTML
-      .replace(/```html/g, '')
-      .replace(/```/g, '')
-      .trim();
+    websiteHTML = websiteHTML.replace(/```html/g, '').replace(/```/g, '').trim();
 
-    if (
-      !websiteHTML.toLowerCase().includes('<!doctype') &&
-      !websiteHTML.toLowerCase().includes('<html')
-    ) {
+    if (!websiteHTML.toLowerCase().includes('<!doctype') && !websiteHTML.toLowerCase().includes('<html')) {
       console.log('⚠️ [AI] Response missing HTML tags, extracting…');
       const htmlMatch = websiteHTML.match(/<!DOCTYPE[\s\S]*<\/html>/i);
       if (htmlMatch) {
@@ -482,31 +463,16 @@ Now, create a unique, creative, conversion-optimized website with over 1000 line
         console.log('✅ [AI] Extracted HTML successfully');
       } else {
         console.log('❌ [AI] Could not extract, using fallback template');
-        websiteHTML = generateProfessionalTemplate(
-          productInfo,
-          heroImages,
-          featureImages,
-          testimonialImages,
-          affiliateId
-        );
+        websiteHTML = generateProfessionalTemplate(productInfo, heroImages, featureImages, testimonialImages, affiliateId);
       }
     }
 
     console.log('✅ [WEBSITE] Website generated successfully!');
-    console.log(
-      '🌐 [WEBSITE] ========== END WEBSITE GENERATION =========='
-    );
+    console.log('🌐 [WEBSITE] ========== END WEBSITE GENERATION ==========');
     return websiteHTML;
   } catch (error) {
     console.error('❌ [AI] Gemini error:', error);
-    console.log('⚠️ [AI] Using fallback template');
-    return generateProfessionalTemplate(
-      productInfo,
-      heroImages,
-      featureImages,
-      testimonialImages,
-      affiliateId
-    );
+    return generateProfessionalTemplate(productInfo, heroImages, featureImages, testimonialImages, affiliateId);
   }
 }
 
@@ -550,10 +516,9 @@ function generateProfessionalTemplate(
         <div class="container">
             <h1>${productInfo.title}</h1>
             <p>${productInfo.description}</p>
-            <a href="${productInfo.originalUrl}${affiliateId ? (productInfo.originalUrl.includes('?') ? '&' : '?') + 'tag=' + affiliateId : ''}" class="cta-button">Get ${productInfo.title} Now - ${productInfo.price}</a>
+            <a href="${productInfo.originalUrl}${affiliateId ? (productInfo.originalUrl.includes('?') ? '&' : '?') + 'tag=' + affiliateId : ''}" class="cta-button">Get ${productInfo.title} Now${productInfo.price ? ' - ' + productInfo.price : ''}</a>
         </div>
     </section>
-    
     <section class="features">
         <div class="container">
             <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 20px;">Why Choose ${productInfo.title}?</h2>
@@ -571,7 +536,6 @@ function generateProfessionalTemplate(
             </div>
         </div>
     </section>
-    
     <section class="testimonials">
         <div class="container">
             <div class="testimonial">
@@ -581,7 +545,7 @@ function generateProfessionalTemplate(
                 <strong>- Sarah Johnson, Verified Customer</strong>
             </div>
             <div style="text-align: center; margin-top: 40px;">
-                <a href="${productInfo.originalUrl}${affiliateId ? (productInfo.originalUrl.includes('?') ? '&' : '?') + 'tag=' + affiliateId : ''}" class="cta-button">Order ${productInfo.title} Today - ${productInfo.price}</a>
+                <a href="${productInfo.originalUrl}${affiliateId ? (productInfo.originalUrl.includes('?') ? '&' : '?') + 'tag=' + affiliateId : ''}" class="cta-button">Order ${productInfo.title} Today${productInfo.price ? ' - ' + productInfo.price : ''}</a>
             </div>
         </div>
     </section>
@@ -591,6 +555,14 @@ function generateProfessionalTemplate(
 
 // ---------------------------------------------------------------------------
 // Analyze product URL
+// ---------------------------------------------------------------------------
+// Strategy:
+//   1. Attempt direct fetch with a 30 s timeout and up to 2 retries.
+//   2. If the fetch succeeds, parse the HTML for title/description/price.
+//   3. If the fetch fails for any reason (blocked, timeout, DNS, etc.),
+//      fall back to extractProductInfoFromUrl() which parses the URL
+//      structure itself — guaranteeing a rich, product-specific result
+//      instead of the generic "Premium Product" placeholder.
 // ---------------------------------------------------------------------------
 async function analyzeProductURL(url: string) {
   try {
@@ -608,8 +580,8 @@ async function analyzeProductURL(url: string) {
           'Cache-Control': 'no-cache',
         },
       },
-      30_000, // 30-second hard timeout
-      2       // up to 2 retries
+      30_000,
+      2
     );
 
     if (!response.ok) {
@@ -623,36 +595,39 @@ async function analyzeProductURL(url: string) {
       $('title').text() ||
       $('h1').first().text() ||
       $('[data-testid="product-title"]').text() ||
-      'Amazing Product';
+      '';
 
     const description =
       $('meta[name="description"]').attr('content') ||
       $('meta[property="og:description"]').attr('content') ||
       $('p').first().text() ||
-      'Discover this incredible product that will transform your life.';
+      '';
 
     const price =
       $('[data-testid="price"]').text() ||
       $('.price').first().text() ||
       $('[class*="price"]').first().text() ||
-      '$99.99';
+      '';
+
+    // If the page returned HTML but it's empty/unhelpful (bot-detection page),
+    // fall back to URL parsing
+    if (!title && !description) {
+      console.warn('[analyzeProductURL] Page returned no usable content — likely bot-detection. Falling back to URL parsing.');
+      return extractProductInfoFromUrl(url);
+    }
 
     return {
-      title: title.substring(0, 100),
-      description: description.substring(0, 200),
+      title: title.substring(0, 120),
+      description: description.substring(0, 300),
       price: price.substring(0, 20),
       originalUrl: url,
+      brand: '',
+      inferredFromUrl: false,
     };
   } catch (error) {
     console.error('URL analysis error:', error);
-    // Graceful fallback — never throw, always return usable data
-    return {
-      title: 'Premium Product',
-      description:
-        'An amazing product that delivers exceptional value and results.',
-      price: '$99.99',
-      originalUrl: url,
-    };
+    console.log('[analyzeProductURL] Falling back to URL-based product info extraction.');
+    return extractProductInfoFromUrl(url);
   }
 }
 
@@ -688,10 +663,7 @@ async function verifyUser(request: NextRequest): Promise<UserData | null> {
 
     if (!decoded || !decoded.userId) return null;
 
-    const user = await db
-      .collection('users')
-      .findOne({ _id: new ObjectId(decoded.userId) });
-
+    const user = await db.collection('users').findOne({ _id: new ObjectId(decoded.userId) });
     return user as UserData | null;
   } catch (error) {
     console.error('User verification error:', error);
@@ -704,14 +676,10 @@ async function verifyUser(request: NextRequest): Promise<UserData | null> {
 // ---------------------------------------------------------------------------
 function getPlanLimits(plan: string) {
   switch (plan) {
-    case 'basic':
-      return { websites: 3 };
-    case 'pro':
-      return { websites: 10 };
-    case 'enterprise':
-      return { websites: 999 };
-    default:
-      return { websites: 3 };
+    case 'basic':      return { websites: 3 };
+    case 'pro':        return { websites: 10 };
+    case 'enterprise': return { websites: 999 };
+    default:           return { websites: 3 };
   }
 }
 
@@ -722,18 +690,12 @@ export async function POST(request: NextRequest) {
   try {
     const user = await verifyUser(request);
     if (!user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const { productUrl, affiliateId, affiliateType } = await request.json();
     if (!productUrl) {
-      return NextResponse.json(
-        { error: 'Product URL is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Product URL is required' }, { status: 400 });
     }
 
     const limits = getPlanLimits(user.plan);
@@ -757,15 +719,8 @@ export async function POST(request: NextRequest) {
     console.log('Scraping product data…');
     const scrapedData = await scrapeProductData(productUrl);
 
-    console.log(
-      'Generating professional website content with Unsplash images…'
-    );
-    const websiteHTML = await generateWebsiteContent(
-      productInfo,
-      scrapedData,
-      affiliateId,
-      affiliateType
-    );
+    console.log('Generating professional website content with Unsplash images…');
+    const websiteHTML = await generateWebsiteContent(productInfo, scrapedData, affiliateId, affiliateType);
 
     const baseSlug = productInfo.title
       .toLowerCase()
@@ -804,9 +759,7 @@ export async function POST(request: NextRequest) {
     };
 
     await db.collection('websites').insertOne(websiteData);
-    await db
-      .collection('users')
-      .updateOne({ _id: user._id }, { $inc: { websiteCount: 1 } });
+    await db.collection('users').updateOne({ _id: user._id }, { $inc: { websiteCount: 1 } });
 
     console.log('Website created successfully:', slug);
 
@@ -822,18 +775,14 @@ export async function POST(request: NextRequest) {
       },
       message: 'Professional affiliate website created and deployed successfully!',
       remainingWebsites: limits.websites - currentWebsiteCount - 1,
-      deployment: {
-        status: 'deployed',
-        platform: 'affiliify',
-      },
+      deployment: { status: 'deployed', platform: 'affiliify' },
     });
   } catch (error) {
     console.error('Website generation error:', error);
     return NextResponse.json(
       {
         error: 'Failed to create website',
-        message:
-          'An error occurred while creating your affiliate website. Please try again.',
+        message: 'An error occurred while creating your affiliate website. Please try again.',
       },
       { status: 500 }
     );
