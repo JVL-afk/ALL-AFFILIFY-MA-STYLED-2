@@ -74,7 +74,8 @@ export default function LeadsPage() {
         throw new Error(errorData.message || `Failed to fetch leads (${response.status})`);
       }
       const data = await response.json();
-      setLeads(data);
+      // API returns { leads: [...], pagination: {...} } — extract the array
+      setLeads(Array.isArray(data) ? data : (data.leads ?? []));
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');

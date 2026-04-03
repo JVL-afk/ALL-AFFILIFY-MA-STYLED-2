@@ -35,6 +35,8 @@ export async function GET(request: NextRequest) {
     // Get dashboard statistics
     const stats = await getDashboardStats(user.id)
 
+    // Return the full nested stats object so the frontend can access
+    // stats.websites.total, stats.performance.totalViews, stats.recent.websites, etc.
     return NextResponse.json({
       success: true,
       user: {
@@ -42,15 +44,14 @@ export async function GET(request: NextRequest) {
         email: user.email,
         name: user.name,
         plan: user.plan,
-        websiteCount: stats.websiteCount,
+        websiteCount: stats.websites.total,
         createdAt: user.createdAt,
         lastLoginAt: (user as any).lastLoginAt || user.createdAt
       },
-      stats: {
-        totalClicks: stats.totalClicks,
-        totalRevenue: stats.totalRevenue,
-        // Add other stats here if needed
-      }
+      websites: stats.websites,
+      analyses: stats.analyses,
+      performance: stats.performance,
+      recent: stats.recent,
     })
   } catch (error) {
     console.error('Dashboard stats error:', error)
@@ -60,4 +61,3 @@ export async function GET(request: NextRequest) {
     )
   }
 }
-
