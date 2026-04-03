@@ -37,15 +37,42 @@ export interface PremiumUser {
  * All plans (basic, pro, enterprise) receive full CRM access.
  */
 export async function checkPremiumStatus(userId: string): Promise<PremiumUser | null> {
+  const requestId = Math.random().toString(36).substring(7);
   try {
+    logger.info('PREMIUM_GATING', 'CHECK_START', 'CHECK_START', { requestId, userId });
     await connectMongoose();
+    
+    // Log the search attempt
+    logger.debug('PREMIUM_GATING', 'SEARCHING_USER', 'SEARCHING_USER', { requestId, userId });
     
     const user = await User.findById(new mongoose.Types.ObjectId(userId));
     
     if (!user) {
-      logger.warn('PREMIUM_GATING', 'USER_NOT_FOUND', 'USER_NOT_FOUND', { userId });
+      logger.warn('PREMIUM_GATING', 'USER_NOT_FOUND', 'USER_NOT_FOUND', { requestId, userId });
+      
+      // DIAGNOSTIC: Try finding by string ID just in case
+      const userByString = await User.findById(userId);
+      if (userByString) {
+        logger.info('PREMIUM_GATING', 'USER_FOUND_BY_STRING_ID', 'USER_FOUND_BY_STRING_ID', { requestId, userId });
+      } else {
+        // DIAGNOSTIC: List a few users to see what's in the collection
+        const sampleUsers = await User.find().limit(3).select('_id email');
+        logger.debug('PREMIUM_GATING', 'COLLECTION_SAMPLE', 'COLLECTION_SAMPLE', { 
+          requestId, 
+          sampleCount: sampleUsers.length,
+          samples: sampleUsers.map(u => ({ id: u._id.toString(), email: u.email }))
+        });
+      }
       return null;
     }
+
+    logger.debug('PREMIUM_GATING', 'USER_FOUND', 'USER_FOUND', { 
+      requestId, 
+      userId: user._id.toString(), 
+      email: user.email,
+      hasSubscription: !!user.subscription,
+      rawUserKeys: Object.keys(user.toObject ? user.toObject() : user)
+    });
 
     // Map plan to tier — all registered plans are supported
     const planTierMap: { [key: string]: PremiumTier } = {

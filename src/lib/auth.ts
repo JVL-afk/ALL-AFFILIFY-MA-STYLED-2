@@ -331,12 +331,26 @@ export async function verifyAuth(request: NextRequest) {
     logger.debug('AUTH', 'FETCHING_USER_FROM_DB', 'FETCHING_USER_FROM_DB', { requestId, userId });
     
     const { db } = await connectToDatabase();
-    logger.debug('AUTH', 'MONGODB_CONNECTED', 'MONGODB_CONNECTED', { requestId });
+    logger.debug('AUTH', 'MONGODB_CONNECTED', 'MONGODB_CONNECTED', { requestId, dbName: db.databaseName });
 
     const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
     
     if (!user) {
       logger.warn('AUTH', 'USER_NOT_FOUND_IN_DB', 'USER_NOT_FOUND_IN_DB', { requestId, userId });
+      
+      // DIAGNOSTIC: Try finding by string ID
+      const userByString = await db.collection('users').findOne({ _id: userId as any });
+      if (userByString) {
+        logger.info('AUTH', 'USER_FOUND_BY_STRING_ID', 'USER_FOUND_BY_STRING_ID', { requestId, userId });
+      } else {
+        // DIAGNOSTIC: List a few users
+        const sampleUsers = await db.collection('users').find().limit(3).toArray();
+        logger.debug('AUTH', 'COLLECTION_SAMPLE', 'COLLECTION_SAMPLE', { 
+          requestId, 
+          sampleCount: sampleUsers.length,
+          samples: sampleUsers.map(u => ({ id: u._id.toString(), email: u.email }))
+        });
+      }
       return { success: false, error: 'User not found', details: { requestId, tokenSource, userId } };
     }
 
