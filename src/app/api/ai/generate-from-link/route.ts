@@ -365,7 +365,7 @@ function generatePlaceholderImages(query: string, count: number) {
 // Affilify URL generator
 // ---------------------------------------------------------------------------
 function generateAffilifyUrl(slug: string): string {
-  return `https://affiliify.eu/sites/${slug}`;
+  return `https://affilify.eu/sites/${slug}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -771,11 +771,11 @@ export async function POST(request: NextRequest) {
         title: productInfo.title,
         description: productInfo.description,
         url: liveUrl,
-        previewUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://affiliify.eu'}/preview/${slug}`,
+        previewUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://affilify.eu'}/preview/${slug}`,
       },
       message: 'Professional affiliate website created and deployed successfully!',
       remainingWebsites: limits.websites - currentWebsiteCount - 1,
-      deployment: { status: 'deployed', platform: 'affiliify' },
+      deployment: { status: 'deployed', platform: 'affilify' },
     });
   } catch (error) {
     console.error('Website generation error:', error);
