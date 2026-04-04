@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ILead } from '@/lib/models/Lead';
 import LeadCard from '@/components/crm/LeadCard';
 import LeadModal from '@/components/crm/LeadModal';
@@ -9,6 +9,7 @@ import { Plus, TrendingUp, Users, Target, CheckCircle } from 'lucide-react';
 
 
 const STATUSES = ['New', 'Contacted', 'Proposal Sent', 'Won', 'Lost'] as const;
+type LeadStatus = typeof STATUSES[number];
 
 // Helper function to get auth token from cookies or localStorage
 const getAuthToken = (): string | null => {
@@ -59,6 +60,11 @@ export default function LeadsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<ILead | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Drag-and-drop state
+  const [draggingLead, setDraggingLead] = useState<ILead | null>(null);
+  const [dragOverStatus, setDragOverStatus] = useState<LeadStatus | null>(null);
+  const dragCounterRef = useRef<Record<string, number>>({});
 
   // Fetch leads on mount
   useEffect(() => {
@@ -140,6 +146,82 @@ export default function LeadsPage() {
     }
   };
 
+  // ── Drag-and-drop handlers ──────────────────────────────────────────────────
+
+  const handleDragStart = (_e: React.DragEvent, lead: ILead) => {
+    setDraggingLead(lead);
+  };
+
+  const handleDragEnd = () => {
+    setDraggingLead(null);
+    setDragOverStatus(null);
+    dragCounterRef.current = {};
+  };
+
+  // Use a counter per column to handle child element enter/leave events correctly
+  const handleColumnDragEnter = (e: React.DragEvent, status: LeadStatus) => {
+    e.preventDefault();
+    dragCounterRef.current[status] = (dragCounterRef.current[status] || 0) + 1;
+    setDragOverStatus(status);
+  };
+
+  const handleColumnDragLeave = (_e: React.DragEvent, status: LeadStatus) => {
+    dragCounterRef.current[status] = (dragCounterRef.current[status] || 0) - 1;
+    if (dragCounterRef.current[status] <= 0) {
+      dragCounterRef.current[status] = 0;
+      setDragOverStatus(prev => (prev === status ? null : prev));
+    }
+  };
+
+  const handleColumnDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetStatus: LeadStatus) => {
+    e.preventDefault();
+    dragCounterRef.current[targetStatus] = 0;
+    setDragOverStatus(null);
+
+    if (!draggingLead) return;
+    if (draggingLead.status === targetStatus) return; // No change needed
+
+    const leadId = draggingLead._id?.toString();
+    if (!leadId) return;
+
+    // Optimistically update the UI immediately
+    const previousLeads = leads;
+    setLeads(prev =>
+      prev.map(l =>
+        l._id?.toString() === leadId ? ({ ...l, status: targetStatus } as ILead) : l
+      )
+    );
+    setDraggingLead(null);
+
+    // Persist to the API
+    try {
+      const response = await makeAuthenticatedRequest('/api/crm/leads', {
+        method: 'PUT',
+        body: JSON.stringify({ _id: leadId, status: targetStatus }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update lead status');
+      }
+      // Sync with the server response to get the latest document
+      const updatedLead = await response.json();
+      setLeads(prev =>
+        prev.map(l => (l._id?.toString() === leadId ? updatedLead : l))
+      );
+    } catch (err) {
+      // Roll back on failure
+      setLeads(previousLeads);
+      setError(err instanceof Error ? err.message : 'Failed to move lead');
+      console.error('Error updating lead status via drag:', err);
+    }
+  };
+
+  // ── Helpers ─────────────────────────────────────────────────────────────────
+
   const getLeadsByStatus = (status: string) => leads.filter(l => l.status === status);
 
   const stats = [
@@ -148,6 +230,29 @@ export default function LeadsPage() {
     { label: 'Won', value: getLeadsByStatus('Won').length, icon: CheckCircle, color: 'text-green-600' },
     { label: 'Conversion Rate', value: leads.length > 0 ? `${Math.round((getLeadsByStatus('Won').length / leads.length) * 100)}%` : '0%', icon: TrendingUp, color: 'text-orange-600' },
   ];
+
+  const getHeaderColor = (s: string) => {
+    switch (s) {
+      case 'New':           return 'bg-blue-500/20 text-blue-300';
+      case 'Contacted':     return 'bg-yellow-500/20 text-yellow-300';
+      case 'Proposal Sent': return 'bg-purple-500/20 text-purple-300';
+      case 'Won':           return 'bg-green-500/20 text-green-300';
+      case 'Lost':          return 'bg-red-500/20 text-red-300';
+      default:              return 'bg-gray-500/20 text-gray-300';
+    }
+  };
+
+  const getDropHighlight = (s: LeadStatus) => {
+    if (dragOverStatus !== s || !draggingLead) return '';
+    switch (s) {
+      case 'New':           return 'ring-2 ring-blue-400 bg-blue-500/10';
+      case 'Contacted':     return 'ring-2 ring-yellow-400 bg-yellow-500/10';
+      case 'Proposal Sent': return 'ring-2 ring-purple-400 bg-purple-500/10';
+      case 'Won':           return 'ring-2 ring-green-400 bg-green-500/10';
+      case 'Lost':          return 'ring-2 ring-red-400 bg-red-500/10';
+      default:              return 'ring-2 ring-white/40';
+    }
+  };
 
   return (
     <>
@@ -186,6 +291,13 @@ export default function LeadsPage() {
             })}
           </div>
 
+          {/* Drag hint */}
+          {!loading && leads.length > 0 && (
+            <p className="text-orange-200/60 text-xs text-center mb-4 select-none">
+              ✦ Drag and drop partner cards between columns to update their status
+            </p>
+          )}
+
           {/* Error Message */}
           {error && (
             <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6 text-red-100">
@@ -202,41 +314,52 @@ export default function LeadsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               {STATUSES.map((status) => {
                 const statusLeads = getLeadsByStatus(status);
-                const getHeaderColor = (s: string) => {
-                  switch (s) {
-                    case 'New':
-                      return 'bg-blue-500/20 text-blue-300';
-                    case 'Contacted':
-                      return 'bg-yellow-500/20 text-yellow-300';
-                    case 'Proposal Sent':
-                      return 'bg-purple-500/20 text-purple-300';
-                    case 'Won':
-                      return 'bg-green-500/20 text-green-300';
-                    case 'Lost':
-                      return 'bg-red-500/20 text-red-300';
-                    default:
-                      return 'bg-gray-500/20 text-gray-300';
-                  }
-                };
+                const isDropTarget = dragOverStatus === status && draggingLead !== null && draggingLead.status !== status;
 
                 return (
-                  <div key={status} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 min-h-96">
+                  <div
+                    key={status}
+                    onDragEnter={(e) => handleColumnDragEnter(e, status)}
+                    onDragLeave={(e) => handleColumnDragLeave(e, status)}
+                    onDragOver={handleColumnDragOver}
+                    onDrop={(e) => handleDrop(e, status)}
+                    className={`bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 min-h-96 transition-all duration-150 ${getDropHighlight(status)}`}
+                  >
                     <div className={`${getHeaderColor(status)} px-3 py-2 rounded-lg mb-4 text-center`}>
                       <h3 className="font-semibold text-sm">{status}</h3>
                       <p className="text-xs mt-1 opacity-80">{statusLeads.length} partner{statusLeads.length !== 1 ? 's' : ''}</p>
                     </div>
+
                     <div className="space-y-2">
                       {statusLeads.length > 0 ? (
                         statusLeads.map((lead) => (
-                          <LeadCard
+                          <div
                             key={lead._id?.toString()}
-                            lead={lead}
-                            onEdit={handleEditLead}
-                            onDelete={handleDeleteLead}
-                          />
+                            onDragEnd={handleDragEnd}
+                          >
+                            <LeadCard
+                              lead={lead}
+                              onEdit={handleEditLead}
+                              onDelete={handleDeleteLead}
+                              onDragStart={handleDragStart}
+                            />
+                          </div>
                         ))
                       ) : (
-                        <p className="text-gray-400 text-sm text-center py-8">No partners</p>
+                        <div className={`flex flex-col items-center justify-center py-8 rounded-lg border-2 border-dashed transition-all duration-150 ${isDropTarget ? 'border-white/40 bg-white/5' : 'border-transparent'}`}>
+                          {isDropTarget ? (
+                            <p className="text-white/70 text-sm font-medium">Drop here</p>
+                          ) : (
+                            <p className="text-gray-400 text-sm text-center">No partners</p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Drop zone shown at the bottom of non-empty columns when dragging */}
+                      {statusLeads.length > 0 && isDropTarget && (
+                        <div className="h-12 rounded-lg border-2 border-dashed border-white/30 flex items-center justify-center">
+                          <p className="text-white/50 text-xs">Drop here</p>
+                        </div>
                       )}
                     </div>
                   </div>

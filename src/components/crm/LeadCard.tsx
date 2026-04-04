@@ -3,16 +3,17 @@
 import { ILead } from '@/lib/models/Lead';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Edit2 } from 'lucide-react';
+import { Trash2, Edit2, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface LeadCardProps {
   lead: ILead;
   onEdit: (lead: ILead) => void;
   onDelete: (leadId: string) => void;
+  onDragStart?: (e: React.DragEvent, lead: ILead) => void;
 }
 
-export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
+export default function LeadCard({ lead, onEdit, onDelete, onDragStart }: LeadCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'New':
@@ -30,18 +31,32 @@ export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
     }
   };
 
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', lead._id?.toString() || '');
+    if (onDragStart) onDragStart(e, lead);
+  };
+
   return (
-    <Card className="p-4 mb-3 bg-white/80 backdrop-blur-sm border border-white/30 hover:border-orange-400/50 transition-all hover:shadow-lg">
+    <Card
+      draggable
+      onDragStart={handleDragStart}
+      className="p-4 mb-3 bg-white/80 backdrop-blur-sm border border-white/30 hover:border-orange-400/50 transition-all hover:shadow-lg cursor-grab active:cursor-grabbing active:opacity-60 active:scale-95"
+    >
       <div className="flex justify-between items-start mb-2">
-        <div className="flex-1">
-          <h3 className="font-semibold text-gray-900 text-sm">{lead.name}</h3>
-          <p className="text-xs text-gray-600 truncate">{lead.email}</p>
+        <div className="flex items-start gap-1 flex-1 min-w-0">
+          {/* Drag handle indicator */}
+          <GripVertical className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-gray-900 text-sm">{lead.name}</h3>
+            <p className="text-xs text-gray-600 truncate">{lead.email}</p>
+          </div>
         </div>
-        <div className="flex gap-1 ml-2">
+        <div className="flex gap-1 ml-2 flex-shrink-0">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onEdit(lead)}
+            onClick={(e) => { e.stopPropagation(); onEdit(lead); }}
             className="h-7 w-7 p-0 hover:bg-orange-100"
           >
             <Edit2 className="w-3.5 h-3.5 text-orange-600" />
@@ -49,7 +64,7 @@ export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onDelete(lead._id?.toString() || '')}
+            onClick={(e) => { e.stopPropagation(); onDelete(lead._id?.toString() || ''); }}
             className="h-7 w-7 p-0 hover:bg-red-100"
           >
             <Trash2 className="w-3.5 h-3.5 text-red-600" />
