@@ -33,6 +33,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { MonetizationCarousel, MonetizationMethod } from '@/components/crm/MonetizationCarousel'
+import { MonetizationFormFields } from '@/components/crm/MonetizationFormFields'
 
 interface User {
   id: string
@@ -45,7 +47,7 @@ interface User {
 export default function EnterpriseCreateWebsite() {
   const [user, setUser] = useState<User | null>(null)
   const [currentWebsites, setCurrentWebsites] = useState(0)
-  const [userPlan, setUserPlan] = useState("enterprise") // Default to enterprise, fetch actual plan
+  const [userPlan, setUserPlan] = useState<'basic' | 'pro' | 'enterprise'>("enterprise")
   const [affiliateLink, setAffiliateLink] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -53,34 +55,48 @@ export default function EnterpriseCreateWebsite() {
   const [generatedWebsite, setGeneratedWebsite] = useState<any>(null)
   const router = useRouter()
 
-  // Plan limits (Enterprise has effectively unlimited websites)
+  // Monetization State
+  const [selectedMethod, setSelectedMethod] = useState<MonetizationMethod>('affiliateLinks')
+  const [monetizationData, setMonetizationData] = useState<any>({
+    primaryMethod: 'affiliateLinks',
+    affiliateLinks: { productUrl: '', affiliateId: '', affiliateType: 'link', subId: '' },
+    displayAds: { enabled: false, adsensePublisherId: '', premiumAdNetworkId: '' },
+    digitalProducts: { name: '', description: '', salesPageUrl: '' },
+    sponsorships: { enabled: false, pitch: '' },
+    secondaryMethods: {
+      emailSignup: { enabled: false, espFormActionUrl: '', leadMagnetDownloadUrl: '' },
+      customTrackingScript: { enabled: false, headerScript: '', bodyScript: '' }
+    }
+  })
+
+  // Plan limits
   const planLimits = {
     basic: { websites: 3, name: 'Basic (FREE)' },
     pro: { websites: 10, name: 'Pro ($29)' },
-    enterprise: { websites: Infinity, name: 'Enterprise ($99)' }
+    enterprise: { websites: 999, name: 'Enterprise ($99)' }
   }
 
- const fetchUserData = async () => {
-  try {
-    const response = await fetch("/api/user/data");
-    if (response.ok) {
-      const data = await response.json();
-      setUser(data);
-      setCurrentWebsites(data.websiteCount || 0);
-      setUserPlan(data.plan || "basic");
-    } else {
-      console.error("Failed to fetch user data");
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch("/api/user/data");
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data);
+        setCurrentWebsites(data.websiteCount || 0);
+        setUserPlan(data.plan || "enterprise");
+      } else {
+        console.error("Failed to fetch user data");
+        router.push('/login');
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
       router.push('/login');
     }
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-    router.push('/login');
-  }
-};
+  };
 
-useEffect(() => {
-  fetchUserData();
-}, []);
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
   const validateUrl = (url: string) => {
     try {
@@ -99,27 +115,37 @@ useEffect(() => {
 
     try {
       // Validation
-      if (!affiliateLink.trim()) {
-        setError('Please enter an affiliate link')
+      const linkToValidate = selectedMethod === 'affiliateLinks' 
+        ? monetizationData.affiliateLinks.productUrl 
+        : affiliateLink;
+
+      if (!linkToValidate.trim()) {
+        setError('Please enter a product or affiliate link')
         setLoading(false)
         return
       }
 
-      if (!validateUrl(affiliateLink)) {
+      if (!validateUrl(linkToValidate)) {
         setError('Please enter a valid URL (include https://)')
         setLoading(false)
         return
       }
 
-      // Call the generate-from-link API with Enterprise plan features
+      // Call the generate-from-link API
       const response = await fetch('/api/ai/generate-from-link', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          productUrl: affiliateLink.trim(),
-          plan: 'enterprise' // Include plan for enhanced features
+          productUrl: linkToValidate.trim(),
+          monetization: {
+            ...monetizationData,
+            primaryMethod: selectedMethod
+          },
+          plan: 'enterprise',
+          niche: 'Enterprise Affiliate Marketing',
+          template: 'enterprise'
         }),
       })
 
@@ -128,7 +154,7 @@ useEffect(() => {
       if (response.ok) {
         setGeneratedWebsite(data.website)
         setSuccess('Enterprise-grade website created successfully!')
-        await fetchUserData(); // Reload user data to update website count
+        await fetchUserData();
       } else {
         setError(data.message || 'Failed to create website')
       }
@@ -150,283 +176,180 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900">
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create New Website</h1>
-          <p className="text-gray-900/80">Enterprise plan - Unlimited professional website creation</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Create New Website</h1>
+          <p className="text-gray-300">Enterprise Plan - Unlimited professional website creation</p>
           
-          {/* Plan Status */}
           <div className="mt-4 flex items-center gap-4">
-            <div className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white border-opacity-30">
-              <Crown className="w-4 h-4 inline mr-2 text-blue-400" />
-              <span className="text-gray-900/80">Current Plan: </span>
-              <span className="text-gray-900 font-semibold">{planLimits[user.plan].name}</span>
-            </div>
-            <div className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white border-opacity-30">
-              <Infinity className="w-4 h-4 inline mr-2 text-green-400" />
-              <span className="text-gray-900/80">Websites: </span>
-              <span className="text-gray-900 font-semibold">
-                {user.websiteCount} / Unlimited
-              </span>
-            </div>
+            <Badge variant="secondary" className="bg-white/10 text-white border-white/20">
+              <Crown className="w-4 h-4 mr-2 text-blue-400" />
+              Plan: {planLimits[user.plan].name}
+            </Badge>
+            <Badge variant="secondary" className="bg-white/10 text-white border-white/20">
+              Websites: {user.websiteCount} / Unlimited
+            </Badge>
           </div>
         </div>
 
         {/* Error/Success Messages */}
         {error && (
-          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg backdrop-blur-sm flex items-center">
-            <AlertCircle className="w-5 h-5 text-red-400 mr-3" />
-            <span className="text-red-100">{error}</span>
-          </div>
+          <Card className="bg-red-600/20 border-red-600/30 mb-8">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-3">
+                <AlertCircle className="w-6 h-6 text-red-400" />
+                <div>
+                  <h3 className="text-red-400 font-medium">Error</h3>
+                  <p className="text-gray-200">{error}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {success && (
-          <div className="mb-6 p-4 bg-green-500/20 border border-green-500/30 rounded-lg backdrop-blur-sm flex items-center">
-            <CheckCircle className="w-5 h-5 text-green-400 mr-3" />
-            <span className="text-green-100">{success}</span>
-          </div>
+          <Card className="bg-green-600/20 border-green-600/30 mb-8">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-3">
+                <CheckCircle className="w-6 h-6 text-green-400" />
+                <div>
+                  <h3 className="text-green-400 font-medium">Success</h3>
+                  <p className="text-gray-200">{success}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Create Website Form */}
-          <div className="lg:col-span-2">
-            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 backdrop-blur-sm border-white border-opacity-30">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Website Details Form */}
+          <div className="lg:col-span-2 space-y-8">
+            <Card className="bg-black/40 backdrop-blur-sm border-white/10">
               <CardHeader>
-                <CardTitle className="text-gray-900 flex items-center gap-2">
-                  <Wand2 className="w-5 h-5" />
-                  Enterprise Website Creation
-                </CardTitle>
-                <CardDescription className="text-gray-900/70">
-                  Create your enterprise-grade affiliate website with unlimited features
+                <CardTitle className="text-white">Monetization Strategy</CardTitle>
+                <CardDescription className="text-gray-400">
+                  Choose how you want to monetize your new website
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* URL Input */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-900">
-                    Affiliate Link *
-                  </label>
-                  <Input
-                    type="url"
-                    placeholder="https://amazon.com/product-link or any affiliate URL"
-                    value={affiliateLink}
-                    onChange={(e) => {
-                      setAffiliateLink(e.target.value)
-                      setError('')
-                    }}
-                    className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder:text-gray-900/50"
-                    disabled={loading}
+              <CardContent className="space-y-8">
+                <MonetizationCarousel 
+                  selectedMethod={selectedMethod}
+                  onMethodChange={setSelectedMethod}
+                  userPlan={userPlan}
+                />
+
+                <div className="p-6 rounded-xl bg-white/5 border border-white/10">
+                  <MonetizationFormFields 
+                    method={selectedMethod}
+                    userPlan={userPlan}
+                    data={monetizationData}
+                    onChange={setMonetizationData}
                   />
-                  <p className="text-sm text-gray-900/60">
-                    Enterprise plan includes all premium features, unlimited websites, team collaboration, and white-label options
-                  </p>
                 </div>
 
-                {/* Enterprise Features Info */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-10 rounded-lg p-4 border border-white/10">
-                    <div className="flex items-center space-x-3">
-                      <BarChart3 className="w-5 h-5 text-blue-400" />
-                      <div>
-                        <h4 className="text-gray-900 font-medium">Enterprise Analytics</h4>
-                        <p className="text-gray-900/60 text-sm">Advanced insights & reporting</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-10 rounded-lg p-4 border border-white/10">
-                    <div className="flex items-center space-x-3">
-                      <Users className="w-5 h-5 text-purple-400" />
-                      <div>
-                        <h4 className="text-gray-900 font-medium">Team Collaboration</h4>
-                        <p className="text-gray-900/60 text-sm">Seamless teamwork & sharing</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-10 rounded-lg p-4 border border-white/10">
-                    <div className="flex items-center space-x-3">
-                      <Shield className="w-5 h-5 text-green-400" />
-                      <div>
-                        <h4 className="text-gray-900 font-medium">White Labeling</h4>
-                        <p className="text-gray-900/60 text-sm">Brand your websites as your own</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-10 rounded-lg p-4 border border-white/10">
-                    <div className="flex items-center space-x-3">
-                      <Code className="w-5 h-5 text-yellow-400" />
-                      <div>
-                        <h4 className="text-gray-900 font-medium">API Access</h4>
-                        <p className="text-gray-900/60 text-sm">Integrate with your existing tools</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Generate Button */}
+                {/* Create Button */}
                 <Button 
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-gray-900 font-semibold py-3 text-lg"
-                  disabled={loading || !affiliateLink.trim()}
+                  className="w-full h-12 text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-600/25"
+                  disabled={loading}
                   onClick={handleSubmit}
                 >
                   {loading ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Creating Enterprise Website...
+                      Generating Your Empire...
                     </>
                   ) : (
                     <>
-                      <Wand2 className="w-5 h-5 mr-2" />
-                      Generate Enterprise Website
+                      <Sparkles className="w-5 h-5 mr-2" />
+                      Create Enterprise Website with AI
                     </>
                   )}
                 </Button>
-
-                {/* Generated Website Result */}
-                {generatedWebsite && (
-                  <div className="mt-6 p-6 bg-green-500/20 border border-green-500/30 rounded-lg backdrop-blur-sm">
-                    <h3 className="text-lg font-semibold text-green-100 mb-4 flex items-center">
-                      <CheckCircle className="w-5 h-5 mr-2" />
-                      Enterprise Website Created Successfully!
-                    </h3>
-                    
-                    <div className="space-y-3">
-                      <div>
-                        <span className="text-green-200 font-medium">Title: </span>
-                        <span className="text-green-100">{generatedWebsite.title}</span>
-                      </div>
-                      
-                      <div>
-                        <span className="text-green-200 font-medium">URL: </span>
-                        <a 
-                          href={generatedWebsite.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-green-100 hover:text-gray-900 underline inline-flex items-center"
-                        >
-                          {generatedWebsite.url}
-                          <ExternalLink className="w-4 h-4 ml-1" />
-                        </a>
-                      </div>
-                      
-                      <div className="flex gap-3 mt-4">
-                        <Button
-                          onClick={() => window.open(generatedWebsite.previewUrl, '_blank')}
-                          variant="outline"
-                          className="border-green-400 text-green-100 hover:bg-green-500/20"
-                        >
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          Preview Website
-                        </Button>
-                        
-                        <Button
-                          onClick={() => router.push('/dashboard/my-websites')}
-                          className="bg-green-600 hover:bg-green-700 text-gray-900"
-                        >
-                          <ArrowRight className="w-4 h-4 mr-2" />
-                          Manage Websites
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
+
+            {/* Generated Website Result */}
+            {generatedWebsite && (
+              <Card className="bg-green-500/10 border-green-500/30 overflow-hidden">
+                <CardHeader className="bg-green-500/20">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-green-100 flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5" />
+                      Enterprise Website Created Successfully!
+                    </CardTitle>
+                    <Button size="sm" variant="outline" className="border-green-500/30 text-green-100 hover:bg-green-500/20" asChild>
+                      <a href={generatedWebsite.url} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Visit Site
+                      </a>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6 space-y-4">
+                  <div>
+                    <Label className="text-green-200/60 text-xs uppercase tracking-wider">Title</Label>
+                    <p className="text-white font-bold text-xl">{generatedWebsite.title}</p>
+                  </div>
+                  <div>
+                    <Label className="text-green-200/60 text-xs uppercase tracking-wider">Live URL</Label>
+                    <p className="text-cyan-400 font-mono break-all">{generatedWebsite.url}</p>
+                  </div>
+                  <div className="pt-4 flex gap-3">
+                    <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => router.push('/dashboard/my-websites')}>
+                      Manage Websites
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
-          {/* Sidebar */}
+          {/* Sidebar Info */}
           <div className="space-y-6">
-            {/* Plan Status */}
-            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
+            <Card className="bg-black/40 backdrop-blur-sm border-white/10">
               <CardHeader>
-                <CardTitle className="text-gray-900">Enterprise Plan Status</CardTitle>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-blue-400" />
+                  Enterprise Features
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-700">Websites Created</span>
-                  <span className="text-gray-900 font-medium">{user.websiteCount}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-700">Website Limit</span>
-                  <span className="text-gray-900 font-medium flex items-center">
-                    <Infinity className="w-4 h-4 mr-1" />
-                    Unlimited
-                  </span>
-                </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center text-gray-700">
-                    <Shield className="w-4 h-4 mr-2 text-blue-400" />
-                    Enterprise templates
-                  </div>
-                  <div className="flex items-center text-gray-700">
-                    <Users className="w-4 h-4 mr-2 text-blue-400" />
-                    Team collaboration enabled
-                  </div>
-                  <div className="flex items-center text-gray-700">
-                    <Database className="w-4 h-4 mr-2 text-blue-400" />
-                    Advanced data analytics
-                  </div>
-                  <div className="flex items-center text-gray-700">
-                    <Code className="w-4 h-4 mr-2 text-blue-400" />
-                    API access enabled
-                  </div>
-                </div>
+                <ul className="space-y-3 text-sm text-gray-400">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    Unlimited Websites
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    White-Label Options
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    Priority AI Generation
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    Dedicated Support
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    API Access
+                  </li>
+                </ul>
               </CardContent>
             </Card>
 
-            {/* Enterprise Benefits */}
-            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
+            <Card className="bg-gradient-to-br from-blue-600/20 to-indigo-600/20 border-blue-500/30">
               <CardHeader>
-                <CardTitle className="text-gray-900">Enterprise Benefits</CardTitle>
-                <CardDescription className="text-gray-700">
-                  Your exclusive enterprise features
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center text-gray-700">
-                    <Crown className="w-4 h-4 mr-2 text-yellow-400" />
-                    <span>Unlimited websites</span>
-                  </div>
-                  <div className="flex items-center text-gray-700">
-                    <Users className="w-4 h-4 mr-2 text-blue-400" />
-                    <span>Team collaboration</span>
-                  </div>
-                  <div className="flex items-center text-gray-700">
-                    <Shield className="w-4 h-4 mr-2 text-blue-400" />
-                    <span>White labeling</span>
-                  </div>
-                  <div className="flex items-center text-gray-700">
-                    <Code className="w-4 h-4 mr-2 text-blue-400" />
-                    <span>API access</span>
-                  </div>
-                </div>
-                <Button asChild className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
-                  <Link href="/dashboard/team-collaboration">
-                    Manage Team Access
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Help */}
-            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
-              <CardHeader>
-                <CardTitle className="text-gray-900">Enterprise Support</CardTitle>
+                <CardTitle className="text-white">Enterprise Power</CardTitle>
+                <CardDescription className="text-blue-200/70">You have full access to all platform features.</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 text-sm mb-4">
-                  Need help? As an Enterprise customer, you have access to priority support.
-                </p>
-                <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20">
-                  <Link href="/dashboard/support">
-                    Contact Enterprise Support
-                  </Link>
-                </Button>
+                <div className="p-4 rounded-lg bg-white/5 border border-white/10 text-center">
+                  <Infinity className="w-8 h-8 text-green-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-300">Unlimited Potential</p>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -435,4 +358,3 @@ useEffect(() => {
     </div>
   )
 }
-

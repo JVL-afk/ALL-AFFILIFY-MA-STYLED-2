@@ -11,6 +11,7 @@ export interface Website {
   content: any
   seo: any
   affiliateLinks: any
+  monetization?: any
   template: string
   url?: string
   status: 'published' | 'archived'
@@ -51,6 +52,7 @@ export async function saveWebsite(userId: string, websiteData: GeneratedWebsite)
       status: 'published' as const, // CRITICAL FIX: Ensure new websites are published, not drafts
 
       affiliateLinks: (websiteData as any).affiliateLinks || [],
+      monetization: (websiteData as any).monetization || null,
       template: websiteData.template,
       // Removed duplicated status line
       views: 0,
@@ -351,8 +353,3 @@ export async function getDashboardStats(userId: string): Promise<any> {
     }
   }
 }
-
-
-
-
-

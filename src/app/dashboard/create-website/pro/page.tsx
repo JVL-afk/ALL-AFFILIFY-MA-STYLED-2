@@ -28,6 +28,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { MonetizationCarousel, MonetizationMethod } from '@/components/crm/MonetizationCarousel'
+import { MonetizationFormFields } from '@/components/crm/MonetizationFormFields'
 
 interface User {
   id: string
@@ -40,7 +42,7 @@ interface User {
 export default function ProCreateWebsite() {
   const [user, setUser] = useState<User | null>(null)
   const [currentWebsites, setCurrentWebsites] = useState(0)
-  const [userPlan, setUserPlan] = useState("pro") // Default to pro, fetch actual plan
+  const [userPlan, setUserPlan] = useState<'basic' | 'pro' | 'enterprise'>("pro")
   const maxWebsites = 10
   const [affiliateLink, setAffiliateLink] = useState('')
   const [loading, setLoading] = useState(false)
@@ -50,6 +52,20 @@ export default function ProCreateWebsite() {
   const [generatedWebsite, setGeneratedWebsite] = useState<any>(null)
   const router = useRouter()
 
+  // Monetization State
+  const [selectedMethod, setSelectedMethod] = useState<MonetizationMethod>('affiliateLinks')
+  const [monetizationData, setMonetizationData] = useState<any>({
+    primaryMethod: 'affiliateLinks',
+    affiliateLinks: { productUrl: '', affiliateId: '', affiliateType: 'link', subId: '' },
+    displayAds: { enabled: false, adsensePublisherId: '', premiumAdNetworkId: '' },
+    digitalProducts: { name: '', description: '', salesPageUrl: '' },
+    sponsorships: { enabled: false, pitch: '' },
+    secondaryMethods: {
+      emailSignup: { enabled: false, espFormActionUrl: '', leadMagnetDownloadUrl: '' },
+      customTrackingScript: { enabled: false, headerScript: '', bodyScript: '' }
+    }
+  })
+
   // Plan limits
   const planLimits = {
     basic: { websites: 3, name: 'Basic (FREE)' },
@@ -58,30 +74,26 @@ export default function ProCreateWebsite() {
   }
 
   const fetchUserData = async () => {
-  try {
-    const response = await fetch("/api/user/data");
-    if (response.ok) {
-      const data = await response.json();
-      setUser(data);
-      setCurrentWebsites(data.websiteCount || 0);
-      setUserPlan(data.plan || "pro");
-    } else {
-      console.error("Failed to fetch user data");
+    try {
+      const response = await fetch("/api/user/data");
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data);
+        setCurrentWebsites(data.websiteCount || 0);
+        setUserPlan(data.plan || "pro");
+      } else {
+        console.error("Failed to fetch user data");
+        router.push('/login');
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
       router.push('/login');
     }
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-    router.push('/login');
-  }
-};
+  };
 
-useEffect(() => {
-  fetchUserData();
-}, []);
-
-useEffect(() => {
-  fetchUserData();
-}, []);
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
   const validateUrl = (url: string) => {
     try {
@@ -89,35 +101,6 @@ useEffect(() => {
       return true
     } catch {
       return false
-    }
-  }
-
-  const handleUpgrade = async (plan: 'enterprise') => {
-    setUpgradeLoading(true)
-    setError('')
-
-    try {
-      const response = await fetch('/api/stripe/create-checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ plan }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        // Redirect to Stripe checkout
-        window.location.href = data.checkoutUrl
-      } else {
-        setError(data.message || 'Failed to create checkout session')
-      }
-    } catch (error) {
-      console.error('Upgrade error:', error)
-      setError('An error occurred while processing your upgrade')
-    } finally {
-      setUpgradeLoading(false)
     }
   }
 
@@ -129,27 +112,37 @@ useEffect(() => {
 
     try {
       // Validation
-      if (!affiliateLink.trim()) {
-        setError('Please enter an affiliate link')
+      const linkToValidate = selectedMethod === 'affiliateLinks' 
+        ? monetizationData.affiliateLinks.productUrl 
+        : affiliateLink;
+
+      if (!linkToValidate.trim()) {
+        setError('Please enter a product or affiliate link')
         setLoading(false)
         return
       }
 
-      if (!validateUrl(affiliateLink)) {
+      if (!validateUrl(linkToValidate)) {
         setError('Please enter a valid URL (include https://)')
         setLoading(false)
         return
       }
 
-      // Call the generate-from-link API with Pro plan features
+      // Call the generate-from-link API
       const response = await fetch('/api/ai/generate-from-link', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          productUrl: affiliateLink.trim(),
-          plan: 'pro' // Include plan for enhanced features
+          productUrl: linkToValidate.trim(),
+          monetization: {
+            ...monetizationData,
+            primaryMethod: selectedMethod
+          },
+          plan: 'pro',
+          niche: 'Pro Affiliate Marketing',
+          template: 'premium'
         }),
       })
 
@@ -158,13 +151,9 @@ useEffect(() => {
       if (response.ok) {
         setGeneratedWebsite(data.website)
         setSuccess('Professional Pro website created successfully!')
-        await fetchUserData(); // Reload user data to update website count
+        await fetchUserData();
       } else {
-        if (data.upgradeRequired) {
-          setError(data.message)
-        } else {
-          setError(data.message || 'Failed to create website')
-        }
+        setError(data.message || 'Failed to create website')
       }
     } catch (error) {
       console.error('Website creation error:', error)
@@ -180,12 +169,6 @@ useEffect(() => {
     return user.websiteCount < limit
   }
 
-  const getRemainingWebsites = () => {
-    if (!user) return 0
-    const limit = planLimits[user.plan].websites
-    return Math.max(0, limit - user.websiteCount)
-  }
-
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -196,294 +179,178 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900">
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create New Website</h1>
-          <p className="text-gray-900/80">Pro plan - Advanced affiliate website creation</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Create New Website</h1>
+          <p className="text-gray-300">Pro Plan - Advanced affiliate website creation</p>
           
-          {/* Plan Status */}
           <div className="mt-4 flex items-center gap-4">
-            <div className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white border-opacity-30">
-              <Crown className="w-4 h-4 inline mr-2 text-purple-400" />
-              <span className="text-gray-900/80">Current Plan: </span>
-              <span className="text-gray-900 font-semibold">{planLimits[user.plan].name}</span>
-            </div>
-            <div className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white border-opacity-30">
-              <span className="text-gray-900/80">Websites: </span>
-              <span className="text-gray-900 font-semibold">
-                {user.websiteCount} / {planLimits[user.plan].websites === 999 ? '∞' : planLimits[user.plan].websites}
-              </span>
-            </div>
+            <Badge variant="secondary" className="bg-white/10 text-white border-white/20">
+              <Crown className="w-4 h-4 mr-2 text-yellow-400" />
+              Plan: {planLimits[user.plan].name}
+            </Badge>
+            <Badge variant="secondary" className="bg-white/10 text-white border-white/20">
+              Websites: {user.websiteCount} / {planLimits[user.plan].websites}
+            </Badge>
           </div>
         </div>
 
         {/* Error/Success Messages */}
         {error && (
-          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg backdrop-blur-sm flex items-center">
-            <AlertCircle className="w-5 h-5 text-red-400 mr-3" />
-            <span className="text-red-100">{error}</span>
-          </div>
+          <Card className="bg-red-600/20 border-red-600/30 mb-8">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-3">
+                <AlertCircle className="w-6 h-6 text-red-400" />
+                <div>
+                  <h3 className="text-red-400 font-medium">Error</h3>
+                  <p className="text-gray-200">{error}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {success && (
-          <div className="mb-6 p-4 bg-green-500/20 border border-green-500/30 rounded-lg backdrop-blur-sm flex items-center">
-            <CheckCircle className="w-5 h-5 text-green-400 mr-3" />
-            <span className="text-green-100">{success}</span>
-          </div>
+          <Card className="bg-green-600/20 border-green-600/30 mb-8">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-3">
+                <CheckCircle className="w-6 h-6 text-green-400" />
+                <div>
+                  <h3 className="text-green-400 font-medium">Success</h3>
+                  <p className="text-gray-200">{success}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Create Website Form */}
-          <div className="lg:col-span-2">
-            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 backdrop-blur-sm border-white border-opacity-30">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Website Details Form */}
+          <div className="lg:col-span-2 space-y-8">
+            <Card className="bg-black/40 backdrop-blur-sm border-white/10">
               <CardHeader>
-                <CardTitle className="text-gray-900 flex items-center gap-2">
-                  <Wand2 className="w-5 h-5" />
-                  Pro Website Creation
-                </CardTitle>
-                <CardDescription className="text-gray-900/70">
-                  Create your professional affiliate website with Pro features
+                <CardTitle className="text-white">Monetization Strategy</CardTitle>
+                <CardDescription className="text-gray-400">
+                  Choose how you want to monetize your new website
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* URL Input */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-900">
-                    Affiliate Link *
-                  </label>
-                  <Input
-                    type="url"
-                    placeholder="https://amazon.com/product-link or any affiliate URL"
-                    value={affiliateLink}
-                    onChange={(e) => {
-                      setAffiliateLink(e.target.value)
-                      setError('')
-                    }}
-                    className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30 text-gray-900 placeholder:text-gray-900/50"
-                    disabled={loading}
+              <CardContent className="space-y-8">
+                <MonetizationCarousel 
+                  selectedMethod={selectedMethod}
+                  onMethodChange={setSelectedMethod}
+                  userPlan={userPlan}
+                />
+
+                <div className="p-6 rounded-xl bg-white/5 border border-white/10">
+                  <MonetizationFormFields 
+                    method={selectedMethod}
+                    userPlan={userPlan}
+                    data={monetizationData}
+                    onChange={setMonetizationData}
                   />
-                  <p className="text-sm text-gray-900/60">
-                    Works with Amazon, ClickBank, ShareASale, and any product URL
-                  </p>
                 </div>
 
-                {/* Pro Features */}
-                <Card className="bg-purple-600/20 border-purple-400/30">
-                  <CardContent className="p-4">
-                    <h3 className="text-purple-100 font-medium mb-3 flex items-center">
-                      <Star className="w-4 h-4 mr-2 text-yellow-400" />
-                      Pro Features Included
-                    </h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex items-center text-gray-700">
-                        <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
-                        Premium templates
-                      </div>
-                      <div className="flex items-center text-gray-700">
-                        <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
-                        Custom domain support
-                      </div>
-                      <div className="flex items-center text-gray-700">
-                        <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
-                        Enhanced SEO
-                      </div>
-                      <div className="flex items-center text-gray-700">
-                        <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
-                        Advanced analytics
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Generate Button */}
-                <div className="space-y-4">
-                  {canCreateWebsite() ? (
-                    <Button
-                      onClick={handleSubmit}
-                      disabled={loading || !affiliateLink.trim()}
-                      className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-gray-900 font-semibold py-3 text-lg"
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                          Creating Pro Website...
-                        </>
-                      ) : (
-                        <>
-                          <Wand2 className="w-5 h-5 mr-2" />
-                          Generate Pro Website ({getRemainingWebsites()} remaining)
-                        </>
-                      )}
-                    </Button>
+                {/* Create Button */}
+                <Button 
+                  className="w-full h-12 text-lg font-bold bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 shadow-lg shadow-blue-500/25"
+                  disabled={!canCreateWebsite() || loading}
+                  onClick={handleSubmit}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Generating Your Empire...
+                    </>
                   ) : (
-                    <div className="space-y-3">
-                      <div className="p-4 bg-gradient-to-br from-orange-900 via-orange-800 to-red-900/20 border border-orange-500/30 rounded-lg">
-                        <div className="flex items-center mb-2">
-                          <Crown className="w-5 h-5 text-orange-400 mr-2" />
-                          <span className="text-orange-100 font-medium">Website Limit Reached</span>
-                        </div>
-                        <p className="text-orange-200 text-sm">
-                          You've reached your Pro plan limit of {planLimits[user.plan].websites} websites. Upgrade to Enterprise for unlimited websites!
-                        </p>
-                      </div>
-                      <Button
-                        onClick={() => handleUpgrade('enterprise')}
-                        disabled={upgradeLoading}
-                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-gray-900 font-semibold py-3 text-lg"
-                      >
-                        {upgradeLoading ? (
-                          <>
-                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                            Upgrading...
-                          </>
-                        ) : (
-                          <>
-                            <CreditCard className="w-5 h-5 mr-2" />
-                            Upgrade to Enterprise ($99/month)
-                          </>
-                        )}
-                      </Button>
-                    </div>
+                    <>
+                      <Sparkles className="w-5 h-5 mr-2" />
+                      Create Pro Website with AI
+                    </>
                   )}
-                </div>
-
-                {/* Generated Website Result */}
-                {generatedWebsite && (
-                  <div className="mt-6 p-6 bg-green-500/20 border border-green-500/30 rounded-lg backdrop-blur-sm">
-                    <h3 className="text-lg font-semibold text-green-100 mb-4 flex items-center">
-                      <CheckCircle className="w-5 h-5 mr-2" />
-                      Pro Website Created Successfully!
-                    </h3>
-                    
-                    <div className="space-y-3">
-                      <div>
-                        <span className="text-green-200 font-medium">Title: </span>
-                        <span className="text-green-100">{generatedWebsite.title}</span>
-                      </div>
-                      
-                      <div>
-                        <span className="text-green-200 font-medium">URL: </span>
-                        <a 
-                          href={generatedWebsite.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-green-100 hover:text-gray-900 underline inline-flex items-center"
-                        >
-                          {generatedWebsite.url}
-                          <ExternalLink className="w-4 h-4 ml-1" />
-                        </a>
-                      </div>
-                      
-                      <div className="flex gap-3 mt-4">
-                        <Button
-                          onClick={() => window.open(generatedWebsite.previewUrl, '_blank')}
-                          variant="outline"
-                          className="border-green-400 text-green-100 hover:bg-green-500/20"
-                        >
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          Preview Website
-                        </Button>
-                        
-                        <Button
-                          onClick={() => router.push('/dashboard/my-websites')}
-                          className="bg-green-600 hover:bg-green-700 text-gray-900"
-                        >
-                          <ArrowRight className="w-4 h-4 mr-2" />
-                          Manage Websites
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Plan Limits */}
-            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
-              <CardHeader>
-                <CardTitle className="text-gray-900">Pro Plan Limits</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-700">Websites</span>
-                  <span className="text-gray-900 font-medium">{user.websiteCount}/{planLimits[user.plan].websites}</span>
-                </div>
-                <div className="w-full bg-gray-700 rounded-full h-2">
-                  <div 
-                    className="bg-purple-600 h-2 rounded-full transition-all"
-                    style={{ width: `${(user.websiteCount / planLimits[user.plan].websites) * 100}%` }}
-                  ></div>
-                </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center text-gray-700">
-                    <Palette className="w-4 h-4 mr-2 text-purple-400" />
-                    Premium templates
-                  </div>
-                  <div className="flex items-center text-gray-700">
-                    <Type className="w-4 h-4 mr-2 text-purple-400" />
-                    Enhanced AI content
-                  </div>
-                  <div className="flex items-center text-gray-700">
-                    <ImageIcon className="w-4 h-4 mr-2 text-purple-400" />
-                    Premium image library
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Upgrade Benefits */}
-            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
-              <CardHeader>
-                <CardTitle className="text-gray-900">Upgrade to Enterprise</CardTitle>
-                <CardDescription className="text-gray-700">
-                  Get unlimited websites and advanced features
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center text-gray-700">
-                    <Crown className="w-4 h-4 mr-2 text-yellow-400" />
-                    <span>Unlimited websites</span>
-                  </div>
-                  <div className="flex items-center text-gray-700">
-                    <Palette className="w-4 h-4 mr-2 text-blue-400" />
-                    <span>Enterprise templates</span>
-                  </div>
-                  <div className="flex items-center text-gray-700">
-                    <Globe className="w-4 h-4 mr-2 text-blue-400" />
-                    <span>Team collaboration</span>
-                  </div>
-                  <div className="flex items-center text-gray-700">
-                    <Sparkles className="w-4 h-4 mr-2 text-blue-400" />
-                    <span>Advanced analytics</span>
-                  </div>
-                </div>
-                <Button asChild className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
-                  <Link href="/pricing">
-                    Upgrade to Enterprise - $99/month
-                  </Link>
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Help */}
-            <Card className="bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20 border-white border-opacity-30">
+            {/* Generated Website Result */}
+            {generatedWebsite && (
+              <Card className="bg-green-500/10 border-green-500/30 overflow-hidden">
+                <CardHeader className="bg-green-500/20">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-green-100 flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5" />
+                      Pro Website Created Successfully!
+                    </CardTitle>
+                    <Button size="sm" variant="outline" className="border-green-500/30 text-green-100 hover:bg-green-500/20" asChild>
+                      <a href={generatedWebsite.url} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Visit Site
+                      </a>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6 space-y-4">
+                  <div>
+                    <Label className="text-green-200/60 text-xs uppercase tracking-wider">Title</Label>
+                    <p className="text-white font-bold text-xl">{generatedWebsite.title}</p>
+                  </div>
+                  <div>
+                    <Label className="text-green-200/60 text-xs uppercase tracking-wider">Live URL</Label>
+                    <p className="text-cyan-400 font-mono break-all">{generatedWebsite.url}</p>
+                  </div>
+                  <div className="pt-4 flex gap-3">
+                    <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => router.push('/dashboard/my-websites')}>
+                      Manage Websites
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Sidebar Info */}
+          <div className="space-y-6">
+            <Card className="bg-black/40 backdrop-blur-sm border-white/10">
               <CardHeader>
-                <CardTitle className="text-gray-900">Need Help?</CardTitle>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Star className="w-5 h-5 text-yellow-400" />
+                  Pro Plan Features
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ul className="space-y-3 text-sm text-gray-400">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    10 Websites
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    Premium Templates
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    Custom Domain Support
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    Advanced Analytics
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    A/B Testing Tools
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 border-purple-500/30">
+              <CardHeader>
+                <CardTitle className="text-white">Need More?</CardTitle>
+                <CardDescription className="text-purple-200/70">Upgrade to Enterprise for unlimited power</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 text-sm mb-4">
-                  Check our documentation for website creation tips and best practices.
-                </p>
-                <Button asChild variant="outline" className="w-full border-white border-opacity-30 text-gray-900 hover:bg-gradient-to-br from-orange-900 via-orange-800 to-red-900 bg-opacity-20">
-                  <Link href="/docs">
-                    View Documentation
-                  </Link>
+                <Button className="w-full bg-purple-600 hover:bg-purple-700" asChild>
+                  <Link href="/pricing">View Enterprise Plan</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -493,4 +360,3 @@ useEffect(() => {
     </div>
   )
 }
-
