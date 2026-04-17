@@ -166,6 +166,33 @@ async function validateImageUrl(imageUrl: string): Promise<boolean> {
 }
 
 // ---------------------------------------------------------------------------
+// Analyze product URL (local helper for metadata)
+// ---------------------------------------------------------------------------
+async function analyzeProductURL(url: string) {
+  // Use the existing extraction logic
+  const productInfo = extractProductInfoFromUrl(url);
+  
+  // Try to enrich with a simple fetch if possible, but keep it resilient
+  try {
+    const response = await fetchWithTimeout(url, { method: 'GET' }, 5000, 0);
+    if (response.ok) {
+      const html = await response.text();
+      const $ = cheerio.load(html);
+      
+      const title = $('title').text() || $('meta[property="og:title"]').attr('content');
+      const description = $('meta[name="description"]').attr('content') || $('meta[property="og:description"]').attr('content');
+      
+      if (title) productInfo.title = title.trim().substring(0, 120);
+      if (description) productInfo.description = description.trim().substring(0, 300);
+    }
+  } catch (err) {
+    console.warn('[analyzeProductURL] Enrichment failed, using extracted info:', err);
+  }
+  
+  return productInfo;
+}
+
+// ---------------------------------------------------------------------------
 // Scrape product data
 // ---------------------------------------------------------------------------
 async function scrapeProductData(url: string) {
