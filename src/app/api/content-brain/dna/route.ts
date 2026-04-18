@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
   }
 
-  const user = authResult.user
+  const user = authResult.user!
   const { db } = await connectToDatabase()
 
   try {
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
   }
 
-  const user = authResult.user
+  const user = authResult.user!
   const { db } = await connectToDatabase()
 
   try {
