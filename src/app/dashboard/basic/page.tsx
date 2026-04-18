@@ -85,6 +85,15 @@ export default function BasicDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900">
+      {/* Subtle security notice */}
+      <div className="w-full text-center py-1.5 bg-black bg-opacity-20">
+        <span className="text-gray-400 text-xs">
+          Seeing somebody else&apos;s dashboard?{' '}
+          <Link href="/security" className="text-gray-300 underline underline-offset-2 hover:text-white transition-colors">
+            Learn why
+          </Link>
+        </span>
+      </div>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
