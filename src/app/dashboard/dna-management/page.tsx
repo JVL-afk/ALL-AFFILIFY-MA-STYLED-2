@@ -5,46 +5,44 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
   Save,
-  Plus,
-  Trash2,
   Edit2,
   CheckCircle,
   AlertCircle,
   Loader2,
-  Globe,
   Target,
   Users,
   Lightbulb,
-  Database,
-  ChevronRight
+  Database
 } from 'lucide-react'
 import { AffiliateContentDNA } from '@/lib/content-brain/types'
-import { getAffiliateDNA } from '@/lib/content-brain/api'
+import { getAffiliateDNA, saveAffiliateDNA } from '@/lib/content-brain/api'
 
 export default function DNAManagementPage() {
   const [dna, setDna] = useState<AffiliateContentDNA | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Form state
   const [formData, setFormData] = useState<Partial<AffiliateContentDNA>>({});
 
-  // Fetch DNA on component mount
   useEffect(() => {
     const fetchDNA = async () => {
       try {
-        const fetchedDNA = await getAffiliateDNA('mock-project-id');
+        setIsLoading(true);
+        const fetchedDNA = await getAffiliateDNA('current');
         setDna(fetchedDNA);
         setFormData(fetchedDNA);
       } catch (err) {
         setError('Failed to load Campaign DNA.');
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchDNA();
@@ -60,13 +58,14 @@ export default function DNAManagementPage() {
     setSuccess(null);
 
     try {
-      // Mock save - in a real app, this would POST to an API
-      console.log('Saving DNA:', formData);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setDna(formData as AffiliateContentDNA);
-      setSuccess('Campaign DNA saved successfully!');
-      setIsEditing(false);
+      const success = await saveAffiliateDNA(formData);
+      if (success) {
+        setDna(formData as AffiliateContentDNA);
+        setSuccess('Campaign DNA saved successfully!');
+        setIsEditing(false);
+      } else {
+        throw new Error('Failed to save');
+      }
     } catch (err) {
       setError('Failed to save Campaign DNA.');
     } finally {
@@ -78,10 +77,17 @@ export default function DNAManagementPage() {
   const contentAreaBackground = "bg-gray-800/70 backdrop-blur-sm border border-gray-700 rounded-xl shadow-2xl";
   const gradientText = "text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400";
 
+  if (isLoading) {
+    return (
+      <div className={`${dnaBackground} flex items-center justify-center`}>
+        <Loader2 className="w-10 h-10 animate-spin text-amber-500" />
+      </div>
+    );
+  }
+
   return (
     <div className={`${dnaBackground} p-6`}>
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -91,40 +97,25 @@ export default function DNAManagementPage() {
             Campaign DNA Management <Database className="inline-block w-8 h-8 ml-2" />
           </h1>
           <p className="text-gray-500 mt-1">
-            Configure the core intelligence that powers all your AI-generated content. This is your "Campaign DNA" - the foundation of the Affiliate Content Brain.
+            Configure the core intelligence that powers all your AI-generated content.
           </p>
         </motion.div>
 
-        {/* Status Messages */}
         {error && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            className="mb-4 p-4 bg-red-900/50 border border-red-700 text-red-300 rounded-lg flex items-center"
-          >
+          <div className="mb-4 p-4 bg-red-900/50 border border-red-700 text-red-300 rounded-lg flex items-center">
             <AlertCircle className="w-5 h-5 mr-3" />
             {error}
-          </motion.div>
+          </div>
         )}
         {success && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            className="mb-4 p-4 bg-green-900/50 border border-green-700 text-green-300 rounded-lg flex items-center"
-          >
+          <div className="mb-4 p-4 bg-green-900/50 border border-green-700 text-green-300 rounded-lg flex items-center">
             <CheckCircle className="w-5 h-5 mr-3" />
             {success}
-          </motion.div>
+          </div>
         )}
 
-        {/* Main Content */}
         <div className="space-y-6">
-          {/* Affiliate Profile Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={contentAreaBackground}
-          >
+          <div className={contentAreaBackground}>
             <CardHeader className="border-b border-gray-700">
               <CardTitle className="text-white flex items-center">
                 <Users className="w-5 h-5 mr-2 text-blue-400" />
@@ -173,15 +164,9 @@ export default function DNAManagementPage() {
                 />
               </div>
             </CardContent>
-          </motion.div>
+          </div>
 
-          {/* Product Intelligence Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className={contentAreaBackground}
-          >
+          <div className={contentAreaBackground}>
             <CardHeader className="border-b border-gray-700">
               <CardTitle className="text-white flex items-center">
                 <Lightbulb className="w-5 h-5 mr-2 text-yellow-400" />
@@ -198,7 +183,7 @@ export default function DNAManagementPage() {
                   value={formData.productName || ''}
                   onChange={(e) => handleInputChange('productName', e.target.value)}
                   disabled={!isEditing}
-                  placeholder="e.g., 2026 KTM 450 SX-F"
+                  placeholder="e.g., High-Ticket Affiliate Masterclass"
                   className="bg-gray-900 border-gray-700 text-white disabled:opacity-50"
                 />
               </div>
@@ -225,15 +210,9 @@ export default function DNAManagementPage() {
                 />
               </div>
             </CardContent>
-          </motion.div>
+          </div>
 
-          {/* Market Context Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className={contentAreaBackground}
-          >
+          <div className={contentAreaBackground}>
             <CardHeader className="border-b border-gray-700">
               <CardTitle className="text-white flex items-center">
                 <Target className="w-5 h-5 mr-2 text-red-400" />
@@ -256,7 +235,7 @@ export default function DNAManagementPage() {
                 />
               </div>
               <div>
-                <label className="text-white font-medium block mb-2">Secondary Keywords / LSI Terms (comma-separated)</label>
+                <label className="text-white font-medium block mb-2">Secondary Keywords (comma-separated)</label>
                 <Textarea
                   value={formData.secondaryKeywords?.join(', ') || ''}
                   onChange={(e) => handleInputChange('secondaryKeywords', e.target.value.split(',').map(s => s.trim()))}
@@ -266,40 +245,20 @@ export default function DNAManagementPage() {
                   className="bg-gray-900 border-gray-700 text-white disabled:opacity-50"
                 />
               </div>
-              <div>
-                <label className="text-white font-medium block mb-2">Competitor Analysis Summary</label>
-                <Textarea
-                  value={formData.competitorAnalysisSummary || ''}
-                  onChange={(e) => handleInputChange('competitorAnalysisSummary', e.target.value)}
-                  disabled={!isEditing}
-                  placeholder="How do you differentiate from competitors?"
-                  rows={3}
-                  className="bg-gray-900 border-gray-700 text-white disabled:opacity-50"
-                />
-              </div>
             </CardContent>
-          </motion.div>
+          </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-between items-center">
+          <div className="flex justify-end space-x-4 pb-10">
             {!isEditing ? (
               <Button
                 onClick={() => setIsEditing(true)}
-                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-3 px-6 rounded-lg"
+                className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg"
               >
-                <Edit2 className="w-5 h-5 mr-2" />
+                <Edit2 className="w-4 h-4 mr-2" />
                 Edit Campaign DNA
               </Button>
             ) : (
-              <div className="flex space-x-3">
-                <Button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-3 px-6 rounded-lg"
-                >
-                  {isSaving ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />}
-                  {isSaving ? 'Saving...' : 'Save Changes'}
-                </Button>
+              <>
                 <Button
                   onClick={() => {
                     setIsEditing(false);
@@ -310,7 +269,15 @@ export default function DNAManagementPage() {
                 >
                   Cancel
                 </Button>
-              </div>
+                <Button
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg"
+                >
+                  {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                  {isSaving ? 'Saving...' : 'Save DNA'}
+                </Button>
+              </>
             )}
           </div>
         </div>

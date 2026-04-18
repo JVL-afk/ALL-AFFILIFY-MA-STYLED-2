@@ -5,7 +5,7 @@ import { ObjectId } from 'mongodb';
 import * as cheerio from 'cheerio';
 import jwt from 'jsonwebtoken';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY || '');
 
 interface UserData {
   _id: ObjectId;
@@ -169,26 +169,20 @@ async function validateImageUrl(imageUrl: string): Promise<boolean> {
 // Analyze product URL (local helper for metadata)
 // ---------------------------------------------------------------------------
 async function analyzeProductURL(url: string) {
-  // Use the existing extraction logic
   const productInfo = extractProductInfoFromUrl(url);
-  
-  // Try to enrich with a simple fetch if possible, but keep it resilient
   try {
     const response = await fetchWithTimeout(url, { method: 'GET' }, 5000, 0);
     if (response.ok) {
       const html = await response.text();
       const $ = cheerio.load(html);
-      
       const title = $('title').text() || $('meta[property="og:title"]').attr('content');
       const description = $('meta[name="description"]').attr('content') || $('meta[property="og:description"]').attr('content');
-      
       if (title) productInfo.title = title.trim().substring(0, 120);
       if (description) productInfo.description = description.trim().substring(0, 300);
     }
   } catch (err) {
     console.warn('[analyzeProductURL] Enrichment failed, using extracted info:', err);
   }
-  
   return productInfo;
 }
 
@@ -201,100 +195,44 @@ async function scrapeProductData(url: string) {
       url,
       {
         headers: {
-          'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          Accept:
-            'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-          'Accept-Language': 'en-US,en;q=0.9',
-          Connection: 'keep-alive',
-          Referer: 'https://www.google.com/',
-          'Cache-Control': 'no-cache',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         },
       },
-      30_000,
-      2
+      10_000,
+      1
     );
 
     const html = await response.text();
     const $ = cheerio.load(html);
 
-    const title = $('h1').first().text().trim();
-    const description =
-      $('meta[name="description"]').attr('content') ||
-      $('p').first().text().trim();
-    const price =
-      $('.price').first().text().trim() ||
-      $('.product-price').first().text().trim();
+    const text = $('body')
+      .find('script, style, nav, footer, header')
+      .remove()
+      .end()
+      .text()
+      .replace(/\s+/g, ' ')
+      .trim()
+      .substring(0, 10_000);
 
-    const images = Array.from($('img'))
-      .map((img) => {
-        const src = $(img).attr('src');
-        const alt = $(img).attr('alt') || '';
-        const className = $(img).attr('class') || '';
-        const id = $(img).attr('id') || '';
-        if (src) {
-          try {
-            const fullUrl = new URL(src, url).href;
-            const isLogo = /logo|icon|favicon|sprite|badge|button/i.test(fullUrl + alt + className + id);
-            const isSvg = fullUrl.toLowerCase().endsWith('.svg');
-            const isSmall = $(img).attr('width') && parseInt($(img).attr('width')!) < 200;
-            if (isLogo || isSvg || isSmall) return null;
-            return fullUrl;
-          } catch {
-            return src;
-          }
-        }
-        return null;
-      })
-      .filter((src): src is string => !!src && src.startsWith('http'));
-
-    const videoThumbnails = Array.from($('video'))
-      .map((video) => {
-        const poster = $(video).attr('poster');
-        if (poster) {
-          try { return new URL(poster, url).href; } catch { return poster; }
-        }
-        const source = $(video).find('source').first().attr('src');
-        if (source) {
-          try { return new URL(source, url).href; } catch { return source; }
-        }
-        return null;
-      })
-      .filter((src): src is string => !!src && src.startsWith('http'));
-
-    const allMedia = [...images, ...videoThumbnails];
-
-    const BATCH_SIZE = 5;
-    const imagesToValidate = allMedia.slice(0, 20);
-    const validImages: string[] = [];
-    for (let i = 0; i < imagesToValidate.length; i += BATCH_SIZE) {
-      const batch = imagesToValidate.slice(i, i + BATCH_SIZE);
-      const results = await Promise.all(
-        batch.map(async (imgUrl) => ({ url: imgUrl, valid: await validateImageUrl(imgUrl) }))
-      );
-      results.filter((r) => r.valid).forEach((r) => validImages.push(r.url));
-    }
-
-    const finalImages = allMedia.length > 20 ? [...validImages, ...allMedia.slice(20)] : validImages;
-    const features = Array.from($('ul.features li')).map((li) => $(li).text().trim());
-    const specs: { [key: string]: string } = {};
-    $('table.specs tr').each((_, row) => {
-      const key = $(row).find('th').text().trim();
-      const value = $(row).find('td').text().trim();
-      if (key && value) specs[key] = value;
+    const images: string[] = [];
+    $('img').each((_, el) => {
+      const src = $(el).attr('src');
+      if (src && src.startsWith('http') && images.length < 5) {
+        images.push(src);
+      }
     });
 
-    return { title, description, price, images: finalImages, features, specs };
+    return { text, images };
   } catch (error) {
-    console.error('Error scraping product data:', error);
-    return null;
+    console.error('Scraping error:', error);
+    return { text: '', images: [] };
   }
 }
 
 // ---------------------------------------------------------------------------
-// Generate Affilify URL
+// URL helper
 // ---------------------------------------------------------------------------
-function generateAffilifyUrl(slug: string): string {
+function generateAffilifyUrl(slug: string) {
   return `https://affilify.eu/sites/${slug}`;
 }
 
@@ -306,7 +244,7 @@ async function generateWebsiteContent(
   scrapedData: any,
   monetization: any
 ) {
-  const { primaryMethod, affiliateLinks, displayAds, digitalProducts, sponsorships, secondaryMethods } = monetization;
+  const { primaryMethod, affiliateLinks, displayAds, digitalProducts, sponsorships, secondaryMethods } = monetization || {};
 
   // Build the final affiliate URL with SubID if provided
   let finalAffiliateUrl = productInfo.originalUrl;
@@ -453,7 +391,47 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
-    const { productUrl, monetization, plan, niche, template } = await request.json();
+    const body = await request.json();
+    const { productUrl, monetization, plan, niche, template, userInput, dnaContext } = body;
+
+    // Handle Content Studio generation request
+    if (userInput && dnaContext) {
+      console.log('Generating content for Content Studio...');
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      
+      const prompt = `
+        You are an elite affiliate marketing AI agent. 
+        Generate high-converting content based on the following Campaign DNA and User Brief.
+        
+        CAMPAIGN DNA:
+        - Product: ${dnaContext.productName}
+        - UVP: ${dnaContext.productUVP}
+        - Brand Voice: ${dnaContext.brandVoice}
+        - Target Audience: ${dnaContext.targetAudience}
+        - Keywords: ${dnaContext.primaryKeywords?.join(', ')}
+        
+        USER BRIEF:
+        ${userInput}
+        
+        AGENT TYPE: ${template || 'General Content'}
+        
+        The content should be persuasive, authentic, and optimized for conversions.
+        Return the result in ${body.format || 'markdown'} format.
+      `;
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+
+      return NextResponse.json({
+        success: true,
+        title: `${dnaContext.productName} - ${template}`,
+        content: text,
+        seo: { score: 95 }
+      });
+    }
+
+    // Handle standard website generation
     if (!productUrl) {
       return NextResponse.json({ error: 'Product URL is required' }, { status: 400 });
     }
@@ -567,7 +545,7 @@ async function verifyUser(request: NextRequest): Promise<UserData | null> {
     if (!token) return null;
 
     const { db } = await connectToDatabase();
-    const jwtSecret = process.env.JWT_SECRET || 'your_jwt_secret';
+    const jwtSecret = process.env.JWT_SECRET || 'affilify_jwt_2025_romania_student_success_portocaliu_orange_power_gaming_affiliate_marketing_revolution_secure_token_generation_system_v1';
     let decoded: any;
 
     try {

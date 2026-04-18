@@ -11,58 +11,48 @@ export async function getAffiliateDNA(projectId: string): Promise<AffiliateConte
   try {
     logger.debug('CONTENT_BRAIN', 'FETCHING_DNA_CLIENT', 'FETCHING_DNA_CLIENT', { projectId });
     
-    // In a real app, this would be an API call to avoid direct DB access on client
     const response = await fetch(`/api/content-brain/dna?projectId=${projectId}`);
     if (response.ok) {
       return await response.json();
     }
 
-    // Default fallback DNA for demo/dev
-    return {
-      affiliateId: 'user-123',
-      brandVoice: 'expert',
-      targetAudience: 'Affiliate marketers looking to scale their income with high-ticket offers.',
-      uniqueSellingProposition: 'The only platform that automates content creation based on real-time product data.',
-      promotedProductId: 'ktm-450-sxf-2026',
-      productName: '2026 KTM 450 SX-F',
-      productUVP: 'The lightest, most powerful motocross bike on the market, giving you the hole-shot advantage every time.',
-      productPainPoints: ['Losing races due to underpowered bikes', 'Complex maintenance', 'High cost of parts'],
-      deepScrapeData: {
-        price: 11999,
-        engine: '450cc SOHC',
-        weight: '220 lbs (dry)',
-        features: ['Electric Start', 'Traction Control', 'Launch Control'],
-      },
-      primaryKeywords: ['best motocross bike 2026', 'KTM 450 SX-F review', 'motocross hole-shot tips'],
-      secondaryKeywords: ['dirt bike maintenance guide', '450cc vs 250cc motocross', 'motocross training'],
-      competitorAnalysisSummary: 'Competitors focus on raw power; our angle is the weight-to-power ratio and superior handling.',
-      contentHistoryIds: [],
-      performanceMetrics: {},
-    } as AffiliateContentDNA;
+    throw new Error('Failed to fetch DNA');
   } catch (error: any) {
     logger.error('CONTENT_BRAIN', 'FETCH_DNA_CLIENT_FAILED', 'FETCH_DNA_CLIENT_FAILED', { error: error.message });
-    // Return default instead of throwing to keep UI stable
+    // Return empty DNA structure instead of mock data
     return {
-      affiliateId: 'user-123',
+      affiliateId: '',
       brandVoice: 'expert',
-      targetAudience: 'Affiliate marketers looking to scale their income with high-ticket offers.',
-      uniqueSellingProposition: 'The only platform that automates content creation based on real-time product data.',
-      promotedProductId: 'ktm-450-sxf-2026',
-      productName: '2026 KTM 450 SX-F',
-      productUVP: 'The lightest, most powerful motocross bike on the market, giving you the hole-shot advantage every time.',
-      productPainPoints: ['Losing races due to underpowered bikes', 'Complex maintenance', 'High cost of parts'],
-      deepScrapeData: {
-        price: 11999,
-        engine: '450cc SOHC',
-        weight: '220 lbs (dry)',
-        features: ['Electric Start', 'Traction Control', 'Launch Control'],
-      },
-      primaryKeywords: ['best motocross bike 2026', 'KTM 450 SX-F review', 'motocross hole-shot tips'],
-      secondaryKeywords: ['dirt bike maintenance guide', '450cc vs 250cc motocross', 'motocross training'],
-      competitorAnalysisSummary: 'Competitors focus on raw power; our angle is the weight-to-power ratio and superior handling.',
+      targetAudience: '',
+      uniqueSellingProposition: '',
+      promotedProductId: '',
+      productName: '',
+      productUVP: '',
+      productPainPoints: [],
+      deepScrapeData: {},
+      primaryKeywords: [],
+      secondaryKeywords: [],
+      competitorAnalysisSummary: '',
       contentHistoryIds: [],
       performanceMetrics: {},
     } as AffiliateContentDNA;
+  }
+}
+
+/**
+ * Saves the Affiliate Content DNA.
+ */
+export async function saveAffiliateDNA(dna: Partial<AffiliateContentDNA>): Promise<boolean> {
+  try {
+    const response = await fetch('/api/content-brain/dna', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dna),
+    });
+    return response.ok;
+  } catch (error) {
+    console.error('Error saving DNA:', error);
+    return false;
   }
 }
 
@@ -77,29 +67,26 @@ export async function generateContent(
 ): Promise<GeneratedContent> {
   try {
     logger.info('CONTENT_BRAIN', 'GENERATING_CONTENT_START', 'GENERATING_CONTENT_START', { agentId: agent.id });
-
-    // In a real production environment, this would call our /api/ai/generate-from-link 
-    // or a specialized /api/content-brain/generate endpoint.
-    // For the frontend component to work, we'll simulate the API call logic.
     
     const response = await fetch('/api/ai/generate-from-link', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Authorization header would be added by makeAuthenticatedRequest helper
       },
       body: JSON.stringify({
-        productUrl: dna.promotedProductId, // Using ID as placeholder for URL
+        productUrl: dna.promotedProductId,
         niche: dna.brandVoice,
         targetAudience: dna.targetAudience,
         template: agent.id,
         userInput: userInput,
-        dnaContext: dna // Pass full DNA for context injection
+        dnaContext: dna,
+        format: agent.outputFormat
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`AI Generation failed: ${response.statusText}`);
+      const errorData = await response.json();
+      throw new Error(errorData.error || `AI Generation failed: ${response.statusText}`);
     }
 
     const result = await response.json();
@@ -110,7 +97,7 @@ export async function generateContent(
       dnaSnapshot: dna,
       agentUsed: agent.id,
       title: result.title || `Generated Content: ${agent.name}`,
-      content: result.content || result.description || "AI failed to return content. Please try again.",
+      content: result.content || "AI failed to return content. Please try again.",
       format: agent.outputFormat,
       plagiarismScore: Math.floor(Math.random() * 5),
       aiDetectionScore: Math.floor(Math.random() * 3),
@@ -119,28 +106,7 @@ export async function generateContent(
     };
   } catch (error: any) {
     logger.error('CONTENT_BRAIN', 'GENERATION_FAILED', 'GENERATION_FAILED', { error: error.message });
-    
-    // Fallback for demo purposes if API is not fully ready
-    return {
-      id: `content-${Date.now()}`,
-      sessionId: 'mock-session',
-      dnaSnapshot: dna,
-      agentUsed: agent.id,
-      title: `Generated Content: ${agent.name}`,
-      content: `[DEMO MODE] This is a high-converting ${agent.name} generated for ${dna.productName}. 
-      
-      Targeting: ${dna.targetAudience}
-      Voice: ${dna.brandVoice}
-      
-      The ${dna.productName} is the ultimate solution for ${dna.productPainPoints[0]}. With its ${dna.productUVP}, you'll never have to worry about ${dna.productPainPoints[1]} again.
-      
-      Keywords used: ${dna.primaryKeywords.join(', ')}`,
-      format: agent.outputFormat,
-      plagiarismScore: 2,
-      aiDetectionScore: 1,
-      seoScore: 92,
-      createdAt: new Date(),
-    };
+    throw error;
   }
 }
 

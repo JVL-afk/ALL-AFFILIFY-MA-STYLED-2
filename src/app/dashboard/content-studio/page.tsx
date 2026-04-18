@@ -2,38 +2,24 @@
 
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
-import { Input } from '@/components/ui/input'
 import {
   Sparkles,
   Feather,
   LayoutGrid,
   Mail,
-  Twitter,
   Youtube,
   BookOpen,
   ClipboardList,
-  CheckCircle,
   Loader2,
   AlertCircle,
-  Copy,
-  Users,
-  Code,
-  Target,
-  BarChart3,
-  RefreshCw,
   Zap,
   ChevronRight,
-  ClipboardCheck,
-  Palette,
-  FileText,
-  MessageSquare,
-  Search,
-  Globe
+  FileText
 } from 'lucide-react'
 import Link from 'next/link'
 import { AffiliateContentDNA, ContentAgent, GeneratedContent } from '@/lib/content-brain/types'
@@ -79,23 +65,25 @@ const contentAgents: ContentAgent[] = [
   },
 ];
 
-// --- Component ---
 export default function ContentStudioPage() {
   const [dna, setDna] = useState<AffiliateContentDNA | null>(null);
   const [selectedAgent, setSelectedAgent] = useState<ContentAgent | null>(contentAgents[0]);
   const [userInput, setUserInput] = useState('');
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDnaLoading, setIsDnaLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch DNA on component mount
   useEffect(() => {
     const fetchDNA = async () => {
       try {
-        const fetchedDNA = await getAffiliateDNA('mock-project-id'); // Use a mock ID for now
+        setIsDnaLoading(true);
+        const fetchedDNA = await getAffiliateDNA('current');
         setDna(fetchedDNA);
       } catch (err) {
-        setError('Failed to load Affiliate Content DNA. Check API connection.');
+        setError('Failed to load Campaign DNA. Please configure it in DNA Management.');
+      } finally {
+        setIsDnaLoading(false);
       }
     };
     fetchDNA();
@@ -118,27 +106,25 @@ export default function ContentStudioPage() {
     try {
       const content = await generateContent(dna, selectedAgent, userInput);
       setGeneratedContent(content);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError('Content generation failed. Please check the prompt and try again.');
+      setError(err.message || 'Content generation failed. Please check your API key and try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const isButtonDisabled = isLoading || !selectedAgent || !dna || !userInput.trim();
+  const isButtonDisabled = isLoading || isDnaLoading || !selectedAgent || !dna || !userInput.trim();
 
-  // Custom styling to match AFFILIFY's vibe
   const studioBackground = "min-h-screen bg-gray-900";
   const sidebarBackground = "bg-gray-800/70 backdrop-blur-sm border-r border-gray-700";
   const contentAreaBackground = "bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl shadow-2xl";
   const gradientText = "text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400";
-  const primaryButtonClass = "w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-gray-900 font-bold py-3 rounded-lg transition-all duration-300 shadow-lg";
+  const primaryButtonClass = "w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-gray-900 font-bold py-3 rounded-lg transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed";
 
   return (
     <div className={`${studioBackground} p-6`}>
       <div className="max-w-8xl mx-auto">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -152,37 +138,33 @@ export default function ContentStudioPage() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-10rem)]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Sidebar: Agents & DNA */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className={`lg:col-span-3 p-4 rounded-xl ${sidebarBackground} overflow-y-auto`}
+            className={`lg:col-span-3 p-4 rounded-xl ${sidebarBackground}`}
           >
             <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
               <Sparkles className="w-5 h-5 mr-2 text-yellow-400" /> AI Agents
             </h2>
             <div className="space-y-3">
               {contentAgents.map((agent) => (
-                <Card
+                <div
                   key={agent.id}
                   onClick={() => setSelectedAgent(agent)}
-                  className={`cursor-pointer transition-all duration-200 ${
+                  className={`p-3 rounded-lg cursor-pointer transition-all duration-200 border ${
                     selectedAgent?.id === agent.id
-                      ? 'border-green-500 ring-2 ring-green-500 bg-gray-700'
-                      : 'border-gray-700 hover:border-green-500 hover:bg-gray-700/50'
-                  } bg-gray-800 text-white`}
+                      ? 'border-green-500 bg-gray-700'
+                      : 'border-gray-700 hover:border-green-500/50 bg-gray-800'
+                  } text-white`}
                 >
-                  <CardHeader className="p-3">
-                    <CardTitle className="text-sm flex items-center">
-                      <agent.icon className="w-4 h-4 mr-2 text-green-400" />
-                      {agent.name}
-                    </CardTitle>
-                    <CardDescription className="text-xs text-gray-400">
-                      {agent.description}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
+                  <div className="flex items-center mb-1">
+                    <agent.icon className="w-4 h-4 mr-2 text-green-400" />
+                    <span className="text-sm font-medium">{agent.name}</span>
+                  </div>
+                  <p className="text-xs text-gray-400">{agent.description}</p>
+                </div>
               ))}
             </div>
 
@@ -190,60 +172,63 @@ export default function ContentStudioPage() {
               <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
                 <ClipboardList className="w-5 h-5 mr-2 text-blue-400" /> Campaign DNA
               </h2>
-              <Card className="bg-gray-800 border-gray-700 text-white">
-                <CardContent className="p-4 text-sm space-y-2">
-                  <p className="text-gray-400">Voice: <span className="font-medium text-white">{dna?.brandVoice || 'Loading...'}</span></p>
-                  <p className="text-gray-400">Product: <span className="font-medium text-white">{dna?.productName || 'Loading...'}</span></p>
-                  <p className="text-gray-400">Keywords: <span className="font-medium text-white">{dna?.primaryKeywords.length || 0} loaded</span></p>
-                  <Button asChild variant="link" className="p-0 h-auto text-green-400 hover:text-green-300">
-                    <Link href="/dashboard/dna-management">
-                      Manage DNA <ChevronRight className="w-4 h-4 ml-1" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-sm space-y-2 text-white">
+                {isDnaLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="w-5 h-5 animate-spin text-green-400" />
+                  </div>
+                ) : dna?.productName ? (
+                  <>
+                    <p className="text-gray-400">Voice: <span className="font-medium text-white capitalize">{dna.brandVoice}</span></p>
+                    <p className="text-gray-400">Product: <span className="font-medium text-white">{dna.productName}</span></p>
+                    <p className="text-gray-400">Keywords: <span className="font-medium text-white">{dna.primaryKeywords?.length || 0} loaded</span></p>
+                  </>
+                ) : (
+                  <p className="text-yellow-400 text-xs italic">DNA not configured. Content quality may be lower.</p>
+                )}
+                <Button asChild variant="link" className="p-0 h-auto text-green-400 hover:text-green-300">
+                  <Link href="/dashboard/dna-management">
+                    Manage DNA <ChevronRight className="w-4 h-4 ml-1" />
+                  </Link>
+                </Button>
+              </div>
             </div>
           </motion.div>
 
-          {/* Main Content Area: Input & Output */}
+          {/* Main Content Area */}
           <div className="lg:col-span-9 space-y-6">
-            {/* Input Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className={contentAreaBackground}
             >
-              <CardHeader className="border-b border-gray-700">
-                <CardTitle className="text-white flex items-center">
+              <div className="p-6 border-b border-gray-700">
+                <h3 className="text-xl font-bold text-white flex items-center">
                   {selectedAgent && <selectedAgent.icon className="w-5 h-5 mr-2 text-green-400" />}
                   {selectedAgent?.name || 'Select an Agent'} Brief
-                </CardTitle>
-                <CardDescription className="text-gray-400">
+                </h3>
+                <p className="text-gray-400 text-sm mt-1">
                   Provide a detailed brief for the AI. What should the content focus on?
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
+                </p>
+              </div>
+              <div className="p-6">
                 <Textarea
-                  placeholder="e.g., 'Focus on the superior handling and lightweight design of the KTM 450 SX-F, targeting experienced riders who want a competitive edge.'"
+                  placeholder="e.g., 'Focus on the unique features of the product and how it solves specific user pain points.'"
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
                   rows={4}
-                  className="bg-gray-900 border-gray-700 text-white focus:ring-green-500 focus:border-green-500"
+                  className="bg-gray-900 border-gray-700 text-white focus:ring-green-500 focus:border-green-500 mb-4"
                 />
                 {error && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="mt-3 p-3 bg-red-900/50 border border-red-700 text-red-300 rounded-lg flex items-center"
-                  >
-                    <AlertCircle className="w-4 h-4 mr-2" />
+                  <div className="mb-4 p-3 bg-red-900/50 border border-red-700 text-red-300 rounded-lg flex items-center text-sm">
+                    <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
                     {error}
-                  </motion.div>
+                  </div>
                 )}
                 <Button
                   onClick={handleGenerate}
                   disabled={isButtonDisabled}
-                  className={`${primaryButtonClass} mt-4`}
+                  className={primaryButtonClass}
                 >
                   {isLoading ? (
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
@@ -252,52 +237,32 @@ export default function ContentStudioPage() {
                   )}
                   {isLoading ? 'Generating Content...' : 'Generate High-Converting Content'}
                 </Button>
-              </CardContent>
+              </div>
             </motion.div>
 
-            {/* Output Card */}
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
               {generatedContent && (
                 <motion.div
-                  key="output"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
                   className={contentAreaBackground}
                 >
-                  <CardHeader className="border-b border-gray-700 flex flex-row items-center justify-between">
-                    <div>
-                      <CardTitle className="text-white flex items-center">
-                        <ClipboardCheck className="w-5 h-5 mr-2 text-green-400" />
-                        Generated Content
-                      </CardTitle>
-                      <CardDescription className="text-gray-400">
-                        {selectedAgent?.name} - SEO Score: <span className="font-bold text-green-400">{generatedContent.seoScore}%</span>
-                      </CardDescription>
+                  <div className="p-6 border-b border-gray-700 flex justify-between items-center">
+                    <h3 className="text-xl font-bold text-white flex items-center">
+                      <FileText className="w-5 h-5 mr-2 text-green-400" />
+                      Generated Content
+                    </h3>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs bg-green-900/50 text-green-400 px-2 py-1 rounded border border-green-700">
+                        SEO Score: {generatedContent.seoScore}%
+                      </span>
                     </div>
-                    <div className="flex space-x-2">
-                      <Button variant="outline" size="sm" className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600">
-                        <Copy className="w-4 h-4 mr-2" /> Copy
-                      </Button>
-                      <Button asChild variant="outline" size="sm" className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600">
-                        <Link href="/dashboard/docos">
-                          <FileText className="w-4 h-4 mr-2" /> Refine in docOS
-                        </Link>
-                      </Button>
+                  </div>
+                  <div className="p-6">
+                    <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 text-gray-300 whitespace-pre-wrap font-mono text-sm max-h-[500px] overflow-y-auto">
+                      {generatedContent.content}
                     </div>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="prose prose-invert max-w-none text-gray-300">
-                      {/* In a real app, this would render the markdown/json content */}
-                      <pre className="whitespace-pre-wrap p-4 bg-gray-900 border border-gray-700 rounded-lg text-sm">
-                        {generatedContent.content}
-                      </pre>
-                    </div>
-                    <div className="mt-4 text-xs text-gray-500 flex justify-between">
-                      <span>Plagiarism Score: {generatedContent.plagiarismScore}% | AI Detection Score: {generatedContent.aiDetectionScore}%</span>
-                      <span>Generated at: {new Date(generatedContent.createdAt).toLocaleTimeString()}</span>
-                    </div>
-                  </CardContent>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -305,9 +270,5 @@ export default function ContentStudioPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }
-
-// --- Placeholder for docOS page (The docOS editor) ---
-// This page would contain the block-based editor for content refinement.
-// We will create a link to it but not the full implementation for this phase.

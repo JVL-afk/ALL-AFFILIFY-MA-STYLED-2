@@ -1,0 +1,33 @@
+
+> affilify-platform@0.1.0 build
+> next build
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+   ▲ Next.js 16.0.10 (Turbopack)
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ✓ Compiled successfully in 14.0s
+   Running TypeScript ...
+Failed to compile.
+
+./src/app/api/ai/generate-from-link/route.ts:450:31
+Type error: Cannot find name 'analyzeProductURL'.
+
+[0m [90m 448 |[39m
+ [90m 449 |[39m     console[33m.[39mlog([32m'Analyzing affiliate URL:'[39m[33m,[39m productUrl)[33m;[39m
+[31m[1m>[22m[39m[90m 450 |[39m     [36mconst[39m productInfo [33m=[39m [36mawait[39m analyzeProductURL(productUrl)[33m;[39m
+ [90m     |[39m                               [31m[1m^[22m[39m
+ [90m 451 |[39m
+ [90m 452 |[39m     console[33m.[39mlog([32m'Scraping product data…'[39m)[33m;[39m
+ [90m 453 |[39m     [36mconst[39m scrapedData [33m=[39m [36mawait[39m scrapeProductData(productUrl)[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null
