@@ -4,6 +4,7 @@ import { connectToDatabase } from '../../../../lib/mongodb';
 import { ObjectId } from 'mongodb';
 import * as cheerio from 'cheerio';
 import jwt from 'jsonwebtoken';
+import { generateWebsiteContent as generateAIWebsiteContent } from '@/lib/ai';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY || '');
 
@@ -143,29 +144,6 @@ function extractProductInfoFromUrl(url: string): {
 }
 
 // ---------------------------------------------------------------------------
-// Validate if an image URL is accessible
-// ---------------------------------------------------------------------------
-async function validateImageUrl(imageUrl: string): Promise<boolean> {
-  try {
-    const response = await fetchWithTimeout(
-      imageUrl,
-      {
-        method: 'HEAD',
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        },
-      },
-      5_000,
-      0
-    );
-    const contentType = response.headers.get('content-type');
-    return response.ok && (contentType?.startsWith('image/') || false);
-  } catch {
-    return false;
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Analyze product URL (local helper for metadata)
 // ---------------------------------------------------------------------------
 async function analyzeProductURL(url: string) {
@@ -242,7 +220,8 @@ function generateAffilifyUrl(slug: string) {
 async function generateWebsiteContent(
   productInfo: any,
   scrapedData: any,
-  monetization: any
+  monetization: any,
+  aiGeneratedContent: any
 ) {
   const { primaryMethod, affiliateLinks, displayAds, digitalProducts, sponsorships, secondaryMethods } = monetization || {};
 
@@ -313,14 +292,31 @@ async function generateWebsiteContent(
     `;
   }
 
+  // Use AI generated content if available, otherwise fallback to basic structure
+  const hero = aiGeneratedContent?.content?.hero || {
+    headline: productInfo.title,
+    subheadline: productInfo.description,
+    ctaText: `Get Started with ${productInfo.title}`
+  };
+
+  const features = aiGeneratedContent?.content?.features || [
+    { title: 'Premium Performance', description: `Engineered for excellence, ${productInfo.title} delivers unmatched results in its category.`, icon: '🚀' },
+    { title: 'Exceptional Value', description: 'Invest in quality that lasts. This product offers the best price-to-performance ratio on the market.', icon: '💎' }
+  ];
+
+  const benefits = aiGeneratedContent?.content?.benefits || [];
+  const testimonials = aiGeneratedContent?.content?.testimonials || [];
+  const faq = aiGeneratedContent?.content?.faq || [];
+
   return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${productInfo.title} - Expert Review</title>
-    <meta name="description" content="${productInfo.description}">
+    <title>${aiGeneratedContent?.seo?.title || productInfo.title + ' - Expert Review'}</title>
+    <meta name="description" content="${aiGeneratedContent?.seo?.description || productInfo.description}">
+    <meta name="keywords" content="${aiGeneratedContent?.seo?.keywords?.join(', ') || ''}">
     ${adsenseScript}
     ${headerScript}
     <style>
@@ -335,6 +331,16 @@ async function generateWebsiteContent(
         .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-top: 50px; }
         .feature { padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .feature h3 { color: #1e293b; margin-bottom: 15px; }
+        .benefits { padding: 80px 0; }
+        .benefit-list { list-style: none; padding: 0; max-width: 800px; margin: 40px auto; }
+        .benefit-item { margin-bottom: 20px; padding-left: 30px; position: relative; }
+        .benefit-item::before { content: '✓'; position: absolute; left: 0; color: #2563eb; font-weight: bold; }
+        .testimonials { padding: 80px 0; background: #f1f5f9; }
+        .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .testimonial-card { padding: 30px; background: white; border-radius: 12px; font-style: italic; }
+        .faq { padding: 80px 0; }
+        .faq-item { margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        .faq-question { font-weight: bold; font-size: 1.2rem; color: #1e293b; margin-bottom: 10px; }
         @media (max-width: 768px) { .hero h1 { font-size: 2.5rem; } }
     </style>
 </head>
@@ -342,9 +348,9 @@ async function generateWebsiteContent(
     ${bodyScript}
     <section class="hero">
         <div class="container">
-            <h1>${productInfo.title}</h1>
-            <p>${productInfo.description}</p>
-            <a href="${finalAffiliateUrl}" class="cta-button">Get Started with ${productInfo.title}</a>
+            <h1>${hero.headline}</h1>
+            <p>${hero.subheadline}</p>
+            <a href="${finalAffiliateUrl}" class="cta-button">${hero.ctaText}</a>
         </div>
     </section>
 
@@ -354,19 +360,66 @@ async function generateWebsiteContent(
 
     <section class="features">
         <div class="container">
-            <h2 style="text-align: center; font-size: 2.5rem;">Why You Need This</h2>
+            <h2 style="text-align: center; font-size: 2.5rem;">Key Features</h2>
             <div class="feature-grid">
+                ${features.map((f: any) => `
                 <div class="feature">
-                    <h3>Premium Performance</h3>
-                    <p>Engineered for excellence, ${productInfo.title} delivers unmatched results in its category.</p>
+                    <div style="font-size: 2rem; margin-bottom: 15px;">${f.icon || '✨'}</div>
+                    <h3>${f.title}</h3>
+                    <p>${f.description}</p>
                 </div>
-                <div class="feature">
-                    <h3>Exceptional Value</h3>
-                    <p>Invest in quality that lasts. This product offers the best price-to-performance ratio on the market.</p>
-                </div>
+                `).join('')}
             </div>
         </div>
     </section>
+
+    ${benefits.length > 0 ? `
+    <section class="benefits">
+        <div class="container">
+            <h2 style="text-align: center; font-size: 2.5rem;">Why Choose This?</h2>
+            <ul class="benefit-list">
+                ${benefits.map((b: any) => `
+                <li class="benefit-item">
+                    <strong>${b.title}:</strong> ${b.description}
+                </li>
+                `).join('')}
+            </ul>
+        </div>
+    </section>
+    ` : ''}
+
+    ${testimonials.length > 0 ? `
+    <section class="testimonials">
+        <div class="container">
+            <h2 style="text-align: center; font-size: 2.5rem;">What Users Say</h2>
+            <div class="testimonial-grid">
+                ${testimonials.map((t: any) => `
+                <div class="testimonial-card">
+                    <p>"${t.text}"</p>
+                    <div style="margin-top: 15px; font-weight: bold; color: #2563eb;">- ${t.name}</div>
+                    <div style="color: #f59e0b;">${'★'.repeat(t.rating || 5)}</div>
+                </div>
+                `).join('')}
+            </div>
+        </div>
+    </section>
+    ` : ''}
+
+    ${faq.length > 0 ? `
+    <section class="faq">
+        <div class="container">
+            <h2 style="text-align: center; font-size: 2.5rem;">Frequently Asked Questions</h2>
+            <div style="max-width: 800px; margin: 40px auto;">
+                ${faq.map((f: any) => `
+                <div class="faq-item">
+                    <div class="faq-question">${f.question}</div>
+                    <div class="faq-answer">${f.answer}</div>
+                </div>
+                `).join('')}
+            </div>
+        </div>
+    </section>
+    ` : ''}
 
     ${emailFormHtml}
     ${sponsorshipHtml}
@@ -457,8 +510,19 @@ export async function POST(request: NextRequest) {
     console.log('Scraping product data…');
     const scrapedData = await scrapeProductData(productUrl);
 
+    console.log('Generating comprehensive AI content...');
+    // Use the elite generation logic from lib/ai.ts
+    const aiGeneratedContent = await generateAIWebsiteContent({
+      productUrl,
+      niche: niche || 'Affiliate Marketing',
+      targetAudience: body.targetAudience || 'Potential Customers',
+      template: template || 'modern',
+      tone: body.tone || 'professional',
+      features: body.features || []
+    });
+
     console.log('Generating professional website content with monetization…');
-    const websiteHTML = await generateWebsiteContent(productInfo, scrapedData, monetization);
+    const websiteHTML = await generateWebsiteContent(productInfo, scrapedData, monetization, aiGeneratedContent);
 
     const baseSlug = productInfo.title
       .toLowerCase()
@@ -476,8 +540,8 @@ export async function POST(request: NextRequest) {
       _id: new ObjectId(),
       userId: user._id,
       slug,
-      title: productInfo.title,
-      description: productInfo.description,
+      title: aiGeneratedContent.title || productInfo.title,
+      description: aiGeneratedContent.description || productInfo.description,
       productUrl,
       url: liveUrl,
       productInfo,
@@ -497,7 +561,7 @@ export async function POST(request: NextRequest) {
       performance: {
         uptime: 100,
         loadTime: 0.8,
-        seoScore: 95
+        seoScore: aiGeneratedContent.seo?.score || 95
       },
       isActive: true,
     };
@@ -510,8 +574,8 @@ export async function POST(request: NextRequest) {
       website: {
         id: websiteData._id.toString(),
         slug,
-        title: productInfo.title,
-        description: productInfo.description,
+        title: websiteData.title,
+        description: websiteData.description,
         url: liveUrl,
       },
       message: 'Professional affiliate website created and deployed successfully!',
