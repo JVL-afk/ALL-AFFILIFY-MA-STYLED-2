@@ -6,7 +6,7 @@ import * as cheerio from 'cheerio';
 import * as jwt from 'jsonwebtoken';
 import { google } from 'googleapis';
 // @ts-ignore
-import { YoutubeTranscript } from 'youtube-transcript-api';
+import YoutubeTranscript from 'youtube-transcript-api';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const youtube = google.youtube({
@@ -211,7 +211,7 @@ async function getYouTubeVideos(query: string, maxResults: number = 3) {
 
         let transcript = '';
         try {
-          const transcriptData = await YoutubeTranscript.fetchTranscript(videoId);
+          const transcriptData = await YoutubeTranscript.getTranscript(videoId);
           transcript = transcriptData.map((t: any) => t.text).join(' ');
           console.log(`🎥 [YOUTUBE] Transcript fetched for ${videoId} (${transcript.length} chars)`);
         } catch (e) {
