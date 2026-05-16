@@ -34,6 +34,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^3.0.0",
     "framer-motion": "^12.23.12",
+    "googleapis": "^171.4.0",
     "jsonwebtoken": "^9.0.2",
     "jszip": "^3.10.1",
     "lucide-react": "^0.542.0",
@@ -53,6 +54,7 @@
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^9.0.0",
+    "youtube-transcript-api": "^3.0.6",
     "zod": "^4.3.6"
   },
   "devDependencies": {

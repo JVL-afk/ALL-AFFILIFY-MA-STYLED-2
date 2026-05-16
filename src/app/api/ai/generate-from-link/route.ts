@@ -4,8 +4,14 @@ import { connectToDatabase } from '../../../../lib/mongodb';
 import { ObjectId } from 'mongodb';
 import * as cheerio from 'cheerio';
 import * as jwt from 'jsonwebtoken';
+import { google } from 'googleapis';
+import { YoutubeTranscript } from 'youtube-transcript-api';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const youtube = google.youtube({
+  version: 'v3',
+  auth: process.env.YOUTUBE_API_KEY,
+});
 
 // ---------------------------------------------------------------------------
 // Resilient fetch helper
@@ -175,6 +181,63 @@ async function validateImageUrl(imageUrl: string): Promise<boolean> {
     return response.ok && (contentType?.startsWith('image/') || false);
   } catch {
     return false;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// YouTube Data API and Transcript Retrieval
+// ---------------------------------------------------------------------------
+async function getYouTubeVideos(query: string, maxResults: number = 3) {
+  console.log('🎥 [YOUTUBE] ========== STARTING YOUTUBE SEARCH ==========');
+  console.log('🎥 [YOUTUBE] Query:', query);
+
+  try {
+    const response = await youtube.search.list({
+      part: ['snippet'],
+      q: query,
+      maxResults,
+      type: ['video'],
+      relevanceLanguage: 'en',
+    });
+
+    const videos = response.data.items || [];
+    console.log(`🎥 [YOUTUBE] Found ${videos.length} videos`);
+
+    const videoDetails = await Promise.all(
+      videos.map(async (video) => {
+        const videoId = video.id?.videoId;
+        if (!videoId) return null;
+
+        let transcript = '';
+        try {
+          const transcriptData = await YoutubeTranscript.fetchTranscript(videoId);
+          transcript = transcriptData.map((t) => t.text).join(' ');
+          console.log(`🎥 [YOUTUBE] Transcript fetched for ${videoId} (${transcript.length} chars)`);
+        } catch (e) {
+          console.log(`🎥 [YOUTUBE] Could not fetch transcript for ${videoId}`);
+        }
+
+        return {
+          videoId,
+          title: video.snippet?.title,
+          description: video.snippet?.description,
+          thumbnail: video.snippet?.thumbnails?.high?.url || video.snippet?.thumbnails?.default?.url,
+          channelTitle: video.snippet?.channelTitle,
+          publishTime: video.snippet?.publishTime,
+          url: `https://www.youtube.com/watch?v=${videoId}`,
+          embedUrl: `https://www.youtube.com/embed/${videoId}`,
+          transcript: transcript.substring(0, 5000), // Limit transcript size for prompt
+        };
+      })
+    );
+
+    const validVideos = videoDetails.filter((v) => v !== null);
+    console.log(`🎥 [YOUTUBE] ✅ Successfully processed ${validVideos.length} videos`);
+    console.log('🎥 [YOUTUBE] ========== END YOUTUBE SEARCH ==========');
+    return validVideos;
+  } catch (error) {
+    console.error('🎥 [YOUTUBE] ❌ Error fetching YouTube videos:', error);
+    return [];
   }
 }
 
@@ -417,6 +480,13 @@ async function generateWebsiteContent(
   console.log('🖼️ [IMAGE] Feature 2:', featureImages[1]?.url ? '✅ VALID' : '❌ MISSING');
   console.log('🖼️ [IMAGE] Testimonial:', testimonialImages[0]?.url ? '✅ VALID' : '❌ MISSING');
 
+  console.log('🎥 [YOUTUBE] ========== FETCHING YOUTUBE VIDEOS ==========');
+  const youtubeSearchQuery = productInfo.inferredFromUrl
+    ? `${productInfo.brand} ${productInfo.title.split('–')[0].trim()} review tutorial`
+    : `${productInfo.title} official review tutorial`;
+  const youtubeVideos = await getYouTubeVideos(youtubeSearchQuery, 3);
+  console.log('🎥 [YOUTUBE] Videos found:', youtubeVideos.length);
+
   // If scraping was blocked, tell Gemini explicitly so it can research the product itself
   const scrapedDataNote = productInfo.inferredFromUrl
     ? `NOTE: Direct scraping of the product page was blocked by the target website. ` +
@@ -432,12 +502,23 @@ ${scrapedDataNote}
 Here is the product data you have to work with: ${JSON.stringify({ ...scrapedData, ...productInfo })}.
 
 Here are the high-quality image URLs you MUST use in the generated HTML for the hero section and features:
-Hero Image: ${heroImages[0]?.url || 'NO_HERO_IMAGE'}
-Feature Image 1: ${featureImages[0]?.url || 'NO_FEATURE_IMAGE_1'}
-Feature Image 2: ${featureImages[1]?.url || 'NO_FEATURE_IMAGE_2'}
-Testimonial Image: ${testimonialImages[0]?.url || 'NO_TESTIMONIAL_IMAGE'}
+	Hero Image: ${heroImages[0]?.url || 'NO_HERO_IMAGE'}
+	Feature Image 1: ${featureImages[0]?.url || 'NO_FEATURE_IMAGE_1'}
+	Feature Image 2: ${featureImages[1]?.url || 'NO_FEATURE_IMAGE_2'}
+	Testimonial Image: ${testimonialImages[0]?.url || 'NO_TESTIMONIAL_IMAGE'}
+	
+	🎥 YOUTUBE VIDEOS (REAL & VERIFIABLE):
+	${youtubeVideos.length > 0 
+    ? youtubeVideos.map((v, i) => `Video ${i+1}:
+      - Title: ${v.title}
+      - URL: ${v.url}
+      - Embed URL: ${v.embedUrl}
+      - Thumbnail: ${v.thumbnail}
+      - Channel: ${v.channelTitle}
+      - Transcript Snippet: ${v.transcript.substring(0, 1000)}...`).join('\n\n')
+    : 'NO_YOUTUBE_VIDEOS_FOUND'}
 
-CRITICAL: The affiliate link is: ${productInfo.originalUrl}
+	CRITICAL: The affiliate link is: ${productInfo.originalUrl}
 ${affiliateId ? `AFFILIATE INTEGRATION: The user has provided an affiliate ID: ${affiliateId}. If the product link is from a known platform (like Amazon, eBay, etc.), you MUST append this affiliate ID to the URL using the correct parameter (e.g., ?tag=${affiliateId} for Amazon). If the platform is unknown, ensure the affiliate ID is integrated into the CTA links or mentioned appropriately in the conversion-focused content to ensure the user gets credit for the sale.` : ''}
 ALL call-to-action (CTA) buttons MUST use the affiliate-integrated URL.
 Do NOT use placeholder links like "#" or relative links. Every CTA button must have a valid href.
