@@ -382,7 +382,7 @@ async function generateWebsiteContent(
   console.log('🌐 [WEBSITE] Product URL:', productInfo.originalUrl);
   console.log('🌐 [WEBSITE] Info inferred from URL:', productInfo.inferredFromUrl || false);
 
-  const model = genAI.getGenerativeModel({ model: 'gemini-3.1-pro' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-3.0-flash' });
 
   const scrapedImages = scrapedData?.images || [];
   console.log('🖼️ [IMAGE] Scraped images available:', scrapedImages.length);
