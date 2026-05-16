@@ -5,6 +5,7 @@ import { ObjectId } from 'mongodb';
 import * as cheerio from 'cheerio';
 import * as jwt from 'jsonwebtoken';
 import { google } from 'googleapis';
+// @ts-ignore
 import { YoutubeTranscript } from 'youtube-transcript-api';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
@@ -211,7 +212,7 @@ async function getYouTubeVideos(query: string, maxResults: number = 3) {
         let transcript = '';
         try {
           const transcriptData = await YoutubeTranscript.fetchTranscript(videoId);
-          transcript = transcriptData.map((t) => t.text).join(' ');
+          transcript = transcriptData.map((t: any) => t.text).join(' ');
           console.log(`🎥 [YOUTUBE] Transcript fetched for ${videoId} (${transcript.length} chars)`);
         } catch (e) {
           console.log(`🎥 [YOUTUBE] Could not fetch transcript for ${videoId}`);
@@ -223,7 +224,7 @@ async function getYouTubeVideos(query: string, maxResults: number = 3) {
           description: video.snippet?.description,
           thumbnail: video.snippet?.thumbnails?.high?.url || video.snippet?.thumbnails?.default?.url,
           channelTitle: video.snippet?.channelTitle,
-          publishTime: video.snippet?.publishTime,
+          publishTime: video.snippet?.publishedAt,
           url: `https://www.youtube.com/watch?v=${videoId}`,
           embedUrl: `https://www.youtube.com/embed/${videoId}`,
           transcript: transcript.substring(0, 5000), // Limit transcript size for prompt
