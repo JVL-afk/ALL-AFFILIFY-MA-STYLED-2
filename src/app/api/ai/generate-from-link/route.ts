@@ -3,19 +3,18 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { connectToDatabase } from '../../../../lib/mongodb';
 import { ObjectId } from 'mongodb';
 import * as cheerio from 'cheerio';
-import jwt from 'jsonwebtoken';
-import { generateWebsiteContent as generateAIWebsiteContent } from '@/lib/ai';
+import * as jwt from 'jsonwebtoken';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY || '');
-
-interface UserData {
-  _id: ObjectId;
-  plan: string;
-  websiteCount: number;
-}
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 // ---------------------------------------------------------------------------
 // Resilient fetch helper
+// ---------------------------------------------------------------------------
+// Every outbound fetch in this file goes through this helper, which provides:
+//   • A hard AbortController-based timeout (default 30 s)
+//   • Automatic retry with exponential back-off for transient network errors
+//     (ETIMEDOUT, ECONNRESET, ECONNREFUSED, ENOTFOUND, AbortError)
+//   • Clean error propagation so callers can decide on fallback behaviour
 // ---------------------------------------------------------------------------
 async function fetchWithTimeout(
   url: string,
@@ -62,6 +61,11 @@ async function fetchWithTimeout(
 // ---------------------------------------------------------------------------
 // Smart URL-to-product-info parser
 // ---------------------------------------------------------------------------
+// When direct scraping is blocked or fails, this function extracts as much
+// product context as possible from the URL structure itself (hostname, path
+// segments, query params) and returns a rich, human-readable product info
+// object that Gemini can use to generate an accurate affiliate website.
+// ---------------------------------------------------------------------------
 function extractProductInfoFromUrl(url: string): {
   title: string;
   description: string;
@@ -78,16 +82,19 @@ function extractProductInfoFromUrl(url: string): {
       .map((s) => s.trim())
       .filter(Boolean);
 
+    // Humanise a slug segment: "bmw-m5-sedan" → "BMW M5 Sedan"
     const humanise = (slug: string): string =>
       slug
         .replace(/[-_]/g, ' ')
-        .replace(/\b(\d{4})\b/g, '$1')
+        .replace(/\b(\d{4})\b/g, '$1') // keep years as-is
         .replace(/\b\w/g, (c) => c.toUpperCase())
         .trim();
 
+    // Extract brand from hostname: "bmw-m.com" → "BMW M", "amazon.com" → "Amazon"
     const brandRaw = hostname.split('.')[0];
     const brand = humanise(brandRaw);
 
+    // Find the most descriptive path segment (longest non-year, non-generic slug)
     const genericSegments = new Set([
       'en', 'us', 'uk', 'de', 'fr', 'all-models', 'products', 'product',
       'shop', 'store', 'catalog', 'category', 'overview', 'detail', 'item',
@@ -99,26 +106,31 @@ function extractProductInfoFromUrl(url: string): {
       return (
         lower.length > 3 &&
         !genericSegments.has(lower) &&
-        !/^\d{4}$/.test(lower)
+        !/^\d{4}$/.test(lower) // skip bare year segments
       );
     });
 
+    // The last meaningful segment is usually the product name
     const productSlug =
       candidateSegments[candidateSegments.length - 1] ||
       candidateSegments[0] ||
       pathSegments[pathSegments.length - 1] ||
       'product';
 
+    // Strip file extensions
     const cleanSlug = productSlug.replace(/\.(html?|php|aspx?)$/i, '');
     const productName = humanise(cleanSlug);
 
+    // Try to find a year in the path (useful for cars, electronics, etc.)
     const yearMatch = pathSegments.join('/').match(/\b(20\d{2}|19\d{2})\b/);
     const year = yearMatch ? yearMatch[1] : '';
 
+    // Build a rich title: "BMW M5 Sedan (2024) – BMW M"
     const title = year
       ? `${productName} (${year}) – ${brand}`
       : `${productName} – ${brand}`;
 
+    // Build a descriptive fallback description
     const description =
       `Discover the ${productName}${year ? ` ${year}` : ''} by ${brand}. ` +
       `Explore its features, specifications, and find the best deal through our affiliate link.`;
@@ -144,24 +156,26 @@ function extractProductInfoFromUrl(url: string): {
 }
 
 // ---------------------------------------------------------------------------
-// Analyze product URL (local helper for metadata)
+// Validate if an image URL is accessible
 // ---------------------------------------------------------------------------
-async function analyzeProductURL(url: string) {
-  const productInfo = extractProductInfoFromUrl(url);
+async function validateImageUrl(imageUrl: string): Promise<boolean> {
   try {
-    const response = await fetchWithTimeout(url, { method: 'GET' }, 5000, 0);
-    if (response.ok) {
-      const html = await response.text();
-      const $ = cheerio.load(html);
-      const title = $('title').text() || $('meta[property="og:title"]').attr('content');
-      const description = $('meta[name="description"]').attr('content') || $('meta[property="og:description"]').attr('content');
-      if (title) productInfo.title = title.trim().substring(0, 120);
-      if (description) productInfo.description = description.trim().substring(0, 300);
-    }
-  } catch (err) {
-    console.warn('[analyzeProductURL] Enrichment failed, using extracted info:', err);
+    const response = await fetchWithTimeout(
+      imageUrl,
+      {
+        method: 'HEAD',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        },
+      },
+      5_000,
+      0 // no retries for image validation — speed matters
+    );
+    const contentType = response.headers.get('content-type');
+    return response.ok && (contentType?.startsWith('image/') || false);
+  } catch {
+    return false;
   }
-  return productInfo;
 }
 
 // ---------------------------------------------------------------------------
@@ -173,265 +187,500 @@ async function scrapeProductData(url: string) {
       url,
       {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          Accept:
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+          'Accept-Language': 'en-US,en;q=0.9',
+          Connection: 'keep-alive',
+          Referer: 'https://www.google.com/',
+          'Cache-Control': 'no-cache',
         },
       },
-      10_000,
-      1
+      30_000,
+      2
     );
 
     const html = await response.text();
     const $ = cheerio.load(html);
 
-    const text = $('body')
-      .find('script, style, nav, footer, header')
-      .remove()
-      .end()
-      .text()
-      .replace(/\s+/g, ' ')
-      .trim()
-      .substring(0, 10_000);
+    const title = $('h1').first().text().trim();
+    const description =
+      $('meta[name="description"]').attr('content') ||
+      $('p').first().text().trim();
+    const price =
+      $('.price').first().text().trim() ||
+      $('.product-price').first().text().trim();
 
-    const images: string[] = [];
-    $('img').each((_, el) => {
-      const src = $(el).attr('src');
-      if (src && src.startsWith('http') && images.length < 5) {
-        images.push(src);
-      }
+    const images = Array.from($('img'))
+      .map((img) => {
+        const src = $(img).attr('src');
+        const alt = $(img).attr('alt') || '';
+        const className = $(img).attr('class') || '';
+        const id = $(img).attr('id') || '';
+        if (src) {
+          try {
+            const fullUrl = new URL(src, url).href;
+            const isLogo = /logo|icon|favicon|sprite|badge|button/i.test(fullUrl + alt + className + id);
+            const isSvg = fullUrl.toLowerCase().endsWith('.svg');
+            const isSmall = $(img).attr('width') && parseInt($(img).attr('width')!) < 200;
+            if (isLogo || isSvg || isSmall) return null;
+            return fullUrl;
+          } catch {
+            return src;
+          }
+        }
+        return null;
+      })
+      .filter((src): src is string => !!src && src.startsWith('http'));
+
+    console.log('Total images found:', images.length);
+
+    const videoThumbnails = Array.from($('video'))
+      .map((video) => {
+        const poster = $(video).attr('poster');
+        if (poster) {
+          try { return new URL(poster, url).href; } catch { return poster; }
+        }
+        const source = $(video).find('source').first().attr('src');
+        if (source) {
+          try { return new URL(source, url).href; } catch { return source; }
+        }
+        return null;
+      })
+      .filter((src): src is string => !!src && src.startsWith('http'));
+
+    const allMedia = [...images, ...videoThumbnails];
+
+    // Validate images in batches of 5 to avoid connection-pool exhaustion
+    const BATCH_SIZE = 5;
+    const imagesToValidate = allMedia.slice(0, 20);
+    const validImages: string[] = [];
+    for (let i = 0; i < imagesToValidate.length; i += BATCH_SIZE) {
+      const batch = imagesToValidate.slice(i, i + BATCH_SIZE);
+      const results = await Promise.all(
+        batch.map(async (imgUrl) => ({ url: imgUrl, valid: await validateImageUrl(imgUrl) }))
+      );
+      results.filter((r) => r.valid).forEach((r) => validImages.push(r.url));
+    }
+
+    console.log('Valid images:', validImages.length, '/', imagesToValidate.length);
+
+    const finalImages = allMedia.length > 20 ? [...validImages, ...allMedia.slice(20)] : validImages;
+    const features = Array.from($('ul.features li')).map((li) => $(li).text().trim());
+    const specs: { [key: string]: string } = {};
+    $('table.specs tr').each((_, row) => {
+      const key = $(row).find('th').text().trim();
+      const value = $(row).find('td').text().trim();
+      if (key && value) specs[key] = value;
     });
 
-    return { text, images };
+    return { title, description, price, images: finalImages, features, specs };
   } catch (error) {
-    console.error('Scraping error:', error);
-    return { text: '', images: [] };
+    console.error('Error scraping product data:', error);
+    return null;
+  }
+}
+
+interface UserData {
+  _id: ObjectId;
+  email: string;
+  plan: string;
+  websiteCount: number;
+}
+
+// ---------------------------------------------------------------------------
+// Unsplash image fetcher
+// ---------------------------------------------------------------------------
+async function getUnsplashImages(query: string, count: number = 10) {
+  console.log('🖼️ [IMAGE] ========== STARTING UNSPLASH FETCH ==========');
+  console.log('🖼️ [IMAGE] Query:', query);
+  console.log('🖼️ [IMAGE] Count requested:', count);
+
+  try {
+    const unsplashApiKey = process.env.UNSPLASH_ACCESS_KEY;
+    if (!unsplashApiKey) {
+      console.log('🖼️ [IMAGE] ❌ No API key - using placeholders');
+      return generatePlaceholderImages(query, count);
+    }
+
+    const apiUrl = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=${count}&orientation=landscape&order_by=relevant`;
+    console.log('🖼️ [IMAGE] Fetching from:', apiUrl);
+
+    const response = await fetchWithTimeout(
+      apiUrl,
+      { headers: { Authorization: `Client-ID ${unsplashApiKey}` } },
+      15_000,
+      1
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('🖼️ [IMAGE] ❌ API Error Response:', errorText);
+      throw new Error(`Unsplash API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('🖼️ [IMAGE] Results found:', data.results?.length || 0);
+
+    const images = data.results.map((photo: any, index: number) => {
+      const imageData = {
+        url: photo.urls.regular,
+        thumb: photo.urls.thumb,
+        alt: photo.alt_description || query,
+        credit: `Photo by ${photo.user.name} on Unsplash`,
+        download_url: photo.links.download_location,
+      };
+      console.log(`🖼️ [IMAGE] [${index + 1}/${data.results.length}] URL: ${imageData.url}`);
+      return imageData;
+    });
+
+    console.log('🖼️ [IMAGE] ✅ Successfully fetched', images.length, 'images');
+    console.log('🖼️ [IMAGE] ========== END UNSPLASH FETCH ==========');
+    return images;
+  } catch (error) {
+    console.error('🖼️ [IMAGE] ❌ EXCEPTION in getUnsplashImages:', error);
+    return generatePlaceholderImages(query, count);
   }
 }
 
 // ---------------------------------------------------------------------------
-// URL helper
+// Placeholder image generator (last-resort fallback)
 // ---------------------------------------------------------------------------
-function generateAffilifyUrl(slug: string) {
+function generatePlaceholderImages(query: string, count: number) {
+  const images = [];
+  for (let i = 0; i < count; i++) {
+    images.push({
+      url: `https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=600&fit=crop&crop=center`,
+      thumb: `https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop&crop=center`,
+      alt: query,
+      credit: 'Professional stock photo',
+      download_url: null,
+    });
+  }
+  return images;
+}
+
+// ---------------------------------------------------------------------------
+// Affilify URL generator
+// ---------------------------------------------------------------------------
+function generateAffilifyUrl(slug: string): string {
   return `https://affilify.eu/sites/${slug}`;
 }
 
 // ---------------------------------------------------------------------------
-// Generate website content with monetization injection
+// Website content generator (Gemini AI + Unsplash)
 // ---------------------------------------------------------------------------
 async function generateWebsiteContent(
   productInfo: any,
   scrapedData: any,
-  monetization: any,
-  aiGeneratedContent: any
+  affiliateId: string,
+  affiliateType: string
 ) {
-  const { primaryMethod, affiliateLinks, displayAds, digitalProducts, sponsorships, secondaryMethods } = monetization || {};
+  console.log('🌐 [WEBSITE] ========== STARTING WEBSITE GENERATION ==========');
+  console.log('🌐 [WEBSITE] Product title:', productInfo.title);
+  console.log('🌐 [WEBSITE] Product URL:', productInfo.originalUrl);
+  console.log('🌐 [WEBSITE] Info inferred from URL:', productInfo.inferredFromUrl || false);
 
-  // Build the final affiliate URL with SubID if provided
-  let finalAffiliateUrl = productInfo.originalUrl;
-  if (primaryMethod === 'affiliateLinks' && affiliateLinks) {
-    const url = new URL(affiliateLinks.productUrl || productInfo.originalUrl);
-    if (affiliateLinks.affiliateId) {
-      url.searchParams.set('tag', affiliateLinks.affiliateId);
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+
+  const scrapedImages = scrapedData?.images || [];
+  console.log('🖼️ [IMAGE] Scraped images available:', scrapedImages.length);
+
+  // Build a smart Unsplash search query based on available product context
+  const imageSearchQuery = productInfo.inferredFromUrl
+    ? `${productInfo.brand} ${productInfo.title.split('–')[0].trim()} product`
+    : `${productInfo.title} product lifestyle`;
+
+  console.log('🖼️ [IMAGE] ========== FETCHING HERO IMAGE ==========');
+  const heroImages =
+    scrapedImages.length > 0
+      ? [{ url: scrapedImages[0], alt: `${productInfo.title} hero image`, credit: 'Scraped from product page', download_url: null }]
+      : await getUnsplashImages(imageSearchQuery, 1);
+  console.log('🖼️ [IMAGE] Hero image selected:', heroImages[0]?.url);
+
+  console.log('🖼️ [IMAGE] ========== FETCHING FEATURE IMAGES ==========');
+  const featureImages =
+    scrapedImages.length > 1
+      ? scrapedImages.slice(1).map((url: string) => ({ url, alt: `${productInfo.title} feature image`, credit: 'Scraped from product page', download_url: null }))
+      : await getUnsplashImages(`${imageSearchQuery} features`, 10);
+  console.log('🖼️ [IMAGE] Feature image 1:', featureImages[0]?.url);
+  console.log('🖼️ [IMAGE] Feature image 2:', featureImages[1]?.url);
+
+  console.log('🖼️ [IMAGE] ========== FETCHING TESTIMONIAL IMAGE ==========');
+  const testimonialImages = await getUnsplashImages('happy customer testimonial', 1);
+  console.log('🖼️ [IMAGE] Testimonial image:', testimonialImages[0]?.url);
+
+  console.log('🖼️ [IMAGE] ========== IMAGE SUMMARY ==========');
+  console.log('🖼️ [IMAGE] Hero:', heroImages[0]?.url ? '✅ VALID' : '❌ MISSING');
+  console.log('🖼️ [IMAGE] Feature 1:', featureImages[0]?.url ? '✅ VALID' : '❌ MISSING');
+  console.log('🖼️ [IMAGE] Feature 2:', featureImages[1]?.url ? '✅ VALID' : '❌ MISSING');
+  console.log('🖼️ [IMAGE] Testimonial:', testimonialImages[0]?.url ? '✅ VALID' : '❌ MISSING');
+
+  // If scraping was blocked, tell Gemini explicitly so it can research the product itself
+  const scrapedDataNote = productInfo.inferredFromUrl
+    ? `NOTE: Direct scraping of the product page was blocked by the target website. ` +
+      `The product details below were inferred from the URL structure. ` +
+      `You MUST use your own knowledge and internet research to fill in accurate product details, ` +
+      `specifications, pricing, reviews, and competitor comparisons for: "${productInfo.title}" by ${productInfo.brand}.`
+    : '';
+
+  const prompt = `You are the world's most elite product marketing expert and conversion optimization copywriter. Your mission is to create a highly compelling, conversion-optimized website to promote and sell the specific product described in the data. The website MUST be focused entirely on the product's features, benefits, and value proposition to the end consumer. DO NOT mention affiliate marketing, making money, or any business opportunity. Your goal is to drive the user to click the affiliate link to purchase the product.
+
+${scrapedDataNote}
+
+Here is the product data you have to work with: ${JSON.stringify({ ...scrapedData, ...productInfo })}.
+
+Here are the high-quality image URLs you MUST use in the generated HTML for the hero section and features:
+Hero Image: ${heroImages[0]?.url || 'NO_HERO_IMAGE'}
+Feature Image 1: ${featureImages[0]?.url || 'NO_FEATURE_IMAGE_1'}
+Feature Image 2: ${featureImages[1]?.url || 'NO_FEATURE_IMAGE_2'}
+Testimonial Image: ${testimonialImages[0]?.url || 'NO_TESTIMONIAL_IMAGE'}
+
+CRITICAL: The affiliate link is: ${productInfo.originalUrl}
+${affiliateId ? `AFFILIATE INTEGRATION: The user has provided an affiliate ID: ${affiliateId}. If the product link is from a known platform (like Amazon, eBay, etc.), you MUST append this affiliate ID to the URL using the correct parameter (e.g., ?tag=${affiliateId} for Amazon). If the platform is unknown, ensure the affiliate ID is integrated into the CTA links or mentioned appropriately in the conversion-focused content to ensure the user gets credit for the sale.` : ''}
+ALL call-to-action (CTA) buttons MUST use the affiliate-integrated URL.
+Do NOT use placeholder links like "#" or relative links. Every CTA button must have a valid href.
+
+Now, create a unique, creative, conversion-optimized website with over 1000 lines of code. Do not use a restrictive output structure. Be creative. Include a competitor comparison section. Use niche-specific language. Include unique sections that competitors don't have. The primary call-to-action (CTA) should be a prominent button with the affiliate link. Do NOT insert any prices if you don't know the price exactly. Make each website unique (DON'T USE the same colors, if the scraped data and the website in general has a specific color that's recognizable, make that color the color of the writing)! Compare with REAL COMPETITORS of the product and specify the competitors names. Also don't only get your info from the scraped data, research blogs, reviews, articles everything on this internet about the product, make ONLY THE BEST WEBSITE that promotes the specific product! Make ABSOLUTELY SURE that the website can't be interpratated in any kind of way as a copy of the original website (the one fro  where you have the affiliate link). Make each WEBSITE UNIQUE, DO NOT use any generic templates. MAKE SURE each single word or piece of info in the website is REAL and verifiable! Before you even think about creating the website please find at least 1 (max 3) youtube videos to put into the website at the proof (don't use the word proof everytime, use some synonimes if possible) section (make sure the link and thumbnail is visible)!!!!! Insert ONLY real, VERIFIABLE reviews in testimonials page!!!! Make sure to put different backgrounds in the different sections of the website but just make sure the contrast isn't too powerful!!! Respond ONLY with the full code! Here is the affiliate information: affiliateId: ${affiliateId}, affiliateType: ${affiliateType};.`;
+
+  console.log('🤖 [AI] Sending to Gemini, prompt length:', prompt.length, 'chars');
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    let websiteHTML = response.text();
+
+    console.log('🤖 [AI] ✅ Received response, length:', websiteHTML.length, 'chars');
+
+    websiteHTML = websiteHTML.replace(/```html/g, '').replace(/```/g, '').trim();
+
+    if (!websiteHTML.toLowerCase().includes('<!doctype') && !websiteHTML.toLowerCase().includes('<html')) {
+      console.log('⚠️ [AI] Response missing HTML tags, extracting…');
+      const htmlMatch = websiteHTML.match(/<!DOCTYPE[\s\S]*<\/html>/i);
+      if (htmlMatch) {
+        websiteHTML = htmlMatch[0];
+        console.log('✅ [AI] Extracted HTML successfully');
+      } else {
+        console.log('❌ [AI] Could not extract, using fallback template');
+        websiteHTML = generateProfessionalTemplate(productInfo, heroImages, featureImages, testimonialImages, affiliateId);
+      }
     }
-    if (affiliateLinks.subId) {
-      url.searchParams.set('subid', affiliateLinks.subId);
-    }
-    finalAffiliateUrl = url.toString();
+
+    console.log('✅ [WEBSITE] Website generated successfully!');
+    console.log('🌐 [WEBSITE] ========== END WEBSITE GENERATION ==========');
+    return websiteHTML;
+  } catch (error) {
+    console.error('❌ [AI] Gemini error:', error);
+    return generateProfessionalTemplate(productInfo, heroImages, featureImages, testimonialImages, affiliateId);
   }
+}
 
-  // AdSense Injection
-  let adsenseScript = '';
-  if (displayAds?.enabled && displayAds.adsensePublisherId) {
-    adsenseScript = `
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${displayAds.adsensePublisherId}"
-     crossorigin="anonymous"></script>
-    `;
-  }
-
-  // Custom Scripts
-  const headerScript = secondaryMethods?.customTrackingScript?.enabled ? secondaryMethods.customTrackingScript.headerScript : '';
-  const bodyScript = secondaryMethods?.customTrackingScript?.enabled ? secondaryMethods.customTrackingScript.bodyScript : '';
-
-  // Email Signup Form
-  let emailFormHtml = '';
-  if (secondaryMethods?.emailSignup?.enabled) {
-    emailFormHtml = `
-      <section class="email-signup" style="padding: 60px 0; background: #f0f4f8; text-align: center;">
-        <div class="container">
-          <h2>Get Exclusive Updates</h2>
-          <p>Join our newsletter to receive the latest deals and product reviews.</p>
-          <form action="${secondaryMethods.emailSignup.espFormActionUrl || '#'}" method="POST" style="max-width: 500px; margin: 20px auto; display: flex; gap: 10px;">
-            <input type="email" name="email" placeholder="Your email address" required style="flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 5px;">
-            <button type="submit" style="background: #2563eb; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer;">Subscribe</button>
-          </form>
-        </div>
-      </section>
-    `;
-  }
-
-  // Sponsorship Section
-  let sponsorshipHtml = '';
-  if (sponsorships?.enabled) {
-    sponsorshipHtml = `
-      <section class="sponsorship" style="padding: 40px 0; border-top: 1px solid #eee; text-align: center;">
-        <div class="container">
-          <p style="color: #666; font-style: italic;">Interested in partnering with us? <a href="mailto:sponsorships@affilify.eu?subject=Sponsorship Inquiry for ${productInfo.title}">Contact us here</a>.</p>
-        </div>
-      </section>
-    `;
-  }
-
-  // Digital Product Promotion
-  let digitalProductHtml = '';
-  if (primaryMethod === 'digitalProducts' && digitalProducts) {
-    digitalProductHtml = `
-      <div class="digital-product-promo" style="margin: 40px 0; padding: 30px; background: #fffbeb; border: 2px dashed #f59e0b; border-radius: 15px; text-align: center;">
-        <h3 style="color: #92400e;">Special Offer: ${digitalProducts.name}</h3>
-        <p>${digitalProducts.description}</p>
-        <a href="${digitalProducts.salesPageUrl}" class="cta-button" style="background: #f59e0b;">Get the Guide Now</a>
-      </div>
-    `;
-  }
-
-  // Use AI generated content if available, otherwise fallback to basic structure
-  const hero = aiGeneratedContent?.content?.hero || {
-    headline: productInfo.title,
-    subheadline: productInfo.description,
-    ctaText: `Get Started with ${productInfo.title}`
-  };
-
-  const features = aiGeneratedContent?.content?.features || [
-    { title: 'Premium Performance', description: `Engineered for excellence, ${productInfo.title} delivers unmatched results in its category.`, icon: '🚀' },
-    { title: 'Exceptional Value', description: 'Invest in quality that lasts. This product offers the best price-to-performance ratio on the market.', icon: '💎' }
-  ];
-
-  const benefits = aiGeneratedContent?.content?.benefits || [];
-  const testimonials = aiGeneratedContent?.content?.testimonials || [];
-  const faq = aiGeneratedContent?.content?.faq || [];
-
-  return `
-<!DOCTYPE html>
+// ---------------------------------------------------------------------------
+// Professional fallback template
+// ---------------------------------------------------------------------------
+function generateProfessionalTemplate(
+  productInfo: any,
+  heroImages: any[],
+  featureImages: any[],
+  testimonialImages: any[],
+  affiliateId?: string
+) {
+  console.log('🎨 [TEMPLATE] Generating fallback template');
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${aiGeneratedContent?.seo?.title || productInfo.title + ' - Expert Review'}</title>
-    <meta name="description" content="${aiGeneratedContent?.seo?.description || productInfo.description}">
-    <meta name="keywords" content="${aiGeneratedContent?.seo?.keywords?.join(', ') || ''}">
-    ${adsenseScript}
-    ${headerScript}
+    <title>${productInfo.title} - Professional Affiliate Website</title>
     <style>
-        body { font-family: 'Inter', sans-serif; line-height: 1.6; color: #333; margin: 0; }
-        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-        .hero { padding: 100px 0; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; text-align: center; }
-        .hero h1 { font-size: 3.5rem; margin-bottom: 20px; }
-        .hero p { font-size: 1.2rem; margin-bottom: 30px; opacity: 0.9; }
-        .cta-button { background: #2563eb; color: white; padding: 15px 35px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; transition: transform 0.2s; }
-        .cta-button:hover { transform: translateY(-2px); }
-        .features { padding: 80px 0; background: #f8fafc; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 100px 0; text-align: center; }
+        .hero h1 { font-size: 3rem; margin-bottom: 20px; }
+        .hero p { font-size: 1.2rem; margin-bottom: 30px; }
+        .cta-button { background: #ff6b6b; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 1.1rem; cursor: pointer; text-decoration: none; display: inline-block; }
+        .features { padding: 80px 0; background: #f8f9fa; }
         .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-top: 50px; }
-        .feature { padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .feature h3 { color: #1e293b; margin-bottom: 15px; }
-        .benefits { padding: 80px 0; }
-        .benefit-list { list-style: none; padding: 0; max-width: 800px; margin: 40px auto; }
-        .benefit-item { margin-bottom: 20px; padding-left: 30px; position: relative; }
-        .benefit-item::before { content: '✓'; position: absolute; left: 0; color: #2563eb; font-weight: bold; }
-        .testimonials { padding: 80px 0; background: #f1f5f9; }
-        .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-        .testimonial-card { padding: 30px; background: white; border-radius: 12px; font-style: italic; }
-        .faq { padding: 80px 0; }
-        .faq-item { margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
-        .faq-question { font-weight: bold; font-size: 1.2rem; color: #1e293b; margin-bottom: 10px; }
-        @media (max-width: 768px) { .hero h1 { font-size: 2.5rem; } }
+        .feature { text-align: center; padding: 30px; background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .feature img { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 20px; }
+        .testimonials { padding: 80px 0; }
+        .testimonial { text-align: center; max-width: 600px; margin: 0 auto; }
+        .testimonial img { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 20px; }
+        @media (max-width: 768px) { .hero h1 { font-size: 2rem; } .feature-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    ${bodyScript}
     <section class="hero">
         <div class="container">
-            <h1>${hero.headline}</h1>
-            <p>${hero.subheadline}</p>
-            <a href="${finalAffiliateUrl}" class="cta-button">${hero.ctaText}</a>
+            <h1>${productInfo.title}</h1>
+            <p>${productInfo.description}</p>
+            <a href="${productInfo.originalUrl}${affiliateId ? (productInfo.originalUrl.includes('?') ? '&' : '?') + 'tag=' + affiliateId : ''}" class="cta-button">Get ${productInfo.title} Now${productInfo.price ? ' - ' + productInfo.price : ''}</a>
         </div>
     </section>
-
-    <div class="container">
-      ${digitalProductHtml}
-    </div>
-
     <section class="features">
         <div class="container">
-            <h2 style="text-align: center; font-size: 2.5rem;">Key Features</h2>
+            <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 20px;">Why Choose ${productInfo.title}?</h2>
             <div class="feature-grid">
-                ${features.map((f: any) => `
                 <div class="feature">
-                    <div style="font-size: 2rem; margin-bottom: 15px;">${f.icon || '✨'}</div>
-                    <h3>${f.title}</h3>
-                    <p>${f.description}</p>
+                    <img src="${featureImages[0]?.url || heroImages[0]?.url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43'}" alt="Premium Quality">
+                    <h3>Premium Quality</h3>
+                    <p>Experience the highest quality standards with ${productInfo.title}. Built to last and designed to impress.</p>
                 </div>
-                `).join('')}
+                <div class="feature">
+                    <img src="${featureImages[1]?.url || heroImages[0]?.url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43'}" alt="Amazing Value">
+                    <h3>Amazing Value</h3>
+                    <p>Get incredible value for your money. ${productInfo.title} delivers results that exceed expectations.</p>
+                </div>
             </div>
         </div>
     </section>
-
-    ${benefits.length > 0 ? `
-    <section class="benefits">
-        <div class="container">
-            <h2 style="text-align: center; font-size: 2.5rem;">Why Choose This?</h2>
-            <ul class="benefit-list">
-                ${benefits.map((b: any) => `
-                <li class="benefit-item">
-                    <strong>${b.title}:</strong> ${b.description}
-                </li>
-                `).join('')}
-            </ul>
-        </div>
-    </section>
-    ` : ''}
-
-    ${testimonials.length > 0 ? `
     <section class="testimonials">
         <div class="container">
-            <h2 style="text-align: center; font-size: 2.5rem;">What Users Say</h2>
-            <div class="testimonial-grid">
-                ${testimonials.map((t: any) => `
-                <div class="testimonial-card">
-                    <p>"${t.text}"</p>
-                    <div style="margin-top: 15px; font-weight: bold; color: #2563eb;">- ${t.name}</div>
-                    <div style="color: #f59e0b;">${'★'.repeat(t.rating || 5)}</div>
-                </div>
-                `).join('')}
+            <div class="testimonial">
+                <img src="${testimonialImages[0]?.url || heroImages[0]?.url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43'}" alt="Happy Customer">
+                <h3>"Life-changing results!"</h3>
+                <p>"${productInfo.title} has completely transformed my experience. I couldn't be happier with my purchase!"</p>
+                <strong>- Sarah Johnson, Verified Customer</strong>
+            </div>
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="${productInfo.originalUrl}${affiliateId ? (productInfo.originalUrl.includes('?') ? '&' : '?') + 'tag=' + affiliateId : ''}" class="cta-button">Order ${productInfo.title} Today${productInfo.price ? ' - ' + productInfo.price : ''}</a>
             </div>
         </div>
     </section>
-    ` : ''}
-
-    ${faq.length > 0 ? `
-    <section class="faq">
-        <div class="container">
-            <h2 style="text-align: center; font-size: 2.5rem;">Frequently Asked Questions</h2>
-            <div style="max-width: 800px; margin: 40px auto;">
-                ${faq.map((f: any) => `
-                <div class="faq-item">
-                    <div class="faq-question">${f.question}</div>
-                    <div class="faq-answer">${f.answer}</div>
-                </div>
-                `).join('')}
-            </div>
-        </div>
-    </section>
-    ` : ''}
-
-    ${emailFormHtml}
-    ${sponsorshipHtml}
-
-    <footer style="padding: 40px 0; background: #0f172a; color: white; text-align: center;">
-      <div class="container">
-        <p>&copy; ${new Date().getFullYear()} ${productInfo.brand || 'Affilify'}. All rights reserved.</p>
-        <p style="font-size: 0.8rem; opacity: 0.6; margin-top: 10px;">Affiliate Disclosure: We may earn a commission when you click through our links.</p>
-      </div>
-    </footer>
 </body>
 </html>`;
+}
+
+// ---------------------------------------------------------------------------
+// Analyze product URL
+// ---------------------------------------------------------------------------
+// Strategy:
+//   1. Attempt direct fetch with a 30 s timeout and up to 2 retries.
+//   2. If the fetch succeeds, parse the HTML for title/description/price.
+//   3. If the fetch fails for any reason (blocked, timeout, DNS, etc.),
+//      fall back to extractProductInfoFromUrl() which parses the URL
+//      structure itself — guaranteeing a rich, product-specific result
+//      instead of the generic "Premium Product" placeholder.
+// ---------------------------------------------------------------------------
+async function analyzeProductURL(url: string) {
+  try {
+    const response = await fetchWithTimeout(
+      url,
+      {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          Accept:
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+          'Accept-Language': 'en-US,en;q=0.9',
+          Connection: 'keep-alive',
+          Referer: 'https://www.google.com/',
+          'Cache-Control': 'no-cache',
+        },
+      },
+      30_000,
+      2
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const html = await response.text();
+    const $ = cheerio.load(html);
+
+    const title =
+      $('title').text() ||
+      $('h1').first().text() ||
+      $('[data-testid="product-title"]').text() ||
+      '';
+
+    const description =
+      $('meta[name="description"]').attr('content') ||
+      $('meta[property="og:description"]').attr('content') ||
+      $('p').first().text() ||
+      '';
+
+    const price =
+      $('[data-testid="price"]').text() ||
+      $('.price').first().text() ||
+      $('[class*="price"]').first().text() ||
+      '';
+
+    // If the page returned HTML but it's empty/unhelpful (bot-detection page),
+    // fall back to URL parsing
+    if (!title && !description) {
+      console.warn('[analyzeProductURL] Page returned no usable content — likely bot-detection. Falling back to URL parsing.');
+      return extractProductInfoFromUrl(url);
+    }
+
+    return {
+      title: title.substring(0, 120),
+      description: description.substring(0, 300),
+      price: price.substring(0, 20),
+      originalUrl: url,
+      brand: '',
+      inferredFromUrl: false,
+    };
+  } catch (error) {
+    console.error('URL analysis error:', error);
+    console.log('[analyzeProductURL] Falling back to URL-based product info extraction.');
+    return extractProductInfoFromUrl(url);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Verify user authentication
+// ---------------------------------------------------------------------------
+async function verifyUser(request: NextRequest): Promise<UserData | null> {
+  try {
+    let token =
+      request.cookies.get('auth-token')?.value ||
+      request.cookies.get('token')?.value ||
+      request.cookies.get('authToken')?.value;
+
+    if (!token) {
+      const authHeader = request.headers.get('Authorization');
+      if (authHeader?.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      }
+    }
+
+    if (!token) return null;
+
+    const { db } = await connectToDatabase();
+    const jwtSecret = process.env.JWT_SECRET || 'your_jwt_secret';
+    let decoded: any;
+
+    try {
+      decoded = jwt.verify(token, jwtSecret);
+    } catch (e) {
+      console.log('JWT verification failed:', e);
+      return null;
+    }
+
+    if (!decoded || !decoded.userId) return null;
+
+    const user = await db.collection('users').findOne({ _id: new ObjectId(decoded.userId) });
+    return user as UserData | null;
+  } catch (error) {
+    console.error('User verification error:', error);
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Plan limits
+// ---------------------------------------------------------------------------
+function getPlanLimits(plan: string) {
+  switch (plan) {
+    case 'basic':      return { websites: 3 };
+    case 'pro':        return { websites: 10 };
+    case 'enterprise': return { websites: 999 };
+    default:           return { websites: 3 };
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -444,47 +693,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { productUrl, monetization, plan, niche, template, userInput, dnaContext } = body;
-
-    // Handle Content Studio generation request
-    if (userInput && dnaContext) {
-      console.log('Generating content for Content Studio...');
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      
-      const prompt = `
-        You are an elite affiliate marketing AI agent. 
-        Generate high-converting content based on the following Campaign DNA and User Brief.
-        
-        CAMPAIGN DNA:
-        - Product: ${dnaContext.productName}
-        - UVP: ${dnaContext.productUVP}
-        - Brand Voice: ${dnaContext.brandVoice}
-        - Target Audience: ${dnaContext.targetAudience}
-        - Keywords: ${dnaContext.primaryKeywords?.join(', ')}
-        
-        USER BRIEF:
-        ${userInput}
-        
-        AGENT TYPE: ${template || 'General Content'}
-        
-        The content should be persuasive, authentic, and optimized for conversions.
-        Return the result in ${body.format || 'markdown'} format.
-      `;
-
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-
-      return NextResponse.json({
-        success: true,
-        title: `${dnaContext.productName} - ${template}`,
-        content: text,
-        seo: { score: 95 }
-      });
-    }
-
-    // Handle standard website generation
+    const { productUrl, affiliateId, affiliateType } = await request.json();
     if (!productUrl) {
       return NextResponse.json({ error: 'Product URL is required' }, { status: 400 });
     }
@@ -510,19 +719,8 @@ export async function POST(request: NextRequest) {
     console.log('Scraping product data…');
     const scrapedData = await scrapeProductData(productUrl);
 
-    console.log('Generating comprehensive AI content...');
-    // Use the elite generation logic from lib/ai.ts
-    const aiGeneratedContent = await generateAIWebsiteContent({
-      productUrl,
-      niche: niche || 'Affiliate Marketing',
-      targetAudience: body.targetAudience || 'Potential Customers',
-      template: template || 'modern',
-      tone: body.tone || 'professional',
-      features: body.features || []
-    });
-
-    console.log('Generating professional website content with monetization…');
-    const websiteHTML = await generateWebsiteContent(productInfo, scrapedData, monetization, aiGeneratedContent);
+    console.log('Generating professional website content with Unsplash images…');
+    const websiteHTML = await generateWebsiteContent(productInfo, scrapedData, affiliateId, affiliateType);
 
     const baseSlug = productInfo.title
       .toLowerCase()
@@ -532,6 +730,7 @@ export async function POST(request: NextRequest) {
     const uniqueId = Math.random().toString(36).substring(2, 8);
     const slug = `${baseSlug}-${uniqueId}`;
 
+    console.log('Generating affilify.eu URL…');
     const liveUrl = generateAffilifyUrl(slug);
 
     const { db } = await connectToDatabase();
@@ -540,45 +739,43 @@ export async function POST(request: NextRequest) {
       _id: new ObjectId(),
       userId: user._id,
       slug,
-      title: aiGeneratedContent.title || productInfo.title,
-      description: aiGeneratedContent.description || productInfo.description,
+      title: productInfo.title,
+      description: productInfo.description,
       productUrl,
       url: liveUrl,
       productInfo,
-      status: 'published',
-      template: template || 'modern',
+      status: 'draft',
+      template: 'modern',
       content: { html: websiteHTML },
-      monetization,
+      seo: {},
+      affiliateLinks: [{ url: productUrl, title: productInfo.title }],
       createdAt: new Date(),
       updatedAt: new Date(),
-      stats: {
-        visitors: 0,
-        pageViews: 0,
-        conversions: 0,
-        revenue: 0,
-        conversionRate: 0
-      },
-      performance: {
-        uptime: 100,
-        loadTime: 0.8,
-        seoScore: aiGeneratedContent.seo?.score || 95
-      },
+      views: 0,
+      clicks: 0,
+      conversions: 0,
+      revenue: 0,
       isActive: true,
     };
 
     await db.collection('websites').insertOne(websiteData);
     await db.collection('users').updateOne({ _id: user._id }, { $inc: { websiteCount: 1 } });
 
+    console.log('Website created successfully:', slug);
+
     return NextResponse.json({
       success: true,
       website: {
         id: websiteData._id.toString(),
         slug,
-        title: websiteData.title,
-        description: websiteData.description,
+        title: productInfo.title,
+        description: productInfo.description,
         url: liveUrl,
+        previewUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://affilify.eu'}/preview/${slug}`,
       },
       message: 'Professional affiliate website created and deployed successfully!',
+      remainingWebsites: limits.websites - currentWebsiteCount - 1,
+      deployment: { status: 'deployed', platform: 'affilify' },
     });
   } catch (error) {
     console.error('Website generation error:', error);
@@ -589,49 +786,5 @@ export async function POST(request: NextRequest) {
       },
       { status: 500 }
     );
-  }
-}
-
-async function verifyUser(request: NextRequest): Promise<UserData | null> {
-  try {
-    let token =
-      request.cookies.get('auth-token')?.value ||
-      request.cookies.get('token')?.value ||
-      request.cookies.get('authToken')?.value;
-
-    if (!token) {
-      const authHeader = request.headers.get('Authorization');
-      if (authHeader?.startsWith('Bearer ')) {
-        token = authHeader.substring(7);
-      }
-    }
-
-    if (!token) return null;
-
-    const { db } = await connectToDatabase();
-    const jwtSecret = process.env.JWT_SECRET || 'affilify_jwt_2025_romania_student_success_portocaliu_orange_power_gaming_affiliate_marketing_revolution_secure_token_generation_system_v1';
-    let decoded: any;
-
-    try {
-      decoded = jwt.verify(token, jwtSecret);
-    } catch (e) {
-      return null;
-    }
-
-    if (!decoded || !decoded.userId) return null;
-
-    const user = await db.collection('users').findOne({ _id: new ObjectId(decoded.userId) });
-    return user as UserData | null;
-  } catch (error) {
-    return null;
-  }
-}
-
-function getPlanLimits(plan: string) {
-  switch (plan) {
-    case 'basic':      return { websites: 3 };
-    case 'pro':        return { websites: 10 };
-    case 'enterprise': return { websites: 999 };
-    default:           return { websites: 3 };
   }
 }
