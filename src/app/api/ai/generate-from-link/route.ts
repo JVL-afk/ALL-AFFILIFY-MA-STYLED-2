@@ -433,6 +433,55 @@ function generateAffilifyUrl(slug: string): string {
 }
 
 // ---------------------------------------------------------------------------
+// Niche Expert Analysis (Layer 1: Understand the niche deeply)
+// ---------------------------------------------------------------------------
+async function analyzeNiche(
+  productInfo: any,
+  scrapedData: any,
+  youtubeVideos: any[]
+) {
+  console.log('🧠 [NICHE] ========== STARTING NICHE ANALYSIS ==========');
+  console.log('🧠 [NICHE] Analyzing niche for:', productInfo.title);
+
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+  const nichePrompt = `You are a world-class niche expert and industry insider. Your task is to deeply understand the niche and market for this product: "${productInfo.title}" by ${productInfo.brand}.
+
+Based on the product data, YouTube videos, and your knowledge, provide a strategic brief that covers:
+
+1. **Niche Language & Terminology**: What are the specific terms, jargon, and phrases that experts in this niche use? What words do insiders use that outsiders don't?
+
+2. **Target Audience Profile**: Who is the ideal customer? What are their pain points, desires, and objections?
+
+3. **Industry Standards & Best Practices**: What does a professional in this space care about? What are the key metrics or features they evaluate?
+
+4. **Competitor Landscape**: Who are the main competitors? What do they do well? What gaps exist?
+
+5. **Unique Selling Angles**: What makes this product special within the niche? What story can we tell that resonates with insiders?
+
+6. **Content Tone & Style**: How should the website sound? Formal? Casual? Technical? Inspirational?
+
+7. **Key Benefits to Emphasize**: Based on the niche, what benefits matter most? (Not just features, but real value).
+
+Product Data: ${JSON.stringify({ ...scrapedData, ...productInfo })}
+
+YouTube Video Insights: ${youtubeVideos.map((v) => `${v.title} - ${v.transcript.substring(0, 500)}`).join('\n\n')}
+
+Respond with a clear, structured brief that will guide the website creation. Be specific and actionable.`;
+
+  try {
+    const result = await model.generateContent(nichePrompt);
+    const response = await result.response;
+    const nicheBrief = response.text();
+    console.log('🧠 [NICHE] ✅ Niche analysis complete, brief length:', nicheBrief.length, 'chars');
+    return nicheBrief;
+  } catch (error) {
+    console.error('🧠 [NICHE] ❌ Niche analysis error:', error);
+    return 'Unable to generate niche brief. Proceed with standard approach.';
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Website content generator (Gemini AI + Unsplash)
 // ---------------------------------------------------------------------------
 async function generateWebsiteContent(
@@ -446,7 +495,7 @@ async function generateWebsiteContent(
   console.log('🌐 [WEBSITE] Product URL:', productInfo.originalUrl);
   console.log('🌐 [WEBSITE] Info inferred from URL:', productInfo.inferredFromUrl || false);
 
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
   const scrapedImages = scrapedData?.images || [];
   console.log('🖼️ [IMAGE] Scraped images available:', scrapedImages.length);
@@ -487,6 +536,10 @@ async function generateWebsiteContent(
     : `${productInfo.title} official review tutorial`;
   const youtubeVideos = await getYouTubeVideos(youtubeSearchQuery, 3);
   console.log('🎥 [YOUTUBE] Videos found:', youtubeVideos.length);
+
+  // Layer 1: Analyze the niche to understand industry language and best practices
+  console.log('🧠 [NICHE] Calling niche expert analysis...');
+  const nicheBrief = await analyzeNiche(productInfo, scrapedData, youtubeVideos);
 
   // If scraping was blocked, tell Gemini explicitly so it can research the product itself
   const scrapedDataNote = productInfo.inferredFromUrl
