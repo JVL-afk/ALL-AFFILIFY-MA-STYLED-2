@@ -508,16 +508,18 @@ Here are the high-quality image URLs you MUST use in the generated HTML for the 
 	Feature Image 2: ${featureImages[1]?.url || 'NO_FEATURE_IMAGE_2'}
 	Testimonial Image: ${testimonialImages[0]?.url || 'NO_TESTIMONIAL_IMAGE'}
 	
-	🎥 YOUTUBE VIDEOS (REAL & VERIFIABLE):
-	${youtubeVideos.length > 0 
+		🎥 YOUTUBE VIDEOS (REAL & VERIFIABLE):
+		${youtubeVideos.length > 0 
     ? youtubeVideos.map((v, i) => `Video ${i+1}:
       - Title: ${v.title}
       - URL: ${v.url}
       - Embed URL: ${v.embedUrl}
       - Thumbnail: ${v.thumbnail}
       - Channel: ${v.channelTitle}
-      - Transcript Snippet: ${v.transcript.substring(0, 1000)}...`).join('\n\n')
+      - Full Transcript: ${v.transcript}`).join('\n\n')
     : 'NO_YOUTUBE_VIDEOS_FOUND'}
+
+		⭐ IMPORTANT: Extract genuine user feedback, benefits, and insights from the video transcripts above. Use these to create authentic, verifiable reviews and testimonials in the website. Focus on real product benefits mentioned in the videos.
 
 	CRITICAL: The affiliate link is: ${productInfo.originalUrl}
 ${affiliateId ? `AFFILIATE INTEGRATION: The user has provided an affiliate ID: ${affiliateId}. If the product link is from a known platform (like Amazon, eBay, etc.), you MUST append this affiliate ID to the URL using the correct parameter (e.g., ?tag=${affiliateId} for Amazon). If the platform is unknown, ensure the affiliate ID is integrated into the CTA links or mentioned appropriately in the conversion-focused content to ensure the user gets credit for the sale.` : ''}
