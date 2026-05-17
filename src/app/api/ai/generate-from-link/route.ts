@@ -186,6 +186,84 @@ async function validateImageUrl(imageUrl: string): Promise<boolean> {
 }
 
 // ---------------------------------------------------------------------------
+// Gemini 2.5 Flash Agent: Generate YouTube Search Queries
+// ---------------------------------------------------------------------------
+// This function uses Gemini 2.5 Flash as an intelligent agent to generate
+// multiple YouTube search queries based on product information and custom instructions.
+// It returns an array of search queries that will be used by the YouTube Data API v3.
+// ---------------------------------------------------------------------------
+async function generateYouTubeSearchQueries(
+  productLink: string,
+  productInfo: any,
+  customInstructions?: string
+): Promise<string[]> {
+  console.log('🤖 [YOUTUBE_AGENT] ========== STARTING YOUTUBE SEARCH QUERY GENERATION ==========');
+  console.log('🤖 [YOUTUBE_AGENT] Product:', productInfo.title);
+  console.log('🤖 [YOUTUBE_AGENT] Link:', productLink);
+
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+  const agentPrompt = `You are a YouTube search optimization expert. Your task is to generate 3-5 diverse and highly relevant YouTube search queries for the following product.
+
+Product Information:
+- Title: ${productInfo.title}
+- Brand: ${productInfo.brand}
+- Description: ${productInfo.description}
+- Link: ${productLink}
+
+${customInstructions ? `Special Instructions: ${customInstructions}` : ''}
+
+Generate search queries that will find:
+1. Professional reviews and unboxings
+2. Tutorial or how-to content
+3. Comparisons with competitors
+4. Real user experiences and testimonials
+5. Product features and specifications breakdown
+
+Return ONLY a JSON array of strings with the search queries. Example format:
+["query 1", "query 2", "query 3", "query 4", "query 5"]
+
+Make sure each query is:
+- Specific and relevant to the product
+- Likely to return high-quality, authentic content
+- Diverse in search intent (reviews, tutorials, comparisons, etc.)
+- Natural and conversational (as a real user would search)`;
+
+  try {
+    const result = await model.generateContent(agentPrompt);
+    const response = await result.response;
+    const responseText = response.text();
+    console.log('🤖 [YOUTUBE_AGENT] Raw response:', responseText);
+
+    // Extract JSON array from the response
+    const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) {
+      console.warn('🤖 [YOUTUBE_AGENT] Could not extract JSON array, using fallback queries');
+      return [
+        `${productInfo.brand} ${productInfo.title} review`,
+        `${productInfo.title} tutorial how to use`,
+        `${productInfo.brand} ${productInfo.title} vs competitors`,
+        `${productInfo.title} unboxing`,
+        `${productInfo.title} features explained`,
+      ];
+    }
+
+    const queries: string[] = JSON.parse(jsonMatch[0]);
+    console.log('🤖 [YOUTUBE_AGENT] ✅ Generated queries:', queries.length);
+    queries.forEach((q, i) => console.log(`  [${i + 1}] ${q}`));
+    return queries;
+  } catch (error) {
+    console.error('🤖 [YOUTUBE_AGENT] ❌ Error generating queries:', error);
+    // Return sensible fallback queries
+    return [
+      `${productInfo.brand} ${productInfo.title} review`,
+      `${productInfo.title} tutorial`,
+      `${productInfo.title} unboxing`,
+    ];
+  }
+}
+
+// ---------------------------------------------------------------------------
 // YouTube Data API and Transcript Retrieval
 // ---------------------------------------------------------------------------
 async function getYouTubeVideos(query: string, maxResults: number = 3) {
@@ -531,10 +609,27 @@ async function generateWebsiteContent(
   console.log('🖼️ [IMAGE] Testimonial:', testimonialImages[0]?.url ? '✅ VALID' : '❌ MISSING');
 
   console.log('🎥 [YOUTUBE] ========== FETCHING YOUTUBE VIDEOS ==========');
-  const youtubeSearchQuery = productInfo.inferredFromUrl
-    ? `${productInfo.brand} ${productInfo.title.split('–')[0].trim()} review tutorial`
-    : `${productInfo.title} official review tutorial`;
-  const youtubeVideos = await getYouTubeVideos(youtubeSearchQuery, 3);
+  
+  // Use Gemini 2.5 Flash agent to generate intelligent YouTube search queries
+  const youtubeSearchQueries = await generateYouTubeSearchQueries(
+    productInfo.originalUrl,
+    productInfo,
+    'Generate search queries that will find high-quality reviews, tutorials, and user experiences for this product.'
+  );
+  
+  // Fetch videos for each generated query and combine results
+  let youtubeVideos: any[] = [];
+  for (const query of youtubeSearchQueries) {
+    const videos = await getYouTubeVideos(query, 2);
+    youtubeVideos = [...youtubeVideos, ...videos];
+    if (youtubeVideos.length >= 6) break; // Limit total videos to 6
+  }
+  
+  // Remove duplicates based on videoId
+  youtubeVideos = Array.from(
+    new Map(youtubeVideos.map(v => [v.videoId, v])).values()
+  ).slice(0, 3);
+  
   console.log('🎥 [YOUTUBE] Videos found:', youtubeVideos.length);
 
   // Layer 1: Analyze the niche to understand industry language and best practices
