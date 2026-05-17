@@ -213,21 +213,12 @@ export default function HomePage() {
 
   const pricingPlans = [
     {
-      name: 'Free',
+      name: 'Basic',
       price: '$0',
       period: '/forever',
       description: 'Perfect for getting started',
       features: ['3 websites', 'Basic templates', 'AI content generation', 'Basic analytics', 'Email support'],
       cta: 'Start Free',
-      highlight: false
-    },
-    {
-      name: 'Basic',
-      price: '$19',
-      period: '/month',
-      description: 'For growing marketers',
-      features: ['10 websites', 'All templates', 'Advanced analytics', 'Custom domains', 'Priority support'],
-      cta: 'Go Basic',
       highlight: false
     },
     {
@@ -924,7 +915,7 @@ export default function HomePage() {
           </motion.div>
 
           {/* Pricing Cards */}
-          <div className="grid md:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6 max-w-7xl mx-auto">
             {pricingPlans.map((plan, index) => (
               <motion.div
                 key={index}
