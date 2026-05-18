@@ -50,6 +50,7 @@ export default function ProCreateWebsite() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [generatedWebsite, setGeneratedWebsite] = useState<any>(null)
+  const [generationMode, setGenerationMode] = useState<'academical' | 'casual'>('academical')
   const router = useRouter()
 
   // Monetization State
@@ -128,8 +129,12 @@ export default function ProCreateWebsite() {
         return
       }
 
-      // Call the generate-from-link API
-      const response = await fetch('/api/ai/generate-from-link', {
+      // Call the appropriate API based on mode
+      const apiEndpoint = generationMode === 'academical' 
+        ? '/api/ai/generate-from-link' 
+        : '/api/ai/generate-from-link/route1';
+
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -236,6 +241,31 @@ export default function ProCreateWebsite() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-8">
+                <div className="space-y-4">
+                  <Label className="text-white text-lg font-semibold">Generation Mode</Label>
+                  <div className="flex gap-4 p-1 bg-white/5 rounded-lg border border-white/10 w-fit">
+                    <Button
+                      variant={generationMode === 'academical' ? 'default' : 'ghost'}
+                      className={generationMode === 'academical' ? 'bg-blue-600 hover:bg-blue-700' : 'text-gray-400 hover:text-white'}
+                      onClick={() => setGenerationMode('academical')}
+                    >
+                      Academical
+                    </Button>
+                    <Button
+                      variant={generationMode === 'casual' ? 'default' : 'ghost'}
+                      className={generationMode === 'casual' ? 'bg-orange-600 hover:bg-orange-700' : 'text-gray-400 hover:text-white'}
+                      onClick={() => setGenerationMode('casual')}
+                    >
+                      Casual
+                    </Button>
+                  </div>
+                  <p className="text-sm text-gray-400">
+                    {generationMode === 'academical' 
+                      ? 'Uses advanced "Perfect Affiliate" criteria for maximum authority and trust.' 
+                      : 'Uses standard creative marketing approach for a more casual feel.'}
+                  </p>
+                </div>
+
                 <MonetizationCarousel 
                   selectedMethod={selectedMethod}
                   onMethodChange={setSelectedMethod}
