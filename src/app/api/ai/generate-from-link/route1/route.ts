@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { connectToDatabase } from '../../../../lib/mongodb';
+import { connectToDatabase } from '../../../../../lib/mongodb';
 import { ObjectId } from 'mongodb';
 import * as cheerio from 'cheerio';
 import * as jwt from 'jsonwebtoken';
