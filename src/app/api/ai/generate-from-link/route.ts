@@ -691,37 +691,40 @@ async function generateWebsiteContent(
       (scrapedData?.rawMarkdown ? `Below is some raw content retrieved from the page that might help: \n\n ${scrapedData.rawMarkdown.substring(0, 2000)}` : '')
     : '';
 
-  const prompt = `You are the world's most elite product marketing expert and conversion optimization copywriter. Your mission is to create a highly compelling, conversion-optimized website to promote and sell the specific product described in the data. The website MUST be focused entirely on the product's features, benefits, and value proposition to the end consumer. DO NOT mention affiliate marketing, making money, or any business opportunity. Your goal is to drive the user to click the affiliate link to purchase the product.
+  const prompt = `You are the world's most elite product marketing expert and conversion optimization copywriter. Your mission is to create a "Perfect Affiliate Website" that is highly compelling and conversion-optimized.
 
-${scrapedDataNote}
+### CORE OBJECTIVES:
+1. **Clear Positioning**: Answer "Who is this for?", "What exact problem does it solve?", and "Why trust this site?". Tighten the niche to increase authority and conversions.
+2. **Search Intent Architecture**: Map content to the visitor's buying stage (Awareness, Evaluation, Purchase).
+3. **Trust Signals Everywhere**: Use real photos/videos, first-hand testing feel, author bios, and transparent affiliate disclosures. Include pros/cons (negative points increase trust).
+4. **Exceptional Content Structure**: Make it scannable, fast, and visually layered. Include a strong headline, quick answer at the top, comparison table, visuals, FAQ, verdict, and CTA.
+5. **Comparison Systems**: Act as a decision engine with side-by-side comparisons and "best for X" segmentation.
+6. **Information Design**: Use whitespace, visual hierarchy, highlighted takeaways, and comparison cards.
+7. **Psychological Clarity**: Reduce uncertainty. Make the user feel understood, safe, and confident.
 
-Here is the product data you have to work with: ${JSON.stringify({ ...scrapedData, ...productInfo })}.
+### DATA & ASSETS:
+- **Product Data**: ${JSON.stringify({ ...scrapedData, ...productInfo })}
+- **Scraped Data Note**: ${scrapedDataNote}
+- **Hero Image**: ${heroImages[0]?.url || 'NO_HERO_IMAGE'}
+- **Feature Image 1**: ${featureImages[0]?.url || 'NO_FEATURE_IMAGE_1'}
+- **Feature Image 2**: ${featureImages[1]?.url || 'NO_FEATURE_IMAGE_2'}
+- **Testimonial Image**: ${testimonialImages[0]?.url || 'NO_TESTIMONIAL_IMAGE'}
+- **YouTube Videos**: ${youtubeVideos.length > 0 
+    ? youtubeVideos.map((v, i) => `Video ${i+1}: ${v.title} (${v.url})`).join(', ') 
+    : 'None'}
+- **Affiliate Link**: ${productInfo.originalUrl}
+- **Affiliate ID**: ${affiliateId || 'None'}
 
-Here are the high-quality image URLs you MUST use in the generated HTML for the hero section and features:
-	Hero Image: ${heroImages[0]?.url || 'NO_HERO_IMAGE'}
-	Feature Image 1: ${featureImages[0]?.url || 'NO_FEATURE_IMAGE_1'}
-	Feature Image 2: ${featureImages[1]?.url || 'NO_FEATURE_IMAGE_2'}
-	Testimonial Image: ${testimonialImages[0]?.url || 'NO_TESTIMONIAL_IMAGE'}
-	
-		🎥 YOUTUBE VIDEOS (REAL & VERIFIABLE):
-		${youtubeVideos.length > 0 
-    ? youtubeVideos.map((v, i) => `Video ${i+1}:
-      - Title: ${v.title}
-      - URL: ${v.url}
-      - Embed URL: ${v.embedUrl}
-      - Thumbnail: ${v.thumbnail}
-      - Channel: ${v.channelTitle}
-      - Full Transcript: ${v.transcript}`).join('\n\n')
-    : 'NO_YOUTUBE_VIDEOS_FOUND'}
+### CRITICAL INSTRUCTIONS:
+- **Unique & Creative**: Generate over 1000 lines of unique code. No generic templates.
+- **Color Strategy**: Use colors recognizable from the product/brand for the writing and accents.
+- **Real Competitors**: Research and compare with REAL competitors by name.
+- **Authentic Media**: Integrate the provided YouTube videos and images. Extract genuine insights from transcripts if available.
+- **CTA Integrity**: ALL buttons MUST use the affiliate-integrated URL. No "#" links.
+- **Verifiable Info**: Ensure every word and piece of info is real and verifiable. Use niche-specific language.
+- **Mobile First**: Optimize for fast loading and mobile UX.
 
-		⭐ IMPORTANT: Extract genuine user feedback, benefits, and insights from the video transcripts above. Use these to create authentic, verifiable reviews and testimonials in the website. Focus on real product benefits mentioned in the videos.
-
-	CRITICAL: The affiliate link is: ${productInfo.originalUrl}
-${affiliateId ? `AFFILIATE INTEGRATION: The user has provided an affiliate ID: ${affiliateId}. If the product link is from a known platform (like Amazon, eBay, etc.), you MUST append this affiliate ID to the URL using the correct parameter (e.g., ?tag=${affiliateId} for Amazon). If the platform is unknown, ensure the affiliate ID is integrated into the CTA links or mentioned appropriately in the conversion-focused content to ensure the user gets credit for the sale.` : ''}
-ALL call-to-action (CTA) buttons MUST use the affiliate-integrated URL.
-Do NOT use placeholder links like "#" or relative links. Every CTA button must have a valid href.
-
-Now, create a unique, creative, conversion-optimized website with over 1000 lines of code. Do not use a restrictive output structure. Be creative. Include a competitor comparison section. Use niche-specific language. Include unique sections that competitors don't have. The primary call-to-action (CTA) should be a prominent button with the affiliate link. Do NOT insert any prices if you don't know the price exactly. Make each website unique (DON'T USE the same colors, if the scraped data and the website in general has a specific color that's recognizable, make that color the color of the writing)! Compare with REAL COMPETITORS of the product and specify the competitors names. Also don't only get your info from the scraped data, research blogs, reviews, articles everything on this internet about the product, make ONLY THE BEST WEBSITE that promotes the specific product! Make ABSOLUTELY SURE that the website can't be interpratated in any kind of way as a copy of the original website (the one fro  where you have the affiliate link). Make each WEBSITE UNIQUE, DO NOT use any generic templates. MAKE SURE each single word or piece of info in the website is REAL and verifiable! Before you even think about creating the website please find at least 1 (max 3) youtube videos to put into the website at the proof (don't use the word proof everytime, use some synonimes if possible) section (make sure the link and thumbnail is visible)!!!!! Insert ONLY real, VERIFIABLE reviews in testimonials page!!!! Make sure to put different backgrounds in the different sections of the website but just make sure the contrast isn't too powerful!!! Respond ONLY with the full code! Here is the affiliate information: affiliateId: ${affiliateId}, affiliateType: ${affiliateType};.`;
+Respond ONLY with the full HTML/CSS code.`;
 
   console.log('🤖 [AI] Sending to Gemini, prompt length:', prompt.length, 'chars');
 
