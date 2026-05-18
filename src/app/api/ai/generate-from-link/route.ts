@@ -321,22 +321,82 @@ async function getYouTubeVideos(query: string, maxResults: number = 3) {
 }
 
 // ---------------------------------------------------------------------------
-// Scrape product data
+// Scrape product data (Enhanced with Jina Reader & Anti-Bot Bypass)
 // ---------------------------------------------------------------------------
 async function scrapeProductData(url: string) {
+  console.log('🔍 [SCRAPER] Starting enhanced scraping for:', url);
+  
+  // Strategy 1: Jina Reader API (Excellent for bypassing Cloudflare/bot-detection)
   try {
+    console.log('🔍 [SCRAPER] Attempting Strategy 1: Jina Reader API...');
+    const jinaUrl = `https://r.jina.ai/${url}`;
+    const response = await fetchWithTimeout(
+      jinaUrl,
+      {
+        headers: {
+          'X-Return-Format': 'markdown',
+          'X-With-Images-Summary': 'true',
+          'X-With-Links-Summary': 'true',
+        }
+      },
+      20_000, // Shorter timeout for Jina
+      1
+    );
+
+    if (response.ok) {
+      const markdown = await response.text();
+      console.log('🔍 [SCRAPER] ✅ Strategy 1 (Jina) Succeeded. Content length:', markdown.length);
+      
+      // Parse markdown to extract product details
+      // Jina usually provides title as the first line
+      const lines = markdown.split('\n').filter(l => l.trim());
+      const title = lines[0]?.replace(/^#+\s+/, '').trim() || '';
+      
+      // Extract images from markdown
+      const imageMatches = markdown.matchAll(/!\[.*?\]\((https?:\/\/.*?)\)/g);
+      const images = Array.from(imageMatches).map(m => m[1]);
+      
+      // Extract links that might be useful
+      const linkMatches = markdown.matchAll(/\[.*?\]\((https?:\/\/.*?)\)/g);
+      const links = Array.from(linkMatches).map(m => m[1]);
+
+      return { 
+        title, 
+        description: markdown.substring(0, 1000), // Give Gemini more context
+        price: '', 
+        images, 
+        features: [], 
+        specs: {},
+        rawMarkdown: markdown,
+        source: 'jina'
+      };
+    }
+    console.warn('🔍 [SCRAPER] ⚠️ Strategy 1 (Jina) failed with status:', response.status);
+  } catch (err) {
+    console.error('🔍 [SCRAPER] ❌ Strategy 1 (Jina) Error:', err);
+  }
+
+  // Strategy 2: Direct Fetch with Enhanced Headers (The original approach, improved)
+  try {
+    console.log('🔍 [SCRAPER] Attempting Strategy 2: Direct Fetch with Enhanced Headers...');
     const response = await fetchWithTimeout(
       url,
       {
         headers: {
           'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          Accept:
-            'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
           'Accept-Language': 'en-US,en;q=0.9',
-          Connection: 'keep-alive',
-          Referer: 'https://www.google.com/',
           'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'Sec-Ch-Ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+          'Sec-Ch-Ua-Mobile': '?0',
+          'Sec-Ch-Ua-Platform': '"Windows"',
+          'Sec-Fetch-Dest': 'document',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-Site': 'none',
+          'Sec-Fetch-User': '?1',
+          'Upgrade-Insecure-Requests': '1',
         },
       },
       30_000,
@@ -344,19 +404,28 @@ async function scrapeProductData(url: string) {
     );
 
     const html = await response.text();
+    
+    // Check if we got blocked (Cloudflare challenge or similar)
+    if (html.includes('cf-browser-verification') || html.includes('ray-id') || html.includes('Access Denied')) {
+      console.warn('🔍 [SCRAPER] ⚠️ Strategy 2 blocked by anti-bot system.');
+      throw new Error('Blocked by anti-bot');
+    }
+
     const $ = cheerio.load(html);
 
-    const title = $('h1').first().text().trim();
+    const title = $('h1').first().text().trim() || $('title').text().trim();
     const description =
       $('meta[name="description"]').attr('content') ||
+      $('meta[property="og:description"]').attr('content') ||
       $('p').first().text().trim();
     const price =
       $('.price').first().text().trim() ||
-      $('.product-price').first().text().trim();
+      $('.product-price').first().text().trim() ||
+      $('[class*="price"]').first().text().trim();
 
     const images = Array.from($('img'))
       .map((img) => {
-        const src = $(img).attr('src');
+        const src = $(img).attr('src') || $(img).attr('data-src') || $(img).attr('data-lazy-src');
         const alt = $(img).attr('alt') || '';
         const className = $(img).attr('class') || '';
         const id = $(img).attr('id') || '';
@@ -365,7 +434,8 @@ async function scrapeProductData(url: string) {
             const fullUrl = new URL(src, url).href;
             const isLogo = /logo|icon|favicon|sprite|badge|button/i.test(fullUrl + alt + className + id);
             const isSvg = fullUrl.toLowerCase().endsWith('.svg');
-            const isSmall = $(img).attr('width') && parseInt($(img).attr('width')!) < 200;
+            const isSmall = ($(img).attr('width') && parseInt($(img).attr('width')!) < 100) || 
+                          ($(img).attr('height') && parseInt($(img).attr('height')!) < 100);
             if (isLogo || isSvg || isSmall) return null;
             return fullUrl;
           } catch {
@@ -376,7 +446,7 @@ async function scrapeProductData(url: string) {
       })
       .filter((src): src is string => !!src && src.startsWith('http'));
 
-    console.log('Total images found:', images.length);
+    console.log('🔍 [SCRAPER] Strategy 2 succeeded. Images found:', images.length);
 
     const videoThumbnails = Array.from($('video'))
       .map((video) => {
@@ -384,17 +454,13 @@ async function scrapeProductData(url: string) {
         if (poster) {
           try { return new URL(poster, url).href; } catch { return poster; }
         }
-        const source = $(video).find('source').first().attr('src');
-        if (source) {
-          try { return new URL(source, url).href; } catch { return source; }
-        }
         return null;
       })
       .filter((src): src is string => !!src && src.startsWith('http'));
 
     const allMedia = [...images, ...videoThumbnails];
 
-    // Validate images in batches of 5 to avoid connection-pool exhaustion
+    // Validate images in batches of 5
     const BATCH_SIZE = 5;
     const imagesToValidate = allMedia.slice(0, 20);
     const validImages: string[] = [];
@@ -406,22 +472,23 @@ async function scrapeProductData(url: string) {
       results.filter((r) => r.valid).forEach((r) => validImages.push(r.url));
     }
 
-    console.log('Valid images:', validImages.length, '/', imagesToValidate.length);
-
     const finalImages = allMedia.length > 20 ? [...validImages, ...allMedia.slice(20)] : validImages;
-    const features = Array.from($('ul.features li')).map((li) => $(li).text().trim());
+    const features = Array.from($('ul.features li, .product-features li, .specs-list li')).map((li) => $(li).text().trim()).filter(Boolean);
     const specs: { [key: string]: string } = {};
-    $('table.specs tr').each((_, row) => {
-      const key = $(row).find('th').text().trim();
-      const value = $(row).find('td').text().trim();
-      if (key && value) specs[key] = value;
+    $('table tr').each((_, row) => {
+      const key = $(row).find('th, td:first-child').text().trim();
+      const value = $(row).find('td:last-child').text().trim();
+      if (key && value && key !== value) specs[key] = value;
     });
 
-    return { title, description, price, images: finalImages, features, specs };
+    return { title, description, price, images: finalImages, features, specs, source: 'direct' };
   } catch (error) {
-    console.error('Error scraping product data:', error);
-    return null;
+    console.error('🔍 [SCRAPER] ❌ Strategy 2 Error:', error);
   }
+
+  // Strategy 3: Ultimate Fallback (Already handled by the caller via analyzeProductURL fallback)
+  console.log('🔍 [SCRAPER] ❌ All scraping strategies failed.');
+  return null;
 }
 
 interface UserData {
@@ -636,12 +703,14 @@ async function generateWebsiteContent(
   console.log('🧠 [NICHE] Calling niche expert analysis...');
   const nicheBrief = await analyzeNiche(productInfo, scrapedData, youtubeVideos);
 
-  // If scraping was blocked, tell Gemini explicitly so it can research the product itself
-  const scrapedDataNote = productInfo.inferredFromUrl
-    ? `NOTE: Direct scraping of the product page was blocked by the target website. ` +
-      `The product details below were inferred from the URL structure. ` +
-      `You MUST use your own knowledge and internet research to fill in accurate product details, ` +
-      `specifications, pricing, reviews, and competitor comparisons for: "${productInfo.title}" by ${productInfo.brand}.`
+  // If scraping was blocked or returned limited data, tell Gemini explicitly
+  const isBlocked = productInfo.inferredFromUrl || (!scrapedData?.title && !scrapedData?.description);
+  const scrapedDataNote = isBlocked
+    ? `NOTE: Direct scraping of the product page was partially or fully blocked by the target website. ` +
+      `The product details below were inferred from the URL or retrieved via a fallback scraper. ` +
+      `You MUST use your own knowledge and extensive internet research to fill in accurate product details, ` +
+      `specifications, pricing, reviews, and competitor comparisons for: "${productInfo.title}" by ${productInfo.brand}. ` +
+      (scrapedData?.rawMarkdown ? `Below is some raw content retrieved from the page that might help: \n\n ${scrapedData.rawMarkdown.substring(0, 2000)}` : '')
     : '';
 
   const prompt = `You are the world's most elite product marketing expert and conversion optimization copywriter. Your mission is to create a highly compelling, conversion-optimized website to promote and sell the specific product described in the data. The website MUST be focused entirely on the product's features, benefits, and value proposition to the end consumer. DO NOT mention affiliate marketing, making money, or any business opportunity. Your goal is to drive the user to click the affiliate link to purchase the product.
@@ -949,7 +1018,16 @@ export async function POST(request: NextRequest) {
     const productInfo = await analyzeProductURL(productUrl);
 
     console.log('Scraping product data…');
-    const scrapedData = await scrapeProductData(productUrl);
+    let scrapedData = await scrapeProductData(productUrl);
+    
+    // If productInfo was inferred from URL but scraper found real data, merge them
+    if (productInfo.inferredFromUrl && scrapedData && scrapedData.title) {
+      console.log('🔍 [SCRAPER] Scraper found real data, updating productInfo...');
+      productInfo.title = scrapedData.title || productInfo.title;
+      productInfo.description = scrapedData.description || productInfo.description;
+      productInfo.price = scrapedData.price || productInfo.price;
+      productInfo.inferredFromUrl = false;
+    }
 
     console.log('Generating professional website content with Unsplash images…');
     const websiteHTML = await generateWebsiteContent(productInfo, scrapedData, affiliateId, affiliateType);
