@@ -29,7 +29,8 @@ import {
   Cpu,
   Search,
   Check,
-  ExternalLink
+  ExternalLink,
+  Video
 } from 'lucide-react'
 import Header from '@/components/Header'
 import { useState } from 'react'
@@ -326,13 +327,13 @@ export default function ProofPage() {
                 </h4>
                 <ul className="space-y-2 text-white/80 text-sm">
                   <li>✓ Real factory specs scraped from official source</li>
+                  <li>✓ <strong>Video Extraction</strong>: Integrated "IN ACTION" video section</li>
                   <li>✓ WP XACT PRO suspension details highlighted</li>
                   <li>✓ Akrapovič titanium exhaust specifications</li>
                   <li>✓ Launch control & quickshifter technology explained</li>
                   <li>✓ DUNLOP GEOMAX MX34 tire performance data</li>
                   <li>✓ Factory race aesthetics & graphics showcased</li>
                   <li>✓ Serviceability & maintenance advantages</li>
-                  <li>✓ KTMconnect app integration details</li>
                 </ul>
               </div>
               
@@ -356,7 +357,7 @@ export default function ProofPage() {
 
             <div className="bg-green-900/50 border border-green-500/50 rounded-xl p-4">
               <p className="text-white/90 text-sm">
-                <strong>The Verdict:</strong> AFFILIFY is the clear winner because it's the only platform that uses <strong>real data</strong>. While competitors use generic content or fake reviews, AFFILIFY scrapes the actual product page to create an authentic, high-converting affiliate site.
+                <strong>The Verdict:</strong> AFFILIFY is the clear winner because it's the only platform that uses <strong>real data</strong> and <strong>multimedia assets</strong>. While competitors use generic content, AFFILIFY scrapes the actual product page and extracts official videos to create an authentic, high-converting affiliate site.
               </p>
             </div>
           </div>
@@ -386,6 +387,20 @@ export default function ProofPage() {
                     <td className="px-6 py-4 text-center text-white/60 text-sm">❌ Partial</td>
                     <td className="px-6 py-4 text-center bg-green-900/30">
                       <span className="text-green-400 font-semibold text-sm">✅ Full & Accurate</span>
+                    </td>
+                  </tr>
+
+                  <tr className="hover:bg-white/5 transition-colors">
+                    <td className="px-6 py-4 text-white/90 font-medium">
+                      <div className="flex items-center">
+                        <Video className="w-5 h-5 text-orange-400 mr-3" />
+                        Video Extraction
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-center text-white/60 text-sm">❌ No</td>
+                    <td className="px-6 py-4 text-center text-white/60 text-sm">❌ No</td>
+                    <td className="px-6 py-4 text-center bg-green-900/30">
+                      <span className="text-green-400 font-semibold text-sm">✅ Integrated Videos</span>
                     </td>
                   </tr>
 
@@ -428,20 +443,6 @@ export default function ProofPage() {
                     <td className="px-6 py-4 text-center text-white/60 text-sm">❌ Generic</td>
                     <td className="px-6 py-4 text-center bg-green-900/30">
                       <span className="text-green-400 font-semibold text-sm">✅ Authentic</span>
-                    </td>
-                  </tr>
-
-                  <tr className="hover:bg-white/5 transition-colors">
-                    <td className="px-6 py-4 text-white/90 font-medium">
-                      <div className="flex items-center">
-                        <Box className="w-5 h-5 text-orange-400 mr-3" />
-                        Unique Sections
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-center text-white/60 text-sm">Standard template</td>
-                    <td className="px-6 py-4 text-center text-white/60 text-sm">Standard template</td>
-                    <td className="px-6 py-4 text-center bg-green-900/30">
-                      <span className="text-green-400 font-semibold text-sm">Multiple unique</span>
                     </td>
                   </tr>
 
@@ -501,6 +502,22 @@ export default function ProofPage() {
               </div>
             </div>
 
+            {/* Video Extraction */}
+            <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:border-green-500/50 transition-all">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center mr-4">
+                  <Video className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-white">Video Extraction</h3>
+              </div>
+              <div className="space-y-3 text-white/80 text-sm">
+                <p className="font-semibold text-white">❌ Base44 & Lovable:</p>
+                <p>Only use static images. No video content to engage visitors or demonstrate the product.</p>
+                <p className="font-semibold text-green-400 mt-4">✅ AFFILIFY:</p>
+                <p>Automatically extracts and embeds official product videos. The KTM website features an "IN ACTION" section with multiple YouTube integrations, showcasing the bike's performance.</p>
+              </div>
+            </div>
+
             {/* Competitor Comparison */}
             <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:border-green-500/50 transition-all">
               <div className="flex items-center mb-4">
@@ -549,22 +566,6 @@ export default function ProofPage() {
               </div>
             </div>
 
-            {/* Interactive Elements */}
-            <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:border-green-500/50 transition-all">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center mr-4">
-                  <Layers className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-white">Interactive Elements</h3>
-              </div>
-              <div className="space-y-3 text-white/80 text-sm">
-                <p className="font-semibold text-white">❌ Base44 & Lovable:</p>
-                <p>Static pages with no interactive elements. Boring and forgettable.</p>
-                <p className="font-semibold text-green-400 mt-4">✅ AFFILIFY:</p>
-                <p>Features the "Anatomy of a Holeshot" interactive diagram that educates buyers while keeping them engaged. Unique and memorable.</p>
-              </div>
-            </div>
-
             {/* Code Depth */}
             <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:border-green-500/50 transition-all">
               <div className="flex items-center mb-4">
@@ -609,7 +610,7 @@ export default function ProofPage() {
                 <img src="/proof/affilify-creation.png" alt="AFFILIFY Creation Process" className="w-full h-auto" />
               </div>
               <p className="text-white/70 text-xs italic text-center">
-                AFFILIFY successfully scraping the 2026 KTM 450 SX-F product page and generating a professional affiliate website.
+                AFFILIFY successfully scraping the 2026 KTM 450 SX-F product page, extracting official videos, and generating a professional affiliate website.
               </p>
             </div>
 
