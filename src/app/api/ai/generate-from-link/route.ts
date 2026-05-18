@@ -194,8 +194,7 @@ async function validateImageUrl(imageUrl: string): Promise<boolean> {
 // ---------------------------------------------------------------------------
 async function generateYouTubeSearchQueries(
   productLink: string,
-  productInfo: any,
-  customInstructions?: string
+  productInfo: any
 ): Promise<string[]> {
   console.log('🤖 [YOUTUBE_AGENT] ========== STARTING YOUTUBE SEARCH QUERY GENERATION ==========');
   console.log('🤖 [YOUTUBE_AGENT] Product:', productInfo.title);
@@ -210,8 +209,6 @@ Product Information:
 - Brand: ${productInfo.brand}
 - Description: ${productInfo.description}
 - Link: ${productLink}
-
-${customInstructions ? `Special Instructions: ${customInstructions}` : ''}
 
 Generate search queries that will find:
 1. Professional reviews and unboxings
@@ -650,56 +647,37 @@ async function generateWebsiteContent(
     ? `${productInfo.brand} ${productInfo.title.split('–')[0].trim()} product`
     : `${productInfo.title} product lifestyle`;
 
-  console.log('🖼️ [IMAGE] ========== FETCHING HERO IMAGE ==========');
-  const heroImages =
+  // Optimize by running independent async tasks in parallel
+  console.log('⚡ [WEBSITE] Starting parallel asset fetching...');
+  
+  const [heroImages, featureImages, testimonialImages, youtubeVideos] = await Promise.all([
+    // 1. Hero Image
     scrapedImages.length > 0
-      ? [{ url: scrapedImages[0], alt: `${productInfo.title} hero image`, credit: 'Scraped from product page', download_url: null }]
-      : await getUnsplashImages(imageSearchQuery, 1);
-  console.log('🖼️ [IMAGE] Hero image selected:', heroImages[0]?.url);
-
-  console.log('🖼️ [IMAGE] ========== FETCHING FEATURE IMAGES ==========');
-  const featureImages =
+      ? Promise.resolve([{ url: scrapedImages[0], alt: `${productInfo.title} hero image`, credit: 'Scraped from product page', download_url: null }])
+      : getUnsplashImages(imageSearchQuery, 1),
+    
+    // 2. Feature Images
     scrapedImages.length > 1
-      ? scrapedImages.slice(1).map((url: string) => ({ url, alt: `${productInfo.title} feature image`, credit: 'Scraped from product page', download_url: null }))
-      : await getUnsplashImages(`${imageSearchQuery} features`, 10);
-  console.log('🖼️ [IMAGE] Feature image 1:', featureImages[0]?.url);
-  console.log('🖼️ [IMAGE] Feature image 2:', featureImages[1]?.url);
+      ? Promise.resolve(scrapedImages.slice(1).map((url: string) => ({ url, alt: `${productInfo.title} feature image`, credit: 'Scraped from product page', download_url: null })))
+      : getUnsplashImages(`${imageSearchQuery} features`, 10),
+    
+    // 3. Testimonial Image
+    getUnsplashImages('happy customer testimonial', 1),
+    
+    // 4. YouTube Videos (Consolidated logic for speed)
+    (async () => {
+      const queries = await generateYouTubeSearchQueries(productInfo.originalUrl, productInfo);
+      // Fetch all queries in parallel but limit results per query
+      const videoResults = await Promise.all(queries.slice(0, 3).map(q => getYouTubeVideos(q, 1)));
+      const flattened = videoResults.flat();
+      return Array.from(new Map(flattened.map(v => [v.videoId, v])).values()).slice(0, 3);
+    })()
+  ]);
 
-  console.log('🖼️ [IMAGE] ========== FETCHING TESTIMONIAL IMAGE ==========');
-  const testimonialImages = await getUnsplashImages('happy customer testimonial', 1);
-  console.log('🖼️ [IMAGE] Testimonial image:', testimonialImages[0]?.url);
+  console.log('⚡ [WEBSITE] Asset fetching complete.');
 
-  console.log('🖼️ [IMAGE] ========== IMAGE SUMMARY ==========');
-  console.log('🖼️ [IMAGE] Hero:', heroImages[0]?.url ? '✅ VALID' : '❌ MISSING');
-  console.log('🖼️ [IMAGE] Feature 1:', featureImages[0]?.url ? '✅ VALID' : '❌ MISSING');
-  console.log('🖼️ [IMAGE] Feature 2:', featureImages[1]?.url ? '✅ VALID' : '❌ MISSING');
-  console.log('🖼️ [IMAGE] Testimonial:', testimonialImages[0]?.url ? '✅ VALID' : '❌ MISSING');
-
-  console.log('🎥 [YOUTUBE] ========== FETCHING YOUTUBE VIDEOS ==========');
-  
-  // Use Gemini 2.5 Flash agent to generate intelligent YouTube search queries
-  const youtubeSearchQueries = await generateYouTubeSearchQueries(
-    productInfo.originalUrl,
-    productInfo,
-    'Generate search queries that will find high-quality reviews, tutorials, and user experiences for this product.'
-  );
-  
-  // Fetch videos for each generated query and combine results
-  let youtubeVideos: any[] = [];
-  for (const query of youtubeSearchQueries) {
-    const videos = await getYouTubeVideos(query, 2);
-    youtubeVideos = [...youtubeVideos, ...videos];
-    if (youtubeVideos.length >= 6) break; // Limit total videos to 6
-  }
-  
-  // Remove duplicates based on videoId
-  youtubeVideos = Array.from(
-    new Map(youtubeVideos.map(v => [v.videoId, v])).values()
-  ).slice(0, 3);
-  
-  console.log('🎥 [YOUTUBE] Videos found:', youtubeVideos.length);
-
-  // Layer 1: Analyze the niche to understand industry language and best practices
+  // Optional: Only run niche analysis if we have enough data or time
+  // For now, let's keep it but ensure it doesn't block too long
   console.log('🧠 [NICHE] Calling niche expert analysis...');
   const nicheBrief = await analyzeNiche(productInfo, scrapedData, youtubeVideos);
 
@@ -1015,10 +993,14 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('Analyzing affiliate URL:', productUrl);
-    const productInfo = await analyzeProductURL(productUrl);
-
-    console.log('Scraping product data…');
-    let scrapedData = await scrapeProductData(productUrl);
+    
+    // Run URL analysis and Scraping in parallel
+    const [productInfo, scrapedDataResult] = await Promise.all([
+      analyzeProductURL(productUrl),
+      scrapeProductData(productUrl)
+    ]);
+    
+    let scrapedData = scrapedDataResult;
     
     // If productInfo was inferred from URL but scraper found real data, merge them
     if (productInfo.inferredFromUrl && scrapedData && scrapedData.title) {
