@@ -975,7 +975,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
-    const { productUrl, affiliateId, affiliateType } = await request.json();
+    const { productUrl, monetization, niche: requestedNiche, template: requestedTemplate } = await request.json();
+    const affiliateId = monetization?.affiliateLinks?.affiliateId;
+    const affiliateType = monetization?.affiliateLinks?.affiliateType;
     if (!productUrl) {
       return NextResponse.json({ error: 'Product URL is required' }, { status: 400 });
     }
@@ -1015,7 +1017,39 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('Generating professional website content with Unsplash images…');
-    const websiteHTML = await generateWebsiteContent(productInfo, scrapedData, affiliateId, affiliateType);
+    let websiteHTML = await generateWebsiteContent(productInfo, scrapedData, affiliateId, affiliateType);
+
+    // Apply monetization strategies
+    if (monetization) {
+      const primaryMethod = monetization.primaryMethod;
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      
+      // Apply primary method
+      if (primaryMethod && monetization[primaryMethod]) {
+        console.log(`Applying primary monetization: ${primaryMethod}`);
+        try {
+          const monResponse = await fetch(`${baseUrl}/api/ai/monetization/${primaryMethod.replace(/([A-Z])/g, '-$1').toLowerCase()}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ html: websiteHTML, data: monetization[primaryMethod] })
+          });
+          if (monResponse.ok) {
+            const monData = await monResponse.json();
+            websiteHTML = monData.html;
+          }
+        } catch (e) {
+          console.error(`Error applying ${primaryMethod} monetization:`, e);
+        }
+      }
+
+      // Apply secondary methods (e.g., custom tracking)
+      if (monetization.secondaryMethods?.customTrackingScript?.enabled) {
+        const script = monetization.secondaryMethods.customTrackingScript.headerScript;
+        if (script) {
+          websiteHTML = websiteHTML.replace('</head>', `${script}</head>`);
+        }
+      }
+    }
 
     const baseSlug = productInfo.title
       .toLowerCase()
