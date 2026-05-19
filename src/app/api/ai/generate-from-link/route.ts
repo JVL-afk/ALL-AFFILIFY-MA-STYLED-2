@@ -271,18 +271,27 @@ async function getYouTubeVideos(query: string, maxResults: number = 3) {
     const response = await youtube.search.list({
       part: ['snippet'],
       q: query,
-      maxResults,
+      maxResults: maxResults * 2, // Fetch more to filter out Shorts
       type: ['video'],
+      videoDuration: 'medium', // 'medium' is 4-20 minutes, 'long' is >20 minutes. This naturally excludes Shorts (<1 min).
       relevanceLanguage: 'en',
     });
 
     const videos = response.data.items || [];
-    console.log(`🎥 [YOUTUBE] Found ${videos.length} videos`);
+    console.log(`🎥 [YOUTUBE] Found ${videos.length} videos before filtering`);
 
     const videoDetails = await Promise.all(
       videos.map(async (video) => {
         const videoId = video.id?.videoId;
         if (!videoId) return null;
+
+        // Extra safety: Check if title or description contains "shorts" or common Shorts indicators
+        const title = video.snippet?.title?.toLowerCase() || '';
+        const description = video.snippet?.description?.toLowerCase() || '';
+        if (title.includes('#shorts') || title.includes('youtube shorts') || description.includes('#shorts')) {
+          console.log(`🎥 [YOUTUBE] Skipping potential Short: ${videoId}`);
+          return null;
+        }
 
         let transcript = '';
         try {
@@ -307,8 +316,8 @@ async function getYouTubeVideos(query: string, maxResults: number = 3) {
       })
     );
 
-    const validVideos = videoDetails.filter((v) => v !== null);
-    console.log(`🎥 [YOUTUBE] ✅ Successfully processed ${validVideos.length} videos`);
+    const validVideos = videoDetails.filter((v) => v !== null).slice(0, maxResults);
+    console.log(`🎥 [YOUTUBE] ✅ Successfully processed ${validVideos.length} videos (filtered Shorts)`);
     console.log('🎥 [YOUTUBE] ========== END YOUTUBE SEARCH ==========');
     return validVideos;
   } catch (error) {
