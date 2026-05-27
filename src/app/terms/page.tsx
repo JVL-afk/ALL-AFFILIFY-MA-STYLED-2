@@ -456,19 +456,19 @@ export default function TermsPage() {
 
   const contactInfo = [
     { 
+      title: 'General Inquiries',
+      email: 'general@affilify.eu',
+      description: 'For general questions and inquiries'
+    },
+    {
+      title: 'Support Team',
+      email: 'support@affilify.eu',
+      description: 'For technical support and assistance'
+    },
+    {
       title: 'Legal Department',
-      email: 'legal@affilify.com',
+      email: 'legal@affilify.eu',
       description: 'For legal matters and terms-related questions'
-    },
-    {
-      title: 'General Support',
-      email: 'support@affilify.com',
-      description: 'For general questions about our services'
-    },
-    {
-      title: 'Billing Support',
-      email: 'billing@affilify.com',
-      description: 'For subscription and billing inquiries'
     }
   ]
 

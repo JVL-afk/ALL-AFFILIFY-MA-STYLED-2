@@ -53,6 +53,16 @@ export default function Footer() {
                   About Me
                 </Link>
               </li>
+              <li>
+                <a href="mailto:support@affilify.eu" className="text-gray-400 hover:text-white transition-colors text-sm">
+                  Support
+                </a>
+              </li>
+              <li>
+                <a href="mailto:general@affilify.eu" className="text-gray-400 hover:text-white transition-colors text-sm">
+                  Contact
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -68,6 +78,11 @@ export default function Footer() {
               <li>
                 <Link href="/terms" className="text-gray-400 hover:text-white transition-colors text-sm">
                   Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link href="/security" className="text-gray-400 hover:text-white transition-colors text-sm">
+                  Security
                 </Link>
               </li>
             </ul>

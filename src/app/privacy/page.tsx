@@ -328,19 +328,19 @@ export default function PrivacyPage() {
 
   const contactInfo = [
     { 
-      title: 'Data Protection Officer',
-      email: 'privacy@affilify.com',
+      title: 'General Inquiries',
+      email: 'general@affilify.eu',
+      description: 'For general questions and inquiries'
+    },
+    {
+      title: 'Support Team',
+      email: 'support@affilify.eu',
+      description: 'For technical support and assistance'
+    },
+    {
+      title: 'Privacy Officer',
+      email: 'privacy@affilify.eu',
       description: 'For privacy-related inquiries and requests'
-    },
-    {
-      title: 'General Support',
-      email: 'support@affilify.com',
-      description: 'For general questions about our services'
-    },
-    {
-      title: 'Legal Department',
-      email: 'legal@affilify.com',
-      description: 'For legal matters and compliance issues'
     }
   ]
 

@@ -114,11 +114,14 @@ export default function LegalPage() {
             <p className="text-white/80 text-xl mb-8 max-w-3xl mx-auto">
               If you have any questions about our legal policies or need further clarification, please contact our legal team.
             </p>
-            <Link href="/contact">
-              <button className="px-8 py-3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-bold rounded-lg">
-                Contact Legal Team
-              </button>
-            </Link>
+            <div className="flex flex-col md:flex-row gap-4 justify-center">
+              <a href="mailto:legal@affilify.eu" className="px-8 py-3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-bold rounded-lg inline-block">
+                Email Legal Team
+              </a>
+              <a href="mailto:general@affilify.eu" className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold rounded-lg inline-block">
+                General Inquiries
+              </a>
+            </div>
           </div>
         </motion.section>
       </main>

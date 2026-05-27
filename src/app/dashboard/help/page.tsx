@@ -301,7 +301,7 @@ export default function HelpPage() {
                 Contact Support
               </CardTitle>
               <CardDescription>
-                Can't find what you're looking for? Send us a message
+                Can't find what you're looking for? Send us a message or email us at <a href="mailto:support@affilify.eu" className="text-blue-600 hover:text-blue-700 font-semibold">support@affilify.eu</a>
               </CardDescription>
             </CardHeader>
             <CardContent>

@@ -510,17 +510,17 @@ console.log('Website created:', website.url);`
               <Mail className="w-8 h-8 mx-auto mb-4" />
               <h3 className="font-semibold mb-2">Email Support</h3>
               <p className="text-sm opacity-90 mb-4">Send us a detailed message</p>
-              <button className="bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold text-sm hover:shadow-lg transition-all duration-200">
+              <a href="mailto:support@affilify.eu" className="inline-block bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold text-sm hover:shadow-lg transition-all duration-200">
                 Send Email
-              </button>
+              </a>
             </div>
             <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-6">
               <Users className="w-8 h-8 mx-auto mb-4" />
-              <h3 className="font-semibold mb-2">Community</h3>
-              <p className="text-sm opacity-90 mb-4">Connect with other users</p>
-              <button className="bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold text-sm hover:shadow-lg transition-all duration-200">
-                Join Forum
-              </button>
+              <h3 className="font-semibold mb-2">General Inquiries</h3>
+              <p className="text-sm opacity-90 mb-4">General questions and feedback</p>
+              <a href="mailto:general@affilify.eu" className="inline-block bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold text-sm hover:shadow-lg transition-all duration-200">
+                Contact Us
+              </a>
             </div>
           </div>
         </div>

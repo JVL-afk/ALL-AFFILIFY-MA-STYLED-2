@@ -1213,7 +1213,7 @@ export default function HomePage() {
               <h4 className="text-lg font-semibold text-white mb-4">Company</h4>
               <ul className="space-y-2 text-white/60 text-sm">
                 <li><Link href="/about-me" className="hover:text-orange-400 transition-colors">About Me</Link></li>
-                <li><Link href="/contact" className="hover:text-orange-400 transition-colors">Contact</Link></li>
+                <li><a href="mailto:general@affilify.eu" className="hover:text-orange-400 transition-colors">Contact</a></li>
                 <li><Link href="/privacy" className="hover:text-orange-400 transition-colors">Privacy</Link></li>
                 <li><Link href="/terms" className="hover:text-orange-400 transition-colors">Terms</Link></li>
               </ul>
