@@ -226,7 +226,7 @@ export default function HomePage() {
       price: '$29',
       period: '/month',
       description: 'For serious affiliates',
-      features: ['25 websites', 'A/B testing', 'AI chatbot', 'Email marketing', 'API access'],
+      features: ['10 websites', 'A/B testing', 'AI chatbot', 'Email marketing', 'API access'],
       cta: 'Go Pro',
       highlight: true
     },
@@ -237,6 +237,7 @@ export default function HomePage() {
       description: 'For agencies & teams',
       features: ['Unlimited websites', 'Full code editor', 'Team collaboration', 'White-label', 'Dedicated support'],
       cta: 'Contact Sales',
+      link: '/contact',
       highlight: false
     }
   ]
@@ -555,7 +556,7 @@ export default function HomePage() {
               <span className="text-white"> Works</span>
             </h2>
             <p className="text-xl text-white/60 max-w-3xl mx-auto">
-              From affiliate link to money-making website in under 60 seconds. Our AI handles everything.
+              From affiliate link to high-converting website in under 60 seconds. Our AI handles the heavy lifting.
             </p>
           </motion.div>
 
@@ -749,12 +750,12 @@ export default function HomePage() {
               <span className="text-yellow-300 font-semibold text-sm">The Ultimate Comparison</span>
             </div>
             <h2 className="text-4xl md:text-6xl font-black mb-6">
-              <span className="text-white">Why </span>
+              <span className="text-white">The </span>
               <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">AFFILIFY</span>
-              <span className="text-white"> Wins</span>
+              <span className="text-white"> Advantage</span>
             </h2>
             <p className="text-xl text-white/60 max-w-3xl mx-auto">
-              We gave the same product link to Base44, Lovable, and AFFILIFY. See the difference for yourself.
+              See how our purpose-built affiliate features compare to generic website builders.
             </p>
           </motion.div>
 
@@ -777,7 +778,7 @@ export default function HomePage() {
                   <span className="text-white/60 font-semibold">Lovable</span>
                 </div>
                 <div className="text-center">
-                  <span className="px-3 py-1 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full text-white font-bold text-sm">AFFILIFY 🏆</span>
+                  <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full text-white font-bold text-sm">AFFILIFY</span>
                 </div>
               </div>
               {/* Table Body */}
@@ -950,16 +951,16 @@ export default function HomePage() {
                     </li>
                   ))}
                 </ul>
-                <Link 
-                  href={plan.name === 'Enterprise' ? '/contact' : '/signup'}
-                  className={`block text-center py-3 rounded-xl font-bold transition-all ${
-                    plan.highlight 
-                      ? 'bg-white text-red-600 hover:bg-gray-100' 
-                      : 'bg-orange-600 hover:bg-orange-700 text-white'
-                  }`}
-                >
-                  {plan.cta}
-                </Link>
+                  <Link 
+                    href={plan.link || "/signup"} 
+                    className={`block w-full py-4 rounded-xl font-bold text-center transition-all ${
+                      plan.highlight 
+                        ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg shadow-orange-500/20 hover:scale-105' 
+                        : 'bg-white/10 text-white hover:bg-white/20'
+                    }`}
+                  >
+                    {plan.cta}
+                  </Link>
               </motion.div>
             ))}
           </div>
@@ -1018,7 +1019,7 @@ export default function HomePage() {
               },
               {
                 q: 'How is AFFILIFY different from other website builders?',
-                a: 'Unlike generic builders, AFFILIFY is purpose-built for affiliate marketing. We scrape real product data, create comparison tables, integrate affiliate links automatically, and optimize for conversions.'
+                a: 'Unlike generic builders, AFFILIFY is purpose-built for affiliate marketing. We utilize official APIs and smart content analysis to create comparison tables, integrate affiliate links automatically, and optimize for conversions.'
               },
               {
                 q: 'Can I use my own domain?',
@@ -1137,9 +1138,9 @@ export default function HomePage() {
                 <Rocket className="w-10 h-10 text-white" />
               </div>
             </motion.div>
-            <h2 className="text-4xl md:text-5xl font-black mb-6 text-white">
-              Ready to Start Making Money?
-            </h2>
+          <h2 className="text-4xl md:text-5xl font-black mb-6 text-white">
+            Ready to Scale Your Business?
+          </h2>
             <p className="text-xl text-white/80 max-w-3xl mx-auto mb-10">
               Join thousands of affiliate marketers who are building high-converting websites in minutes, not months. 
               Start free today and see the difference.
@@ -1183,7 +1184,7 @@ export default function HomePage() {
                 <span className="text-white text-xl font-bold">AFFILIFY</span>
               </Link>
               <p className="text-white/60 text-sm mb-4">AI-Powered Affiliate Marketing Platform</p>
-              <p className="text-white/40 text-xs">Built with ❤️ by a 13-year-old from Romania</p>
+              <p className="text-white/40 text-xs">Built with ❤️ by Andrew from Romania</p>
             </div>
             
             {/* Product */}
@@ -1194,6 +1195,7 @@ export default function HomePage() {
                 <li><Link href="/pricing" className="hover:text-orange-400 transition-colors">Pricing</Link></li>
                 <li><Link href="/proof" className="hover:text-orange-400 transition-colors">Proof</Link></li>
                 <li><Link href="/docs" className="hover:text-orange-400 transition-colors">Documentation</Link></li>
+                <li><Link href="/contact" className="hover:text-orange-400 transition-colors">Contact</Link></li>
               </ul>
             </div>
             
@@ -1233,7 +1235,7 @@ export default function HomePage() {
           {/* Bottom */}
           <div className="border-t border-slate-800/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-white/40 text-sm">
-              © 2024 AFFILIFY. All rights reserved.
+              © 2026 AFFILIFY. All rights reserved.
             </p>
             <div className="flex items-center gap-6">
               <Link href="/privacy" className="text-white/40 hover:text-white/60 text-sm transition-colors">

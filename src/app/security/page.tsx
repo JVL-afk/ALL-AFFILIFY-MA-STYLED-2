@@ -43,9 +43,9 @@ export default function SecurityPage() {
   const sections = [
     {
       id: 'security',
-      title: 'Security on our platform',
-      icon: Database,
-      content: `Here at affilify.eu we take your personal security very seriously. We make it our personal commitment to you that from the moment you sign up you are totally safe and isolated from exterior attacks. We can provide you that by assuring you that all your data and all your requests will be run on a separate, hidden server in times when the platform is under attack/ nonoperative so that you can enjoy your post-login affilify.eu worry-free. That is why sometimes (usually the time you sign up) you may see an account that isn't yours. In that case just click the sign out in the bottom left of the dashboard and then login again with your credentials. This will ensure your information is saved two times into the database, assuring you that you will not be impacted during attacks.`
+      title: 'Data Isolation & Session Security',
+      icon: Shield,
+      content: `At affilify.eu, your security and data isolation are our top priorities. We employ enterprise-grade encryption and strict session management to ensure your account remains private and secure. Please note that for security reasons, we implement strict IP-based rate limiting and session validation. In rare cases, if multiple accounts are accessed from the same IP address simultaneously, you may experience session conflicts as part of our anti-fraud protection. If this occurs, simply sign out and log back in to refresh your secure session. This ensures your data remains isolated and protected against unauthorized access attempts.`
     }
   ]
 
@@ -61,7 +61,7 @@ export default function SecurityPage() {
         >
           <div className="flex items-center justify-center mb-4">
             <Shield className="w-12 h-12 text-purple-400 mr-3" />
-            <h1 className="text-4xl font-bold">Security & Privacy</h1>
+            <h1 className="text-4xl font-bold">Trust & Security</h1>
           </div>
           <p className="text-gray-400 text-sm">Last updated: {lastUpdated}</p>
         </motion.div>

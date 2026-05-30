@@ -38,8 +38,8 @@ import {
 } from 'lucide-react'
 
 export default function TermsPage() {
-  const lastUpdated = "January 1, 2025"
-  const effectiveDate = "January 1, 2025"
+  const lastUpdated = "May 30, 2026"
+  const effectiveDate = "May 30, 2026"
 
   const sections = [
     {
@@ -51,8 +51,8 @@ export default function TermsPage() {
         the terms and provision of this agreement. If you do not agree to abide by the above, 
         please do not use this service.
 
-        These Terms of Service ("Terms") govern your use of our website located at affilify.com 
-        and all related services, features, and content offered by AFFILIFY Inc. ("we," "us," or "our").
+        These Terms of Service ("Terms") govern your use of our website located at affilify.eu 
+        and all related services, features, and content offered by AFFILIFY ("we," "us," or "our").
 
         **Agreement to Terms:**
         • You must be at least 18 years old to use our services
@@ -449,9 +449,9 @@ export default function TermsPage() {
 
   const quickLinks = [
     { title: 'Privacy Policy', href: '/privacy', icon: Eye },
-    { title: 'Cookie Policy', href: '/cookie-policy', icon: Settings },
-    { title: 'Acceptable Use Policy', href: '/aup', icon: Shield },
-    { title: 'DMCA Policy', href: '/dmca', icon: FileText }
+    { title: 'Cookie Policy', href: '/legal/cookies', icon: Settings },
+    { title: 'Acceptable Use Policy', href: '/legal/aup', icon: Shield },
+    { title: 'DMCA Policy', href: '/legal/dmca', icon: FileText }
   ]
 
   const contactInfo = [

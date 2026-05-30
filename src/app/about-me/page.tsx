@@ -20,11 +20,11 @@ export default function AboutMePage() {
           <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-8 md:p-12 border border-orange-500/20">
             <div className="prose prose-lg prose-invert max-w-none">
               <p className="text-xl text-gray-200 leading-relaxed mb-6">
-                Hi, I'm Andrew and I'm with nothing better than you. I'm from a small village in Romania and I am a student at the local school. About one year ago, I reached my peak: I had great friends, high grades, and I was seeing my crush on the side. Everything was going as planned.
+                Hi, I'm Andrew. I'm a student from a small village in Romania with a big dream: to democratize affiliate marketing. About one year ago, I was living a typical student life, but I felt a calling to build something that could truly help people achieve financial independence.
               </p>
               
               <p className="text-xl text-gray-200 leading-relaxed mb-6">
-                But then, in December 2024, something hit me. I realized that I don't just want to be that normal guy, I wanted something different. That one thought changed everything, my crush became just another girl and my friends became some annoying people. I knew I had to do something.
+                In late 2024, I realized that I wanted to create a lasting impact. I shifted my focus entirely towards learning and building. It wasn't always easy—I had to make sacrifices and spend countless hours studying code and marketing strategies—but I knew it would be worth it.
               </p>
               
               <p className="text-xl text-gray-200 leading-relaxed mb-6">
@@ -64,7 +64,7 @@ export default function AboutMePage() {
               </p>
 
               <p className="text-xl text-gray-200 leading-relaxed mb-6">
-                Now at the moment when you're seeing this you may find some errors on the app. You may want to leave and nothing is going to stop you, but I just want you to know that I don't want this to be just another app, I want this to be a community! I want this to be an app that's forever changing, an app where users can write its code. This should be a place created by affiliate marketers, for affiliate marketers! So before you leave AFFILIFY forever because of that one little error, just think what it could've been if JUST YOU got involved!
+                AFFILIFY is more than just an app; it's a community. We are constantly evolving and improving based on your feedback. I want this to be a platform created by affiliate marketers, for affiliate marketers. By joining us, you're not just using a tool—you're helping shape the future of automated affiliate marketing.
               </p>  
               
               <p className="text-xl text-gray-200 leading-relaxed">

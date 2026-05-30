@@ -289,10 +289,9 @@ export default function PricingPage() {
             </div>
             
             <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-6 border border-white border-opacity-20">
-              <h3 className="font-semibold mb-2 text-white">Is there a free trial?</h3>
+              <h3 className="font-semibold mb-2 text-white">Is there a free plan?</h3>
               <p className="text-gray-300">
-                We offer a 14-day free trial for all plans. No credit card required to get started. 
-                You can explore all features and see if AFFILIFY is right for you.
+                Yes! We offer a Free Forever plan for beginners. For our Pro and Enterprise plans, we offer a 14-day free trial with no credit card required to get started.
               </p>
             </div>
             

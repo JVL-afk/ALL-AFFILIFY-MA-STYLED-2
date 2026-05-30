@@ -35,7 +35,7 @@ import {
 } from 'lucide-react'
 
 export default function PrivacyPage() {
-  const lastUpdated = "January 1, 2025"
+  const lastUpdated = "May 30, 2026"
 
   const sections = [
     {
@@ -320,9 +320,9 @@ export default function PrivacyPage() {
   ]
 
   const quickLinks = [
-    { title: 'Cookie Policy', href: '/cookie-policy', icon: Cookie },
+    { title: 'Cookie Policy', href: '/legal/cookies', icon: Cookie },
     { title: 'Terms of Service', href: '/terms', icon: FileText },
-    { title: 'Data Processing Agreement', href: '/dpa', icon: Shield },
+    { title: 'Data Processing Agreement', href: '/legal/dpa', icon: Shield },
     { title: 'Security Overview', href: '/security', icon: Lock }
   ]
 

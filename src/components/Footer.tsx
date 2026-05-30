@@ -59,9 +59,9 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="mailto:general@affilify.eu" className="text-gray-400 hover:text-white transition-colors text-sm">
+                <Link href="/contact" className="text-gray-400 hover:text-white transition-colors text-sm">
                   Contact
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -91,7 +91,7 @@ export default function Footer() {
 
         <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">
-            © 2025 AFFILIFY. All rights reserved.
+            © 2026 AFFILIFY. All rights reserved.
           </p>
           <p className="text-gray-400 text-sm mt-4 md:mt-0">
             Made with <span className="text-red-500">❤️</span> for affiliate marketers worldwide

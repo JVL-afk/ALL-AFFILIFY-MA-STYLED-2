@@ -233,7 +233,7 @@ export default function CodeEditorPage() {
               </div>
               <h3 className="text-2xl font-bold mb-4 text-white">Enterprise Security</h3>
               <p className="text-white/70">
-                Bulletproof user isolation. Your code is stored in a private database and deployed to your own GitHub branch.
+                Advanced user isolation. Your code is stored in a private database and protected by strict session validation.
               </p>
             </div>
             

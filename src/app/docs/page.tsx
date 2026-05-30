@@ -174,9 +174,9 @@ export default function DocsPage() {
   ]
 
   const codeExample = `// Initialize AFFILIFY API client
-const affilify = new AffiligyAPI({
+const affilify = new AffilifyAPI({
   apiKey: 'your-api-key',
-  baseURL: 'https://api.affilify.com/v2'
+  baseURL: 'https://api.affilify.eu/v2'
 });
 
 // Create a new website
@@ -280,9 +280,9 @@ console.log('Website created:', website.url);`
             <Link href="/signup" className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105">
               Get Started
             </Link>
-            <Link href="/pricing" className="bg-white bg-opacity-10 backdrop-blur-lg hover:bg-white/20 text-white px-6 py-3 rounded-lg font-semibold border border-white border-opacity-20 transition-all duration-200">
+            <button onClick={() => setActiveSection('authentication')} className="bg-white bg-opacity-10 backdrop-blur-lg hover:bg-white/20 text-white px-6 py-3 rounded-lg font-semibold border border-white border-opacity-20 transition-all duration-200">
               API Reference
-            </Link>
+            </button>
           </div>
 
           {/* Search */}

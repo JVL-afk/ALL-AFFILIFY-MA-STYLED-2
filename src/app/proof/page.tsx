@@ -56,14 +56,14 @@ export default function ProofPage() {
           </div>
           <h1 className="text-5xl md:text-7xl font-bold mb-6">
             <span className="bg-gradient-to-r from-orange-400 via-pink-500 to-red-500 bg-clip-text text-transparent">
-              3 platforms. 1 link.
+              Performance Comparison
             </span>
           </h1>
           <h2 className="text-white/90 text-2xl md:text-3xl max-w-4xl mx-auto mb-4 font-semibold">
-            Which will make the best affiliate website?
+            Purpose-Built vs. General-Purpose AI
           </h2>
           <p className="text-white/70 text-lg max-w-3xl mx-auto mb-8">
-            We gave the same product link to Base44, Lovable, and AFFILIFY. Here's an honest, evidence-based analysis of what happened when each platform created an affiliate website for the <strong>2026 KTM 450 SX-F</strong>.
+            We compared how different AI platforms handle a specific affiliate marketing task: creating a high-converting landing page for the <strong>2026 KTM 450 SX-F</strong>. See how specialized tools make a difference in content depth and data accuracy.
           </p>
         </motion.div>
 
@@ -185,7 +185,7 @@ export default function ProofPage() {
               </div>
               <div className="text-right">
                 <div className="text-white/60 text-sm mb-1">Overall Score</div>
-                <div className="text-4xl font-bold text-orange-400">4/10</div>
+                <div className="text-4xl font-bold text-orange-400">6/10</div>
               </div>
             </div>
             
@@ -247,7 +247,7 @@ export default function ProofPage() {
               </div>
               <div className="text-right">
                 <div className="text-white/60 text-sm mb-1">Overall Score</div>
-                <div className="text-4xl font-bold text-yellow-400">5/10</div>
+                <div className="text-4xl font-bold text-yellow-400">7/10</div>
               </div>
             </div>
             
@@ -300,7 +300,7 @@ export default function ProofPage() {
                   <h3 className="text-3xl font-bold text-white mr-3">AFFILIFY</h3>
                   <div className="px-3 py-1 bg-yellow-500 rounded-full text-gray-900 text-sm font-bold flex items-center">
                     <Crown className="w-4 h-4 mr-1" />
-                    WINNER
+                    BEST FOR AFFILIATES
                   </div>
                 </div>
                 <a 
@@ -315,7 +315,7 @@ export default function ProofPage() {
               </div>
               <div className="text-right">
                 <div className="text-white/60 text-sm mb-1">Overall Score</div>
-                <div className="text-5xl font-bold text-green-400">10/10</div>
+                <div className="text-5xl font-bold text-green-400">9.5/10</div>
               </div>
             </div>
             
