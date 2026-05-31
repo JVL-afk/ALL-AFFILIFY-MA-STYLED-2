@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { 
   Sparkles, 
@@ -166,26 +166,31 @@ export default function HomePage() {
     { 
       quote: "AFFILIFY is a game-changer. I built a site in 5 minutes that converted better than my old one after 6 months of tweaking.", 
       name: "Sarah J.",
+      title: "Affiliate Marketer",
       rating: 5
     },
     { 
       quote: "The AI is incredible. It understands the product and writes compelling copy that I couldn't have written myself.", 
       name: "Mark T.", 
+      title: "Content Creator",
       rating: 5
     },
     { 
       quote: "I went from zero to my first $1,000 in commissions in under a week. This platform is the real deal.", 
       name: "Alex P.", 
+      title: "Performance Marketer",
       rating: 5
     },
     { 
       quote: "As a 13-year-old built this, I had to try it. Now I'm making more than my parents' side hustles combined!", 
       name: "Jordan K.", 
+      title: "Online Entrepreneur",
       rating: 5
     },
     { 
       quote: "The code editor is insane. Full control over everything, yet the AI does the heavy lifting. Best of both worlds.", 
       name: "David R.", 
+      title: "Agency Owner",
       rating: 5
     }
   ]
@@ -373,6 +378,9 @@ export default function HomePage() {
             variants={fadeInUp} 
             className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-orange-500/20 to-red-500/20 backdrop-blur-sm rounded-full border border-orange-500/30 mb-8"
           >
+            <Sparkles className="w-5 h-5 text-orange-400 mr-2" />
+            <span className="text-orange-300 font-semibold text-sm">AI-Powered Affiliate Marketing Platform</span>
+          </motion.div>
 
           {/* Main Headline */}
           <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-[0.9]">
@@ -443,6 +451,8 @@ export default function HomePage() {
               </Link>
             </motion.div>
           </motion.div>
+        </motion.div>
+      </section>
 
       {/* ============================================ */}
       {/* HOW IT WORKS - VISUAL PROCESS */}
@@ -785,14 +795,9 @@ export default function HomePage() {
                 {/* Quote */}
                 <p className="text-white/80 text-lg leading-relaxed mb-6">"{testimonial.quote}"</p>
                 {/* Author */}
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold">
-                    {testimonial.avatar}
-                  </div>
-                  <div>
-                    <div className="text-white font-bold">{testimonial.name}</div>
-                    <div className="text-orange-400 text-sm">{testimonial.title}</div>
-                  </div>
+                <div>
+                  <div className="text-white font-bold">{testimonial.name}</div>
+                  <div className="text-orange-400 text-sm">{testimonial.title}</div>
                 </div>
               </motion.div>
             ))}
@@ -1012,14 +1017,9 @@ export default function HomePage() {
                   ))}
                 </div>
                 <p className="text-white/80 text-lg leading-relaxed mb-6">"{testimonial.quote}"</p>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold">
-                    {testimonial.avatar}
-                  </div>
-                  <div>
-                    <div className="text-white font-bold">{testimonial.name}</div>
-                    <div className="text-orange-400 text-sm">{testimonial.title}</div>
-                  </div>
+                <div>
+                  <div className="text-white font-bold">{testimonial.name}</div>
+                  <div className="text-orange-400 text-sm">{testimonial.title}</div>
                 </div>
               </motion.div>
             ))}
