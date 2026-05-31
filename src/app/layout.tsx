@@ -5,7 +5,7 @@ import '../styles/globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'AFFILIFY - AI-Powered Affiliate Marketing Platform',
+  title: '+ AFFILIFY - AI-Powered Affiliate Marketing Platform',
   description: 'Generate high-converting affiliate websites and analyze competitor strategies with AI-powered tools.',
 }
 

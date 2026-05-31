@@ -3,7 +3,7 @@
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2, Plus } from 'lucide-react'
 
 // This component contains the logic that uses useSearchParams, making it a client component
 // and allowing it to be wrapped in a Suspense boundary in the parent layout/page.
@@ -73,7 +73,7 @@ const LoginContent = () => {
     <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white border-opacity-20 w-full max-w-md">
       <div className="text-center mb-8">
         <div className="w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="text-white font-bold text-2xl">⚡</span>
+          <Plus className="w-8 h-8 text-white" />
         </div>
         <h2 className="text-3xl font-bold text-white mb-2">Welcome Back</h2>
         <p className="text-gray-300">Sign in to your AFFILIFY account</p>

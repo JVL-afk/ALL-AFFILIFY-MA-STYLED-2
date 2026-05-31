@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { 
-  Zap,
+  Plus as Zap,
   LayoutDashboard,
   Plus,
   Globe,

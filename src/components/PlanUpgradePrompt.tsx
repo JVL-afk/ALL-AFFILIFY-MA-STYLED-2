@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Crown, ArrowRight, Sparkles, Zap } from 'lucide-react';
+import { Crown, ArrowRight, Sparkles, Plus as Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PlanType } from '@/lib/plan-middleware';
 

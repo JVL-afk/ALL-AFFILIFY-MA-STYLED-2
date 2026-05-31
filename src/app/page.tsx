@@ -4,7 +4,7 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import Link from 'next/link'
 import { 
   Sparkles, 
-  Zap, 
+  Plus as Zap, 
   TrendingUp, 
   Globe, 
   BarChart3, 

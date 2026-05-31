@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { Plus } from 'lucide-react'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -12,7 +13,7 @@ export default function Header() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 text-white font-bold text-xl hover:text-orange-400 transition-colors">
-            <span className="text-orange-500">⚡</span>
+            <Plus className="w-6 h-6 text-orange-500" />
             <span>AFFILIFY</span>
           </Link>
 

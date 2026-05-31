@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Plus } from 'lucide-react'
 
 export default function Footer() {
   return (
@@ -8,7 +9,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-1">
             <Link href="/" className="flex items-center space-x-2 text-white font-bold text-xl mb-4">
-              <span className="text-orange-500">⚡</span>
+              <Plus className="w-6 h-6 text-orange-500" />
               <span>AFFILIFY</span>
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed">

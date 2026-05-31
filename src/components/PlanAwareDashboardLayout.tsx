@@ -12,7 +12,7 @@ import {
   Layers, 
   GitBranch, 
   PieChart, 
-  Zap, 
+  Plus as Zap, 
   Crown,
   FileText,
   Activity,
