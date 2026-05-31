@@ -165,37 +165,27 @@ export default function HomePage() {
   const testimonials = [
     { 
       quote: "AFFILIFY is a game-changer. I built a site in 5 minutes that converted better than my old one after 6 months of tweaking.", 
-      name: "Sarah J.", 
-      title: "Super Affiliate",
-      avatar: "S",
+      name: "Sarah J.",
       rating: 5
     },
     { 
       quote: "The AI is incredible. It understands the product and writes compelling copy that I couldn't have written myself.", 
       name: "Mark T.", 
-      title: "Content Creator",
-      avatar: "M",
       rating: 5
     },
     { 
       quote: "I went from zero to my first $1,000 in commissions in under a week. This platform is the real deal.", 
       name: "Alex P.", 
-      title: "Newbie Marketer",
-      avatar: "A",
       rating: 5
     },
     { 
       quote: "As a 13-year-old built this, I had to try it. Now I'm making more than my parents' side hustles combined!", 
       name: "Jordan K.", 
-      title: "Student Entrepreneur",
-      avatar: "J",
       rating: 5
     },
     { 
       quote: "The code editor is insane. Full control over everything, yet the AI does the heavy lifting. Best of both worlds.", 
       name: "David R.", 
-      title: "Web Developer",
-      avatar: "D",
       rating: 5
     }
   ]
@@ -342,7 +332,6 @@ export default function HomePage() {
                   Docs
                 </Link>
                 <Link href="/about-me" className="text-gray-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/5 flex items-center gap-1">
-                  <Heart className="w-4 h-4 text-red-500" />
                   My Story
                 </Link>
                 <Link href="/login" className="text-gray-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/5">
@@ -384,18 +373,12 @@ export default function HomePage() {
             variants={fadeInUp} 
             className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-orange-500/20 to-red-500/20 backdrop-blur-sm rounded-full border border-orange-500/30 mb-8"
           >
-            <Sparkles className="w-5 h-5 text-orange-400 mr-2 animate-pulse" />
-            <span className="text-orange-300 font-semibold text-sm">Built by a 13-year-old from Romania 🇷🇴</span>
-            <Link href="/about-me" className="ml-2 text-orange-400 hover:text-orange-300 transition-colors">
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </motion.div>
 
           {/* Main Headline */}
           <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-[0.9]">
             <span className="block text-white mb-2">Turn Any Link Into</span>
             <span className="block bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 bg-clip-text text-transparent">
-              A Money Machine
+              A Affiliate Website
             </span>
             <span className="block text-3xl md:text-4xl lg:text-5xl text-white/80 mt-4 font-bold">
               in 60 Seconds
@@ -439,7 +422,7 @@ export default function HomePage() {
               >
                 <span className="relative z-10 flex items-center gap-3">
                   <Rocket className="w-6 h-6" />
-                  Start Making Money Free
+                  Start Producing
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </span>
                 <motion.div
@@ -460,79 +443,6 @@ export default function HomePage() {
               </Link>
             </motion.div>
           </motion.div>
-
-          {/* Hero Visual - Platform Preview */}
-          <motion.div 
-            variants={fadeInUp}
-            className="relative max-w-6xl mx-auto"
-          >
-            <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-orange-500/20">
-              {/* Browser Chrome */}
-              <div className="bg-slate-800/90 backdrop-blur-sm px-4 py-3 flex items-center gap-3 border-b border-white/10">
-                <div className="flex gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                  <div className="w-3 h-3 rounded-full bg-green-500" />
-                </div>
-                <div className="flex-1 bg-slate-900/50 rounded-lg px-4 py-1.5 text-sm text-white/50 font-mono">
-                  affilify.eu/dashboard
-                </div>
-              </div>
-              {/* Dashboard Preview */}
-              <div className="bg-gradient-to-br from-slate-900 to-slate-950 p-8 min-h-[400px] flex items-center justify-center">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
-                  {/* Stats Cards */}
-                  <motion.div 
-                    className="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-sm rounded-xl p-6 border border-orange-500/30"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                  >
-                    <Globe className="w-8 h-8 text-orange-400 mb-3" />
-                    <div className="text-3xl font-bold text-white mb-1">12</div>
-                    <div className="text-white/60 text-sm">Active Websites</div>
-                  </motion.div>
-                  <motion.div 
-                    className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-sm rounded-xl p-6 border border-green-500/30"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                  >
-                    <TrendingUp className="w-8 h-8 text-green-400 mb-3" />
-                    <div className="text-3xl font-bold text-white mb-1">$4,892</div>
-                    <div className="text-white/60 text-sm">This Month</div>
-                  </motion.div>
-                  <motion.div 
-                    className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 backdrop-blur-sm rounded-xl p-6 border border-blue-500/30"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.7 }}
-                  >
-                    <Users className="w-8 h-8 text-blue-400 mb-3" />
-                    <div className="text-3xl font-bold text-white mb-1">24.5K</div>
-                    <div className="text-white/60 text-sm">Total Visitors</div>
-                  </motion.div>
-                </div>
-              </div>
-            </div>
-            {/* Floating Elements */}
-            <motion.div 
-              className="absolute -top-4 -right-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg"
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              +$127 just now! 🎉
-            </motion.div>
-            <motion.div 
-              className="absolute -bottom-4 -left-4 bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg"
-              animate={{ y: [0, 10, 0] }}
-              transition={{ duration: 2.5, repeat: Infinity }}
-            >
-              New conversion! 🚀
-            </motion.div>
-          </motion.div>
-        </motion.div>
-      </section>
 
       {/* ============================================ */}
       {/* HOW IT WORKS - VISUAL PROCESS */}
@@ -1184,7 +1094,7 @@ export default function HomePage() {
                 <span className="text-white text-xl font-bold">AFFILIFY</span>
               </Link>
               <p className="text-white/60 text-sm mb-4">AI-Powered Affiliate Marketing Platform</p>
-              <p className="text-white/40 text-xs">Built with ❤️ by Andrew from Romania</p>
+              <p className="text-white/40 text-xs">Built by Andrew from Romania</p>
             </div>
             
             {/* Product */}
