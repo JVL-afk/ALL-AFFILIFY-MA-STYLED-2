@@ -378,15 +378,14 @@ export default function HomePage() {
             variants={fadeInUp} 
             className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-orange-500/20 to-red-500/20 backdrop-blur-sm rounded-full border border-orange-500/30 mb-8"
           >
-            <Sparkles className="w-5 h-5 text-orange-400 mr-2" />
-            <span className="text-orange-300 font-semibold text-sm">AI-Powered Affiliate Marketing Platform</span>
+          <span className="text-orange-300 font-semibold text-sm">AI-Powered Affiliate Marketing Platform</span>
           </motion.div>
 
           {/* Main Headline */}
           <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-[0.9]">
             <span className="block text-white mb-2">Turn Any Link Into</span>
             <span className="block bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 bg-clip-text text-transparent">
-              A Affiliate Website
+              An Affiliate Website
             </span>
             <span className="block text-3xl md:text-4xl lg:text-5xl text-white/80 mt-4 font-bold">
               in 60 Seconds
