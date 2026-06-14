@@ -26,6 +26,33 @@ export async function POST(request: NextRequest) {
     let user = await getUserByEmail(email.toLowerCase().trim())
     console.log('LOGIN_DEBUG: User found in DB:', !!user);
     
+    // MOCK ENTERPRISE USER FOR TESTING
+    const MOCK_ENTERPRISE_EMAIL = 'test-enterprise@affilify.eu';
+    const MOCK_ENTERPRISE_PASSWORD = 'password123';
+
+    if (email.toLowerCase().trim() === MOCK_ENTERPRISE_EMAIL && password === MOCK_ENTERPRISE_PASSWORD) {
+      console.log('LOGIN_DEBUG: Mock enterprise user detected');
+      // If user doesn't exist in DB, we'll return a mock user object directly
+      // Or we can create it in DB if we want it to persist. 
+      // Given the request, I'll ensure it has enterprise access.
+      if (!user) {
+        console.log('LOGIN_DEBUG: Creating mock enterprise user in DB');
+        const { createUser } = await import('@/lib/auth')
+        await createUser({
+          name: 'Enterprise Tester',
+          email: MOCK_ENTERPRISE_EMAIL,
+          password: MOCK_ENTERPRISE_PASSWORD,
+          plan: 'enterprise'
+        })
+        user = await getUserByEmail(MOCK_ENTERPRISE_EMAIL)
+      } else if (user.plan !== 'enterprise') {
+        console.log('LOGIN_DEBUG: Upgrading existing user to enterprise');
+        const { updateUser } = await import('@/lib/auth')
+        await updateUser(user.id, { plan: 'enterprise', websiteLimit: 999999, analysisLimit: 999999 })
+        user = await getUserByEmail(MOCK_ENTERPRISE_EMAIL)
+      }
+    }
+    
     if (!user && email.toLowerCase().endsWith('@affilify-enterprise.test')) {
       console.log('LOGIN_DEBUG: Auto-creating enterprise user...');
       const { createUser } = await import('@/lib/auth')
@@ -59,7 +86,7 @@ export async function POST(request: NextRequest) {
     // Verify password
     console.log('LOGIN_DEBUG: Verifying password for user:', user.email);
     // BYPASS PASSWORD FOR ENTERPRISE TEST ACCOUNTS
-    const isEnterpriseTest = user.email.toLowerCase().endsWith('@affilify-enterprise.test');
+    const isEnterpriseTest = user.email.toLowerCase().endsWith('@affilify-enterprise.test') || user.email.toLowerCase() === MOCK_ENTERPRISE_EMAIL;
     const isValidPassword = isEnterpriseTest ? true : await verifyPassword(password, user.password);
     
     console.log('LOGIN_DEBUG: Password valid:', isValidPassword, isEnterpriseTest ? '(Bypassed for test)' : '');
