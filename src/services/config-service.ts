@@ -15,6 +15,8 @@ export interface PlanLimits {
   emailsPerDay: number;
   maxRecipientsPerSend: number;
   maxCampaignsPerMonth: number;
+  aiChatbotMessagesPerMonth: number;
+  aiChatbotMessagesPerDay: number;
 }
 
 /**
@@ -116,18 +118,24 @@ export class ConfigService {
         emailsPerDay: parseInt(process.env.PLAN_FREE_EMAILS_PER_DAY || '100', 10),
         maxRecipientsPerSend: parseInt(process.env.PLAN_FREE_MAX_RECIPIENTS || '100', 10),
         maxCampaignsPerMonth: parseInt(process.env.PLAN_FREE_MAX_CAMPAIGNS || '10', 10),
+        aiChatbotMessagesPerMonth: parseInt(process.env.PLAN_FREE_AI_CHATBOT_PER_MONTH || '50', 10),
+        aiChatbotMessagesPerDay: parseInt(process.env.PLAN_FREE_AI_CHATBOT_PER_DAY || '10', 10),
       },
       pro: {
         emailsPerMonth: parseInt(process.env.PLAN_PRO_EMAILS_PER_MONTH || '100000', 10),
         emailsPerDay: parseInt(process.env.PLAN_PRO_EMAILS_PER_DAY || '5000', 10),
         maxRecipientsPerSend: parseInt(process.env.PLAN_PRO_MAX_RECIPIENTS || '10000', 10),
         maxCampaignsPerMonth: parseInt(process.env.PLAN_PRO_MAX_CAMPAIGNS || '100', 10),
+        aiChatbotMessagesPerMonth: parseInt(process.env.PLAN_PRO_AI_CHATBOT_PER_MONTH || '1000', 10),
+        aiChatbotMessagesPerDay: parseInt(process.env.PLAN_PRO_AI_CHATBOT_PER_DAY || '100', 10),
       },
       enterprise: {
         emailsPerMonth: parseInt(process.env.PLAN_ENTERPRISE_EMAILS_PER_MONTH || '10000000', 10),
         emailsPerDay: parseInt(process.env.PLAN_ENTERPRISE_EMAILS_PER_DAY || '500000', 10),
         maxRecipientsPerSend: parseInt(process.env.PLAN_ENTERPRISE_MAX_RECIPIENTS || '1000000', 10),
         maxCampaignsPerMonth: parseInt(process.env.PLAN_ENTERPRISE_MAX_CAMPAIGNS || '10000', 10),
+        aiChatbotMessagesPerMonth: parseInt(process.env.PLAN_ENTERPRISE_AI_CHATBOT_PER_MONTH || '100000', 10),
+        aiChatbotMessagesPerDay: parseInt(process.env.PLAN_ENTERPRISE_AI_CHATBOT_PER_DAY || '10000', 10),
       },
     };
   }

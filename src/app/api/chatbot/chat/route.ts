@@ -1,55 +1,113 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { requirePremium } from '@/lib/auth-middleware' // Use the correct middleware path
-import { GoogleGenAI } from '@google/genai'
-import { AuthenticatedUser } from '@/lib/types'
+import { NextRequest, NextResponse } from 'next/server';
+import { GoogleGenAI } from '@google/genai';
+import { requirePremium } from '@/lib/auth-middleware';
+import { connectToDatabase } from '@/lib/mongodb';
+import { TenantAwareDb } from '@/lib/tenant-aware-db';
+import { QuotaService } from '@/services/quota-service';
+import { PIIRedactionService } from '@/services/pii-redaction-service';
+import { PromptInjectionShield } from '@/services/prompt-injection-shield';
+import { ChatRequestSchema } from '@/lib/validation/chat-schemas';
+import { logger } from '@/lib/production-logger';
+import { ObjectId } from 'mongodb';
 
-// Initialize Google Gen AI client
-// The API key is expected to be in the environment variables (GEMINI_API_KEY)
-const ai = new GoogleGenAI({})
+const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY || '');
 
-// Best-in-Class: Fine-tuned for affiliate marketing, SEO, and CRO
-const SYSTEM_INSTRUCTION = `You are AFFILIFY AI, an expert affiliate marketing strategist. Your role is to provide institutional-grade, actionable advice on SEO, conversion rate optimization (CRO), and affiliate strategy.
-- Be concise, professional, and data-driven.
-- Always ask clarifying questions if the user's request is vague.
-- Do not mention that you are an AI model. Act as a senior marketing consultant.`
+const SYSTEM_INSTRUCTION = `You are the AFFILIFY AI Assistant, a world-class expert in affiliate marketing, digital entrepreneurship, and performance tracking.
+Your goal is to provide actionable, data-driven advice to help users scale their affiliate businesses.
+Always be professional, concise, and focused on ROI.`;
 
-// POST: Send a message to the AI Chatbot
-export const POST = requirePremium(async (request: NextRequest, user: AuthenticatedUser) => {
-  try {
-    const { message, history } = await request.json()
-
-    if (!message) {
-      return NextResponse.json(
-        { error: 'Missing required field: message' },
-        { status: 400 }
-      )
-    }
-
-    // Best-in-class implementation using Gemini for a conversational, context-aware chat
-    const chat = ai.chats.create({
-      model: 'gemini-2.5-flash', // Use gemini-2.5-flash for speed, but the context implies it's "Pro" qualityty
-      history: history || [],
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
+export async function POST(req: NextRequest) {
+  return requirePremium(req, async (user) => {
+    try {
+      const body = await req.json();
+      
+      // 1. Validation
+      const validation = ChatRequestSchema.safeParse(body);
+      if (!validation.success) {
+        return NextResponse.json({ success: false, error: 'Invalid request data', details: validation.error.format() }, { status: 400 });
       }
-    })
+      const { message, sessionId, history = [] } = validation.data;
 
-    const response = await chat.sendMessage({ message })
-    
-    // In a real implementation, you would save the history to MongoDB here
-    
-    return NextResponse.json({
-      success: true,
-      response: response.text
-    })
+      // 2. Security Shields
+      const shieldResult = PromptInjectionShield.analyze(message);
+      if (!shieldResult.isSafe) {
+        return NextResponse.json({ success: false, error: 'Security violation detected', reason: shieldResult.reason }, { status: 403 });
+      }
 
-  } catch (error) {
-    console.error('AI Chatbot API Error:', error)
-    // Best-in-Class Error Handling: Return a professional, non-technical error message
-    return NextResponse.json(
-      { error: 'An institutional-grade error occurred. Please try again or contact support.' },
-      { status: 500 }
-    )
-  }
-})
+      const redactedMessage = PIIRedactionService.redact(message);
 
+      // 3. Database & Quota Setup
+      const { db } = await connectToDatabase();
+      const tenantDb = new TenantAwareDb(db, { userId: user.id, userPlan: user.plan, role: user.role });
+      const quotaService = new QuotaService(db);
+
+      // 4. Atomic Quota Check
+      const quotaCheck = await quotaService.checkAndDecrementAiChatbotQuota(new ObjectId(user.id));
+      if (!quotaCheck.allowed) {
+        return NextResponse.json({ success: false, error: 'Quota exceeded', reason: quotaCheck.reason }, { status: 429 });
+      }
+
+      // 5. AI Execution
+      const model = genAI.getGenerativeModel({ 
+        model: 'gemini-2.5-flash',
+        systemInstruction: SYSTEM_INSTRUCTION 
+      });
+
+      const chat = model.startChat({
+        history: history,
+      });
+
+      const result = await chat.sendMessage(redactedMessage);
+      const responseText = result.response.text();
+
+      // 6. Persistence
+      if (sessionId) {
+        const messagesCol = tenantDb.collection('chat_messages');
+        
+        // Save User Message
+        const userMsgId = new ObjectId();
+        await messagesCol.insertOne({
+          _id: userMsgId,
+          sessionId: new ObjectId(sessionId),
+          type: 'user',
+          content: message, // Save original for user, but AI saw redacted
+          timestamp: new Date(),
+        });
+
+        // Save AI Response
+        const aiMsgId = new ObjectId();
+        await messagesCol.insertOne({
+          _id: aiMsgId,
+          sessionId: new ObjectId(sessionId),
+          type: 'model',
+          content: responseText,
+          timestamp: new Date(),
+        });
+
+        // Update Session Last Message
+        const sessionsCol = tenantDb.collection('chat_sessions');
+        await sessionsCol.updateOne(
+          { _id: new ObjectId(sessionId) },
+          { $set: { lastMessageAt: new Date(), updatedAt: new Date() } }
+        );
+
+        return NextResponse.json({
+          success: true,
+          response: responseText,
+          message: {
+            id: aiMsgId.toString(),
+            type: 'model',
+            content: responseText,
+            timestamp: new Date().toISOString()
+          }
+        });
+      }
+
+      return NextResponse.json({ success: true, response: responseText });
+
+    } catch (error: any) {
+      logger.error('Chatbot API Error', { error: error.message, stack: error.stack });
+      return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+    }
+  });
+}

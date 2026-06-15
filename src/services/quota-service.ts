@@ -15,6 +15,10 @@ export interface UserQuota {
   emailsSentToday: number;
   emailsAllowedPerMonth: number;
   emailsAllowedPerDay: number;
+  aiChatbotMessagesSentThisMonth: number;
+  aiChatbotMessagesSentToday: number;
+  aiChatbotMessagesAllowedPerMonth: number;
+  aiChatbotMessagesAllowedPerDay: number;
   lastResetDate: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -43,6 +47,10 @@ export class QuotaService {
           emailsSentToday: 0,
           emailsAllowedPerMonth: quotaLimits.monthly,
           emailsAllowedPerDay: quotaLimits.daily,
+          aiChatbotMessagesSentThisMonth: 0,
+          aiChatbotMessagesSentToday: 0,
+          aiChatbotMessagesAllowedPerMonth: quotaLimits.aiMonthly,
+          aiChatbotMessagesAllowedPerDay: quotaLimits.aiDaily,
           lastResetDate: new Date(),
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -78,7 +86,7 @@ export class QuotaService {
    * 
    * If quota is insufficient, the operation fails and no decrement occurs.
    */
-  async checkAndDecrementQuota(userId: ObjectId, emailCount: number = 1): Promise<{ allowed: boolean; remaining: number; reason?: string }> {
+  async checkAndDecrementEmailQuota(userId: ObjectId, emailCount: number = 1): Promise<{ allowed: boolean; remaining: number; reason?: string }> {
     // First, ensure quota record exists
     const quota = await this.db.collection('user_quotas').findOne({ userId });
     if (!quota) {
@@ -186,18 +194,86 @@ export class QuotaService {
   }
 
   /**
+   * Atomically check and decrement AI chatbot quota.
+   */
+  async checkAndDecrementAiChatbotQuota(userId: ObjectId, messageCount: number = 1): Promise<{ allowed: boolean; remaining: number; reason?: string }> {
+    const quota = await this.db.collection('user_quotas').findOne({ userId });
+    if (!quota) {
+      return { allowed: false, remaining: 0, reason: 'Quota not initialized' };
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const lastReset = new Date(quota.lastResetDate);
+    lastReset.setHours(0, 0, 0, 0);
+
+    if (lastReset.getTime() < today.getTime()) {
+      await this.db.collection('user_quotas').updateOne(
+        { userId },
+        {
+          $set: {
+            emailsSentToday: 0,
+            aiChatbotMessagesSentToday: 0,
+            lastResetDate: today,
+            updatedAt: new Date(),
+          },
+        }
+      );
+      quota.emailsSentToday = 0;
+      quota.aiChatbotMessagesSentToday = 0;
+      quota.lastResetDate = today;
+    }
+
+    if (quota.aiChatbotMessagesSentThisMonth + messageCount > quota.aiChatbotMessagesAllowedPerMonth) {
+      return { allowed: false, remaining: 0, reason: 'Monthly AI quota exceeded' };
+    }
+
+    if (quota.aiChatbotMessagesSentToday + messageCount > quota.aiChatbotMessagesAllowedPerDay) {
+      return { allowed: false, remaining: 0, reason: 'Daily AI quota exceeded' };
+    }
+
+    const updateResult = await this.db.collection('user_quotas').findOneAndUpdate(
+      {
+        userId,
+        aiChatbotMessagesSentThisMonth: { $lte: quota.aiChatbotMessagesAllowedPerMonth - messageCount },
+        aiChatbotMessagesSentToday: { $lte: quota.aiChatbotMessagesAllowedPerDay - messageCount },
+      },
+      {
+        $inc: {
+          aiChatbotMessagesSentThisMonth: messageCount,
+          aiChatbotMessagesSentToday: messageCount,
+        },
+        $set: { updatedAt: new Date() },
+      },
+      { returnDocument: 'after' }
+    );
+
+    if (!updateResult) {
+      return { allowed: false, remaining: 0, reason: 'Race condition detected' };
+    }
+
+    const updatedDoc = updateResult as unknown as UserQuota;
+    return {
+      allowed: true,
+      remaining: updatedDoc.aiChatbotMessagesAllowedPerMonth - updatedDoc.aiChatbotMessagesSentThisMonth,
+    };
+  }
+
+  /**
    * Get remaining quota for a user without decrementing.
    */
-  async getRemainingQuota(userId: ObjectId): Promise<{ monthly: number; daily: number }> {
+  async getRemainingQuota(userId: ObjectId): Promise<{ monthly: number; daily: number; aiMonthly: number; aiDaily: number }> {
     const quota = await this.db.collection('user_quotas').findOne({ userId });
 
     if (!quota) {
-      return { monthly: 0, daily: 0 };
+      return { monthly: 0, daily: 0, aiMonthly: 0, aiDaily: 0 };
     }
 
     return {
       monthly: Math.max(0, quota.emailsAllowedPerMonth - quota.emailsSentThisMonth),
       daily: Math.max(0, quota.emailsAllowedPerDay - quota.emailsSentToday),
+      aiMonthly: Math.max(0, quota.aiChatbotMessagesAllowedPerMonth - quota.aiChatbotMessagesSentThisMonth),
+      aiDaily: Math.max(0, quota.aiChatbotMessagesAllowedPerDay - quota.aiChatbotMessagesSentToday),
     };
   }
 
@@ -223,8 +299,13 @@ export class QuotaService {
   /**
    * Get quota limits based on plan type (dynamically loaded from ConfigService).
    */
-  private getQuotaLimitsByPlan(planType: 'free' | 'pro' | 'enterprise'): { monthly: number; daily: number } {
+  private getQuotaLimitsByPlan(planType: 'free' | 'pro' | 'enterprise'): { monthly: number; daily: number; aiMonthly: number; aiDaily: number } {
     const limits = configService.getPlanLimits(planType);
-    return { monthly: limits.emailsPerMonth, daily: limits.emailsPerDay };
+    return { 
+      monthly: limits.emailsPerMonth, 
+      daily: limits.emailsPerDay,
+      aiMonthly: limits.aiChatbotMessagesPerMonth,
+      aiDaily: limits.aiChatbotMessagesPerDay
+    };
   }
 }

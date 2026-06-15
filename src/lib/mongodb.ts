@@ -68,7 +68,7 @@ if (process.env.NODE_ENV === 'development') {
  * Automatically initialize required CRM collections if they don't exist
  */
 async function initializeCRMCollections(db: Db): Promise<void> {
-  const requiredCollections = ['leads', 'tasks', 'proposals', 'clients'];
+  const requiredCollections = ['leads', 'tasks', 'proposals', 'clients', 'chat_sessions', 'chat_messages', 'user_quotas'];
   
   try {
     logger.debug('MONGODB', 'CHECKING_CRM_COLLECTIONS', 'CHECKING_CRM_COLLECTIONS', { collections: requiredCollections });
@@ -101,6 +101,17 @@ async function initializeCRMCollections(db: Db): Promise<void> {
         // Create indexes for better query performance
         await db.collection(collectionName).createIndex({ userId: 1 });
         await db.collection(collectionName).createIndex({ createdAt: -1 });
+
+        // Feature-specific indexes
+        if (collectionName === 'chat_messages') {
+          await db.collection(collectionName).createIndex({ sessionId: 1 });
+        }
+        if (collectionName === 'chat_sessions') {
+          await db.collection(collectionName).createIndex({ lastMessageAt: -1 });
+        }
+        if (collectionName === 'user_quotas') {
+          await db.collection(collectionName).createIndex({ userId: 1 }, { unique: true });
+        }
         
         logger.info('MONGODB', 'COLLECTION_CREATED_SUCCESS', 'COLLECTION_CREATED_SUCCESS', { collectionName });
       } else {

@@ -1,176 +1,67 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { connectToDatabase } from '../../../../lib/mongodb'
-import { ObjectId } from 'mongodb'
-import jwt from 'jsonwebtoken'
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-middleware';
+import { connectToDatabase } from '@/lib/mongodb';
+import { TenantAwareDb } from '@/lib/tenant-aware-db';
+import { MessageRatingSchema } from '@/lib/validation/chat-schemas';
+import { logger } from '@/lib/production-logger';
+import { ObjectId } from 'mongodb';
 
-interface UserData {
-  _id: ObjectId
-  email: string
-  plan: string
-  name: string
-}
+export async function GET(req: NextRequest) {
+  return requireAuth(req, async (user) => {
+    try {
+      const { searchParams } = new URL(req.url);
+      const sessionId = searchParams.get('sessionId');
 
-// Verify user authentication
-async function verifyUser(request: NextRequest): Promise<UserData | null> {
-  try {
-    const token = request.cookies.get('auth-token')?.value
-    if (!token) return null
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'affilify_jwt_2025_romania_student_success_portocaliu_orange_power_gaming_affiliate_marketing_revolution_secure_token_generation_system') as any
-    
-    const { db } = await connectToDatabase()
-    const user = await db.collection('users').findOne({ _id: new ObjectId(decoded.userId) })
-    
-    return user as UserData
-  } catch (error) {
-    console.error('Auth verification error:', error)
-    return null
-  }
-}
-
-// GET - Retrieve messages for a specific chat session
-export async function GET(request: NextRequest) {
-  try {
-    const user = await verifyUser(request)
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
-    }
-
-    const { searchParams } = new URL(request.url)
-    const sessionId = searchParams.get('sessionId')
-    const limit = parseInt(searchParams.get('limit') || '50')
-    const offset = parseInt(searchParams.get('offset') || '0')
-
-    if (!sessionId) {
-      return NextResponse.json(
-        { error: 'Session ID is required' },
-        { status: 400 }
-      )
-    }
-
-    const { db } = await connectToDatabase()
-    
-    // Verify session belongs to user
-    const session = await db.collection('chat_sessions').findOne({
-      _id: new ObjectId(sessionId),
-      userId: user._id.toString()
-    })
-
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Chat session not found' },
-        { status: 404 }
-      )
-    }
-
-    // Get messages for the session
-    const messages = await db.collection('chat_messages')
-      .find({ 
-        sessionId,
-        userId: user._id.toString()
-      })
-      .sort({ createdAt: 1 })
-      .skip(offset)
-      .limit(limit)
-      .toArray()
-
-    const formattedMessages = messages.map(msg => ({
-      id: msg._id.toString(),
-      type: msg.type,
-      content: msg.content,
-      timestamp: msg.timestamp || msg.createdAt,
-      rating: msg.rating || null
-    }))
-
-    return NextResponse.json({
-      success: true,
-      messages: formattedMessages,
-      sessionInfo: {
-        id: session._id.toString(),
-        title: session.title,
-        createdAt: session.createdAt,
-        updatedAt: session.updatedAt
+      if (!sessionId) {
+        return NextResponse.json({ success: false, error: 'Missing sessionId' }, { status: 400 });
       }
-    })
 
-  } catch (error) {
-    console.error('Get messages error:', error)
-    return NextResponse.json(
-      { error: 'Failed to retrieve messages' },
-      { status: 500 }
-    )
-  }
+      const { db } = await connectToDatabase();
+      const tenantDb = new TenantAwareDb(db, { userId: user.id, userPlan: user.plan, role: user.role });
+      const messagesCol = tenantDb.collection('chat_messages');
+
+      const messages = await messagesCol.find({ sessionId: new ObjectId(sessionId) });
+      
+      return NextResponse.json({
+        success: true,
+        messages: messages.map(m => ({
+          id: m._id.toString(),
+          type: m.type,
+          content: m.content,
+          timestamp: m.timestamp,
+          rating: m.rating
+        }))
+      });
+    } catch (error: any) {
+      logger.error('Messages GET Error', { error: error.message });
+      return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+    }
+  });
 }
 
-// POST - Rate a message (thumbs up/down)
-export async function POST(request: NextRequest) {
-  try {
-    const user = await verifyUser(request)
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
-    }
-
-    const { messageId, rating } = await request.json()
-
-    if (!messageId || !rating || !['up', 'down'].includes(rating)) {
-      return NextResponse.json(
-        { error: 'Valid messageId and rating (up/down) are required' },
-        { status: 400 }
-      )
-    }
-
-    const { db } = await connectToDatabase()
-    
-    // Update message rating
-    const result = await db.collection('chat_messages').updateOne(
-      { 
-        _id: new ObjectId(messageId),
-        userId: user._id.toString()
-      },
-      { 
-        $set: { 
-          rating,
-          ratedAt: new Date()
-        } 
+export async function POST(req: NextRequest) {
+  return requireAuth(req, async (user) => {
+    try {
+      const body = await req.json();
+      const validation = MessageRatingSchema.safeParse(body);
+      if (!validation.success) {
+        return NextResponse.json({ success: false, error: 'Invalid data' }, { status: 400 });
       }
-    )
 
-    if (result.matchedCount === 0) {
-      return NextResponse.json(
-        { error: 'Message not found' },
-        { status: 404 }
-      )
+      const { messageId, rating } = validation.data;
+      const { db } = await connectToDatabase();
+      const tenantDb = new TenantAwareDb(db, { userId: user.id, userPlan: user.plan, role: user.role });
+      const messagesCol = tenantDb.collection('chat_messages');
+
+      await messagesCol.updateOne(
+        { _id: new ObjectId(messageId) },
+        { $set: { rating, ratedAt: new Date(), updatedAt: new Date() } }
+      );
+
+      return NextResponse.json({ success: true });
+    } catch (error: any) {
+      logger.error('Messages POST Error', { error: error.message });
+      return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
     }
-
-    return NextResponse.json({
-      success: true,
-      message: 'Message rating updated successfully'
-    })
-
-  } catch (error) {
-    console.error('Rate message error:', error)
-    return NextResponse.json(
-      { error: 'Failed to rate message' },
-      { status: 500 }
-    )
-  }
+  });
 }
-
-// Handle OPTIONS requests for CORS
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
-  })
-}
-
