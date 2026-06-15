@@ -68,7 +68,7 @@ if (process.env.NODE_ENV === 'development') {
  * Automatically initialize required CRM collections if they don't exist
  */
 async function initializeCRMCollections(db: Db): Promise<void> {
-  const requiredCollections = ['leads', 'tasks', 'proposals', 'clients', 'chat_sessions', 'chat_messages', 'user_quotas'];
+  const requiredCollections = ['leads', 'tasks', 'proposals', 'clients', 'chat_sessions', 'chat_messages', 'user_quotas', 'reports'];
   
   try {
     logger.debug('MONGODB', 'CHECKING_CRM_COLLECTIONS', 'CHECKING_CRM_COLLECTIONS', { collections: requiredCollections });
@@ -83,20 +83,31 @@ async function initializeCRMCollections(db: Db): Promise<void> {
         logger.info('MONGODB', 'CREATING_COLLECTION', 'CREATING_COLLECTION', { collectionName });
         
         // Create collection with schema validation
-        await db.createCollection(collectionName, {
-          validator: {
-            $jsonSchema: {
-              bsonType: 'object',
-              required: ['userId', 'createdAt'],
-              properties: {
-                _id: { bsonType: 'objectId' },
-                userId: { bsonType: 'objectId', description: 'User ID' },
-                createdAt: { bsonType: 'date', description: 'Creation timestamp' },
-                updatedAt: { bsonType: 'date', description: 'Last update timestamp' },
-              }
+        const validator: any = {
+          $jsonSchema: {
+            bsonType: 'object',
+            required: ['userId', 'createdAt'],
+            properties: {
+              _id: { bsonType: 'objectId' },
+              userId: { bsonType: 'objectId', description: 'User ID' },
+              createdAt: { bsonType: 'date', description: 'Creation timestamp' },
+              updatedAt: { bsonType: 'date', description: 'Last update timestamp' },
             }
           }
-        });
+        };
+
+        if (collectionName === 'reports') {
+          validator.$jsonSchema.required.push('name', 'type', 'status', 'format');
+          validator.$jsonSchema.properties = {
+            ...validator.$jsonSchema.properties,
+            name: { bsonType: 'string' },
+            type: { bsonType: 'string' },
+            status: { enum: ['draft', 'pending', 'processing', 'completed', 'failed'] },
+            format: { enum: ['PDF', 'Excel', 'CSV'] },
+          };
+        }
+
+        await db.createCollection(collectionName, { validator });
         
         // Create indexes for better query performance
         await db.collection(collectionName).createIndex({ userId: 1 });

@@ -174,6 +174,36 @@ export class EmailSendingService {
   }
 
   /**
+   * Send a generated report to recipients.
+   */
+  async sendReportByEmail(recipients: string[], fileUrl: string, reportName: string): Promise<void> {
+    const subject = `Your AFFILIFY Report: ${reportName}`;
+    const htmlContent = `
+      <h1>Your report is ready</h1>
+      <p>The report <strong>${reportName}</strong> has been generated successfully.</p>
+      <p>You can download it using the following link:</p>
+      <p><a href="${fileUrl}">${fileUrl}</a></p>
+      <p>This link will be active for 7 days.</p>
+    `;
+
+    for (const recipient of recipients) {
+      try {
+        await sendGridAdapter.sendEmail({
+          to: recipient,
+          subject,
+          html: htmlContent,
+        });
+      } catch (error) {
+        logger.error('EmailSendingService', 'sendReportByEmail', 'Failed to send report email', 'Failed to send report email', {
+          recipient,
+          reportName,
+          error: (error as Error).message,
+        });
+      }
+    }
+  }
+
+  /**
    * Get user's remaining quota.
    */
   async getUserQuota(userId: ObjectId): Promise<{ monthly: number; daily: number }> {
