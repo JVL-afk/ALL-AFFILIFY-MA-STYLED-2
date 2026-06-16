@@ -412,8 +412,18 @@ export default function AdvancedAnalyticsPage() {
                         cy="50%"
                         outerRadius={80}
                         dataKey="percentage"
-                        nameKey="age"
-                        label={({ age, percentage }: { age: string; percentage: number }) => `${age}: ${percentage}%`}
+                        label={(props: any) => {
+                          const { cx, cy, midAngle, innerRadius, outerRadius, payload } = props
+                          const RADIAN = Math.PI / 180
+                          const radius = innerRadius + (outerRadius - innerRadius) * 0.5
+                          const x = cx + radius * Math.cos(-midAngle * RADIAN)
+                          const y = cy + radius * Math.sin(-midAngle * RADIAN)
+                          return (
+                            <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={11}>
+                              {`${payload?.age ?? ""}: ${payload?.percentage ?? ""}%`}
+                            </text>
+                          )
+                        }}
                       >
                         {analyticsData.demographics.map((_entry, i) => (
                           <Cell key={i} fill={COLORS[i % COLORS.length]} />
