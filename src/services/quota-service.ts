@@ -91,8 +91,8 @@ export class QuotaService {
     let quota = await this.db.collection('user_quotas').findOne({ userId });
     if (!quota) {
       try {
-        quota = await this.initializeUserQuota(userId, planType);
-      } catch {
+        quota = (await this.initializeUserQuota(userId, planType)) as unknown as typeof quota;
+      } catch (_err) {
         quota = await this.db.collection('user_quotas').findOne({ userId });
         if (!quota) {
           logger.warn('QuotaService', 'checkAndDecrementQuota', 'User quota not found after init attempt', 'User quota not found', { userId: userId.toString() });
@@ -208,8 +208,8 @@ export class QuotaService {
     // Auto-initialize quota on first use — no quota record = new user, not an error
     if (!quota) {
       try {
-        quota = await this.initializeUserQuota(userId, planType);
-      } catch {
+        quota = (await this.initializeUserQuota(userId, planType)) as unknown as typeof quota;
+      } catch (_err) {
         // If init fails (e.g. race condition already inserted), try fetching again
         quota = await this.db.collection('user_quotas').findOne({ userId });
         if (!quota) {
