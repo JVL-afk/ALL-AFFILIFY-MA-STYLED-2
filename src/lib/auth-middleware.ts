@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';
 import { connectToDatabase } from './mongodb';
 import { ObjectId } from 'mongodb';
 
-// Type definitions
 export interface AuthenticatedUser {
   _id: string | ObjectId;
   id: string;
@@ -25,11 +24,15 @@ export interface AuthenticatedUser {
 
 type AuthenticatedHandler = (request: NextRequest, user: AuthenticatedUser) => Promise<NextResponse | Response>;
 
-// Best-in-Class: Robust authentication middleware that handles multiple token sources
-export async function authenticateRequest(request: NextRequest): Promise<{ success: boolean; user?: AuthenticatedUser; error?: string }> {
+/**
+ * Authenticate a raw request and return the user, or an error.
+ * Accepts both NextRequest and native Request (Next.js 16 compatibility).
+ */
+export async function authenticateRequest(
+  request: Request
+): Promise<{ success: boolean; user?: AuthenticatedUser; error?: string }> {
   try {
-    // 1. Extract token from multiple sources (Authorization header, cookies)
-    let token = null;
+    let token: string | null = null;
 
     // Check Authorization header (Bearer token)
     const authHeader = request.headers.get('Authorization');
@@ -37,28 +40,47 @@ export async function authenticateRequest(request: NextRequest): Promise<{ succe
       token = authHeader.substring(7);
     }
 
-    // Check cookies (multiple possible names)
+    // Parse cookies from header (works for both NextRequest and native Request)
     if (!token) {
-      token = request.cookies.get('token')?.value ||
-              request.cookies.get('auth-token')?.value ||
-              request.cookies.get('authToken')?.value ||
-              request.cookies.get('jwt')?.value;
+      const cookieHeader = request.headers.get('cookie') || '';
+      const parseCookie = (name: string): string | undefined => {
+        const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
+        return match ? decodeURIComponent(match[1]) : undefined;
+      };
+      token =
+        parseCookie('token') ||
+        parseCookie('auth-token') ||
+        parseCookie('authToken') ||
+        parseCookie('jwt') ||
+        null;
+
+      // Also try NextRequest.cookies if the object supports it
+      if (!token && typeof (request as any).cookies?.get === 'function') {
+        const nreq = request as NextRequest;
+        token =
+          nreq.cookies.get('token')?.value ||
+          nreq.cookies.get('auth-token')?.value ||
+          nreq.cookies.get('authToken')?.value ||
+          nreq.cookies.get('jwt')?.value ||
+          null;
+      }
     }
 
     if (!token) {
       return { success: false, error: 'Authentication required' };
     }
 
-    // 2. Verify JWT signature
-    const JWT_SECRET = process.env.JWT_SECRET || 'affilify_jwt_2025_romania_student_success_portocaliu_orange_power_gaming_affiliate_marketing_revolution_secure_token_generation_system_v1';
+    const JWT_SECRET =
+      process.env.JWT_SECRET ||
+      'affilify_jwt_2025_romania_student_success_portocaliu_orange_power_gaming_affiliate_marketing_revolution_secure_token_generation_system_v1';
+
     let decoded: any;
     try {
       decoded = jwt.verify(token, JWT_SECRET);
-    } catch (error) {
+    } catch {
       return { success: false, error: 'Invalid token' };
     }
 
-    // 3. Fetch user from database (real-time data)
     const { db } = await connectToDatabase();
     const userDoc = await db.collection('users').findOne(
       { _id: new ObjectId(decoded.userId) },
@@ -69,7 +91,6 @@ export async function authenticateRequest(request: NextRequest): Promise<{ succe
       return { success: false, error: 'User not found' };
     }
 
-    // 4. Return authenticated user
     const user: AuthenticatedUser = {
       _id: userDoc._id.toString(),
       id: userDoc._id.toString(),
@@ -97,91 +118,74 @@ export async function authenticateRequest(request: NextRequest): Promise<{ succe
 }
 
 /**
- * requireAuth supports two calling conventions:
- *   1. Curried:  requireAuth(handler)(request)
- *   2. Direct:   requireAuth(request, handler)
+ * requireAuth(request, handler) — authenticates and runs handler if valid.
+ *
+ * ROOT CAUSE FIX (Next.js 16):
+ * The previous implementation used `instanceof NextRequest` to detect which
+ * calling convention was being used. In Next.js 16 App Router, the request
+ * passed to route handlers is NOT always a true NextRequest instance — it is
+ * a native Web API Request subclass. The instanceof check therefore evaluated
+ * to false, causing requireAuth to fall into the curried path and return a
+ * FUNCTION instead of a Response. Next.js then logged:
+ *   "No response is returned from route handler"
+ * across every single API route using this middleware.
+ *
+ * Fix: The function now has a single, unambiguous signature — it always takes
+ * (request, handler) and always returns a Promise<Response>. No overloading,
+ * no instanceof, no runtime dispatch. The call sites already use this pattern.
  */
-export function requireAuth(
-  requestOrHandler: NextRequest | AuthenticatedHandler,
-  handler?: AuthenticatedHandler
-): any {
-  // Convention 2: requireAuth(request, handler)
-  if (requestOrHandler instanceof NextRequest && handler) {
-    return (async () => {
-      const authResult = await authenticateRequest(requestOrHandler);
-      if (!authResult.success) {
-        return NextResponse.json({ error: authResult.error || 'Authentication required' }, { status: 401 });
-      }
-      return handler(requestOrHandler, authResult.user!);
-    })();
+export async function requireAuth(
+  request: Request,
+  handler: AuthenticatedHandler
+): Promise<NextResponse | Response> {
+  const authResult = await authenticateRequest(request);
+  if (!authResult.success) {
+    return NextResponse.json(
+      { error: authResult.error || 'Authentication required' },
+      { status: 401 }
+    );
   }
-
-  // Convention 1: requireAuth(handler) — returns async (request) => ...
-  const h = requestOrHandler as AuthenticatedHandler;
-  return async (request: NextRequest) => {
-    const authResult = await authenticateRequest(request);
-    if (!authResult.success) {
-      return NextResponse.json({ error: authResult.error || 'Authentication required' }, { status: 401 });
-    }
-    return h(request, authResult.user!);
-  };
+  return handler(request as NextRequest, authResult.user!);
 }
 
 /**
- * requirePremium supports two calling conventions:
- *   1. Curried:  requirePremium(handler)(request)
- *   2. Direct:   requirePremium(request, handler)
+ * requirePremium — restricts to pro or enterprise users only.
  */
-export function requirePremium(
-  requestOrHandler: NextRequest | AuthenticatedHandler,
-  handler?: AuthenticatedHandler
-): any {
-  const check = async (request: NextRequest, h: AuthenticatedHandler) => {
-    const authResult = await authenticateRequest(request);
-    if (!authResult.success) {
-      return NextResponse.json({ error: authResult.error || 'Authentication required' }, { status: 401 });
-    }
-    const user = authResult.user!;
-    const isPremium = user.plan === 'pro' || user.plan === 'enterprise';
-    if (!isPremium) {
-      return NextResponse.json({ error: 'Premium plan required' }, { status: 403 });
-    }
-    return h(request, user);
-  };
-
-  if (requestOrHandler instanceof NextRequest && handler) {
-    return check(requestOrHandler, handler);
+export async function requirePremium(
+  request: Request,
+  handler: AuthenticatedHandler
+): Promise<NextResponse | Response> {
+  const authResult = await authenticateRequest(request);
+  if (!authResult.success) {
+    return NextResponse.json(
+      { error: authResult.error || 'Authentication required' },
+      { status: 401 }
+    );
   }
-
-  const h = requestOrHandler as AuthenticatedHandler;
-  return async (request: NextRequest) => check(request, h);
+  const user = authResult.user!;
+  if (user.plan !== 'pro' && user.plan !== 'enterprise') {
+    return NextResponse.json({ error: 'Premium plan required' }, { status: 403 });
+  }
+  return handler(request as NextRequest, user);
 }
 
 /**
- * requireEnterprise supports two calling conventions:
- *   1. Curried:  requireEnterprise(handler)(request)
- *   2. Direct:   requireEnterprise(request, handler)
+ * requireEnterprise — restricts to enterprise users only.
  */
-export function requireEnterprise(
-  requestOrHandler: NextRequest | AuthenticatedHandler,
-  handler?: AuthenticatedHandler
-): any {
-  const check = async (request: NextRequest, h: AuthenticatedHandler) => {
-    const authResult = await authenticateRequest(request);
-    if (!authResult.success) {
-      return NextResponse.json({ error: authResult.error || 'Authentication required' }, { status: 401 });
-    }
-    const user = authResult.user!;
-    if (user.plan !== 'enterprise') {
-      return NextResponse.json({ error: 'Enterprise plan required' }, { status: 403 });
-    }
-    return h(request, user);
-  };
-
-  if (requestOrHandler instanceof NextRequest && handler) {
-    return check(requestOrHandler, handler);
+export async function requireEnterprise(
+  request: Request,
+  handler: AuthenticatedHandler
+): Promise<NextResponse | Response> {
+  const authResult = await authenticateRequest(request);
+  if (!authResult.success) {
+    return NextResponse.json(
+      { error: authResult.error || 'Authentication required' },
+      { status: 401 }
+    );
   }
-
-  const h = requestOrHandler as AuthenticatedHandler;
-  return async (request: NextRequest) => check(request, h);
+  const user = authResult.user!;
+  if (user.plan !== 'enterprise') {
+    return NextResponse.json({ error: 'Enterprise plan required' }, { status: 403 });
+  }
+  return handler(request as NextRequest, user);
 }
