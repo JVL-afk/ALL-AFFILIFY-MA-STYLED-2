@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -21,6 +21,7 @@ import {
   BarChart3,
   ArrowUp,
   ArrowDown,
+  Lock,
 } from 'lucide-react'
 
 interface AnalyticsData {
@@ -63,6 +64,7 @@ export default function AdvancedAnalyticsPage() {
   const [metrics, setMetrics] = useState<MetricCard[]>([])
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState('30d')
+  const [accessDenied, setAccessDenied] = useState(false)
 
   useEffect(() => {
     fetchAnalyticsData()
@@ -71,12 +73,18 @@ export default function AdvancedAnalyticsPage() {
 
   const fetchAnalyticsData = async () => {
     setLoading(true)
+    setAccessDenied(false)
     try {
-      // FIX: pass timeRange to the API
       const response = await fetch(`/api/analytics/advanced?timeRange=${timeRange}`)
+
+      // Handle plan gate — show upgrade prompt instead of a blank/broken page
+      if (response.status === 403) {
+        setAccessDenied(true)
+        return
+      }
+
       const result = await response.json()
 
-      // FIX: guard against failed responses before accessing .data
       if (response.ok && result.success && result.data) {
         const d = result.data
         setAnalyticsData({
@@ -97,7 +105,6 @@ export default function AdvancedAnalyticsPage() {
           )
         }
       } else {
-        // Non-crashing fallback: show zeroed empty state
         setAnalyticsData(EMPTY_DATA)
         setMetrics([])
       }
@@ -122,6 +129,33 @@ export default function AdvancedAnalyticsPage() {
         >
           <div className="w-20 h-20 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-blue-200 text-lg">Loading Advanced Analytics...</p>
+        </motion.div>
+      </div>
+    )
+  }
+
+  // Plan gate UI
+  if (accessDenied) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-gray-900 flex items-center justify-center p-6">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center max-w-md"
+        >
+          <div className="w-20 h-20 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <Lock className="w-10 h-10 text-white" />
+          </div>
+          <h2 className="text-3xl font-bold text-white mb-3">Pro or Enterprise Required</h2>
+          <p className="text-blue-200/70 mb-8">
+            Advanced Analytics is available on the Pro and Enterprise plans. Upgrade to unlock full performance insights.
+          </p>
+          <Button
+            onClick={() => window.location.href = '/dashboard/billing'}
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-3"
+          >
+            Upgrade Your Plan
+          </Button>
         </motion.div>
       </div>
     )
@@ -231,7 +265,6 @@ export default function AdvancedAnalyticsPage() {
                 <TrendingUp className="w-5 h-5 text-blue-400" />
                 <span>Revenue Trend</span>
               </CardTitle>
-              <CardDescription className="text-blue-200/60">Monthly revenue performance</CardDescription>
             </CardHeader>
             <CardContent>
               {analyticsData.revenue.length > 0 ? (
@@ -264,7 +297,6 @@ export default function AdvancedAnalyticsPage() {
 
         {/* Traffic & Top Pages */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Traffic */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
             <Card className="bg-black/40 backdrop-blur-sm border-blue-500/30">
               <CardHeader>
@@ -297,7 +329,6 @@ export default function AdvancedAnalyticsPage() {
             </Card>
           </motion.div>
 
-          {/* Top Pages */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
             <Card className="bg-black/40 backdrop-blur-sm border-blue-500/30">
               <CardHeader>
@@ -382,9 +413,9 @@ export default function AdvancedAnalyticsPage() {
                         outerRadius={80}
                         dataKey="percentage"
                         nameKey="age"
-                        label={({ age, percentage }) => `${age}: ${percentage}%`}
+                        label={({ age, percentage }: { age: string; percentage: number }) => `${age}: ${percentage}%`}
                       >
-                        {analyticsData.demographics.map((_, i) => (
+                        {analyticsData.demographics.map((_entry, i) => (
                           <Cell key={i} fill={COLORS[i % COLORS.length]} />
                         ))}
                       </Pie>
