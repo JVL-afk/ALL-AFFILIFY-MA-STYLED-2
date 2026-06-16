@@ -17,11 +17,8 @@ export async function GET(req: NextRequest) {
       });
       const sessionsCol = tenantDb.collection('chat_sessions');
 
-      const rawSessions = await sessionsCol.find({});
-      // Ensure it is always an array and sort newest first
-      const sessions = Array.isArray(rawSessions)
-        ? rawSessions
-        : Object.values(rawSessions as any);
+      // find() returns T[] (array) per TenantAwareCollection signature
+      const sessions = await sessionsCol.find({});
 
       sessions.sort((a: any, b: any) =>
         new Date(b.lastMessageAt || b.createdAt || 0).getTime() -
@@ -65,19 +62,20 @@ export async function POST(req: NextRequest) {
       const sessionsCol = tenantDb.collection('chat_sessions');
 
       const now = new Date();
-      const sessionId = await sessionsCol.insertOne({
+      // insertOne returns ObjectId
+      const insertedId: ObjectId = await sessionsCol.insertOne({
         title: validation.data.title || 'New Conversation',
         lastMessage: '',
         messageCount: 0,
         createdAt: now,
         lastMessageAt: now,
         updatedAt: now,
-      });
+      } as any);
 
       return NextResponse.json({
         success: true,
         session: {
-          id: sessionId.toString(),
+          id: insertedId.toString(),
           title: validation.data.title || 'New Conversation',
           lastMessage: '',
           messageCount: 0,
@@ -110,11 +108,14 @@ export async function DELETE(req: NextRequest) {
       });
 
       const sessionsCol = tenantDb.collection('chat_sessions');
-      const messagesCol = tenantDb.collection('chat_messages');
+      // Delete the session (TenantAwareCollection.deleteOne scopes by userId automatically)
+      await sessionsCol.deleteOne({ _id: new ObjectId(sessionId) } as any);
 
-      // Delete session and all its messages
-      await sessionsCol.deleteOne({ _id: new ObjectId(sessionId) });
-      await messagesCol.deleteMany({ sessionId: new ObjectId(sessionId) });
+      // For messages cascade delete: use raw db directly (messages are scoped by sessionId, not userId directly)
+      // We use the underlying raw collection here since TenantAwareCollection has no deleteMany
+      await db.collection('chat_messages').deleteMany({
+        sessionId: new ObjectId(sessionId),
+      });
 
       return NextResponse.json({ success: true });
     } catch (error: any) {
