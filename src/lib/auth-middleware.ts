@@ -77,7 +77,7 @@ export async function authenticateRequest(
     let decoded: any;
     try {
       decoded = jwt.verify(token, JWT_SECRET);
-    } catch {
+    } catch (_err) {
       return { success: false, error: 'Invalid token' };
     }
 
