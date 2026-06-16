@@ -10,19 +10,35 @@ export async function GET(req: NextRequest) {
   return requireAuth(req, async (_req, user) => {
     try {
       const { db } = await connectToDatabase();
-      const tenantDb = new TenantAwareDb(db, { userId: user.id, userPlan: (user.plan === 'basic' ? 'free' : user.plan) as 'free' | 'pro' | 'enterprise', role: (user.role || 'user') as 'user' | 'admin' });
+      const tenantDb = new TenantAwareDb(db, {
+        userId: user.id,
+        userPlan: (user.plan === 'basic' ? 'free' : user.plan) as 'free' | 'pro' | 'enterprise',
+        role: (user.role || 'user') as 'user' | 'admin',
+      });
       const sessionsCol = tenantDb.collection('chat_sessions');
 
-      const sessions = await sessionsCol.find({});
-      
+      const rawSessions = await sessionsCol.find({});
+      // Ensure it is always an array and sort newest first
+      const sessions = Array.isArray(rawSessions)
+        ? rawSessions
+        : Object.values(rawSessions as any);
+
+      sessions.sort((a: any, b: any) =>
+        new Date(b.lastMessageAt || b.createdAt || 0).getTime() -
+        new Date(a.lastMessageAt || a.createdAt || 0).getTime()
+      );
+
       return NextResponse.json({
         success: true,
-        sessions: sessions.map(s => ({
+        sessions: sessions.map((s: any) => ({
           id: s._id.toString(),
-          title: s.title,
+          title: s.title || 'New Conversation',
+          lastMessage: s.lastMessage || '',
+          messageCount: s.messageCount || 0,
           lastMessageAt: s.lastMessageAt,
-          createdAt: s.createdAt
-        }))
+          createdAt: s.createdAt,
+          updatedAt: s.updatedAt || s.lastMessageAt,
+        })),
       });
     } catch (error: any) {
       logger.error('Sessions GET Error', { error: error.message });
@@ -41,23 +57,68 @@ export async function POST(req: NextRequest) {
       }
 
       const { db } = await connectToDatabase();
-      const tenantDb = new TenantAwareDb(db, { userId: user.id, userPlan: (user.plan === 'basic' ? 'free' : user.plan) as 'free' | 'pro' | 'enterprise', role: (user.role || 'user') as 'user' | 'admin' });
+      const tenantDb = new TenantAwareDb(db, {
+        userId: user.id,
+        userPlan: (user.plan === 'basic' ? 'free' : user.plan) as 'free' | 'pro' | 'enterprise',
+        role: (user.role || 'user') as 'user' | 'admin',
+      });
       const sessionsCol = tenantDb.collection('chat_sessions');
 
+      const now = new Date();
       const sessionId = await sessionsCol.insertOne({
         title: validation.data.title || 'New Conversation',
-        lastMessageAt: new Date(),
+        lastMessage: '',
+        messageCount: 0,
+        createdAt: now,
+        lastMessageAt: now,
+        updatedAt: now,
       });
 
       return NextResponse.json({
         success: true,
         session: {
           id: sessionId.toString(),
-          title: validation.data.title || 'New Conversation'
-        }
+          title: validation.data.title || 'New Conversation',
+          lastMessage: '',
+          messageCount: 0,
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString(),
+        },
       });
     } catch (error: any) {
       logger.error('Sessions POST Error', { error: error.message });
+      return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+    }
+  });
+}
+
+export async function DELETE(req: NextRequest) {
+  return requireAuth(req, async (_req, user) => {
+    try {
+      const { searchParams } = new URL(req.url);
+      const sessionId = searchParams.get('sessionId');
+
+      if (!sessionId) {
+        return NextResponse.json({ success: false, error: 'Missing sessionId' }, { status: 400 });
+      }
+
+      const { db } = await connectToDatabase();
+      const tenantDb = new TenantAwareDb(db, {
+        userId: user.id,
+        userPlan: (user.plan === 'basic' ? 'free' : user.plan) as 'free' | 'pro' | 'enterprise',
+        role: (user.role || 'user') as 'user' | 'admin',
+      });
+
+      const sessionsCol = tenantDb.collection('chat_sessions');
+      const messagesCol = tenantDb.collection('chat_messages');
+
+      // Delete session and all its messages
+      await sessionsCol.deleteOne({ _id: new ObjectId(sessionId) });
+      await messagesCol.deleteMany({ sessionId: new ObjectId(sessionId) });
+
+      return NextResponse.json({ success: true });
+    } catch (error: any) {
+      logger.error('Sessions DELETE Error', { error: error.message });
       return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
     }
   });
