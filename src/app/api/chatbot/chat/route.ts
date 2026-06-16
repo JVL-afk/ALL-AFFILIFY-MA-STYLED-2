@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
-import { requirePremium } from '@/lib/auth-middleware';
+import { requireAuth } from '@/lib/auth-middleware';
 import { connectToDatabase } from '@/lib/mongodb';
 import { TenantAwareDb } from '@/lib/tenant-aware-db';
 import { QuotaService } from '@/services/quota-service';
@@ -18,7 +18,7 @@ Your goal is to provide actionable, data-driven advice to help users scale their
 Always be professional, concise, and focused on ROI.`;
 
 export async function POST(req: NextRequest) {
-  return requirePremium(req, async (_req, user) => {
+  return requireAuth(req, async (_req, user) => {
     try {
       const body = await req.json();
 
@@ -39,7 +39,11 @@ export async function POST(req: NextRequest) {
 
       // 3. Database & Quota Setup
       const { db } = await connectToDatabase();
-      const tenantDb = new TenantAwareDb(db, { userId: user.id, userPlan: (user.plan === 'basic' ? 'free' : user.plan) as 'free' | 'pro' | 'enterprise', role: (user.role || 'user') as 'user' | 'admin' });
+      const tenantDb = new TenantAwareDb(db, {
+        userId: user.id,
+        userPlan: (user.plan === 'basic' ? 'free' : user.plan) as 'free' | 'pro' | 'enterprise',
+        role: (user.role || 'user') as 'user' | 'admin',
+      });
       const quotaService = new QuotaService(db);
 
       // 4. Atomic Quota Check
@@ -70,7 +74,7 @@ export async function POST(req: NextRequest) {
           _id: userMsgId,
           sessionId: new ObjectId(sessionId),
           type: 'user',
-          content: message, // Save original for user, but AI saw redacted
+          content: message,
           timestamp: new Date(),
         });
 
@@ -79,7 +83,8 @@ export async function POST(req: NextRequest) {
         await messagesCol.insertOne({
           _id: aiMsgId,
           sessionId: new ObjectId(sessionId),
-          type: 'model',
+          // FIX: store as 'bot' so the frontend type guard works correctly
+          type: 'bot',
           content: responseText,
           timestamp: new Date(),
         });
@@ -88,22 +93,33 @@ export async function POST(req: NextRequest) {
         const sessionsCol = tenantDb.collection('chat_sessions');
         await sessionsCol.updateOne(
           { _id: new ObjectId(sessionId) },
-          { $set: { lastMessageAt: new Date(), updatedAt: new Date() } }
+          { $set: { lastMessage: responseText.slice(0, 100), lastMessageAt: new Date(), updatedAt: new Date() } }
         );
 
         return NextResponse.json({
           success: true,
           response: responseText,
           message: {
+            // FIX: return 'bot' type so the frontend renders it correctly
             id: aiMsgId.toString(),
-            type: 'model',
+            type: 'bot',
             content: responseText,
             timestamp: new Date().toISOString(),
           },
         });
       }
 
-      return NextResponse.json({ success: true, response: responseText });
+      // Sessionless response
+      return NextResponse.json({
+        success: true,
+        response: responseText,
+        message: {
+          id: new ObjectId().toString(),
+          type: 'bot',
+          content: responseText,
+          timestamp: new Date().toISOString(),
+        },
+      });
 
     } catch (error: any) {
       logger.error('Chatbot API Error', { error: error.message, stack: error.stack });
