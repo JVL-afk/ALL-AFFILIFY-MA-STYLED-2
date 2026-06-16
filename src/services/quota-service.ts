@@ -55,9 +55,6 @@ export class QuotaService {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-        $set: {
-          updatedAt: new Date(),
-        },
       },
       { upsert: true, returnDocument: 'after' }
     );
@@ -207,12 +204,38 @@ export class QuotaService {
   async checkAndDecrementAiChatbotQuota(userId: ObjectId, messageCount: number = 1, planType: 'free' | 'pro' | 'enterprise' = 'free'): Promise<{ allowed: boolean; remaining: number; reason?: string }> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let quota: any = await this.db.collection('user_quotas').findOne({ userId });
-    // Auto-initialize quota on first use — no quota record = new user, not an error
-    if (!quota) {
+    // Auto-initialize quota on first use, OR fix corrupt records missing AI limits
+    if (!quota || !quota.aiChatbotMessagesAllowedPerMonth) {
       try {
-        quota = await this.initializeUserQuota(userId, planType);
+        const quotaLimits = this.getQuotaLimitsByPlan(planType);
+        // Use $set (not $setOnInsert) to overwrite corrupt/missing AI limit fields
+        await this.db.collection('user_quotas').updateOne(
+          { userId },
+          {
+            $setOnInsert: {
+              userId,
+              emailsSentThisMonth: 0,
+              emailsSentToday: 0,
+              emailsAllowedPerMonth: quotaLimits.monthly,
+              emailsAllowedPerDay: quotaLimits.daily,
+              lastResetDate: new Date(),
+              createdAt: new Date(),
+            },
+            $set: {
+              aiChatbotMessagesSentThisMonth: quota?.aiChatbotMessagesSentThisMonth ?? 0,
+              aiChatbotMessagesSentToday: quota?.aiChatbotMessagesSentToday ?? 0,
+              aiChatbotMessagesAllowedPerMonth: quotaLimits.aiMonthly,
+              aiChatbotMessagesAllowedPerDay: quotaLimits.aiDaily,
+              updatedAt: new Date(),
+            },
+          },
+          { upsert: true }
+        );
+        quota = await this.db.collection('user_quotas').findOne({ userId });
+        if (!quota) {
+          return { allowed: false, remaining: 0, reason: 'Quota initialization failed' };
+        }
       } catch (_err) {
-        // If init fails (e.g. race condition already inserted), try fetching again
         quota = await this.db.collection('user_quotas').findOne({ userId });
         if (!quota) {
           return { allowed: false, remaining: 0, reason: 'Quota initialization failed' };
