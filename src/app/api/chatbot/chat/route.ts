@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       const quotaService = new QuotaService(db);
 
       // 4. Atomic Quota Check
-      const quotaCheck = await quotaService.checkAndDecrementAiChatbotQuota(new ObjectId(user.id));
+      const quotaCheck = await quotaService.checkAndDecrementAiChatbotQuota(new ObjectId(user.id), 1, (user.plan === 'basic' ? 'free' : user.plan) as 'free' | 'pro' | 'enterprise');
       if (!quotaCheck.allowed) {
         return NextResponse.json({ success: false, error: 'Quota exceeded', reason: quotaCheck.reason }, { status: 429 });
       }
