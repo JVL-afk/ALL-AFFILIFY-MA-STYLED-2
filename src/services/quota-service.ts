@@ -88,10 +88,11 @@ export class QuotaService {
    */
   async checkAndDecrementEmailQuota(userId: ObjectId, emailCount: number = 1, planType: 'free' | 'pro' | 'enterprise' = 'free'): Promise<{ allowed: boolean; remaining: number; reason?: string }> {
     // Auto-initialize quota on first use — no quota record = new user, not an error
-    let quota = await this.db.collection('user_quotas').findOne({ userId });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let quota: any = await this.db.collection('user_quotas').findOne({ userId });
     if (!quota) {
       try {
-        quota = (await this.initializeUserQuota(userId, planType)) as unknown as typeof quota;
+        quota = await this.initializeUserQuota(userId, planType);
       } catch (_err) {
         quota = await this.db.collection('user_quotas').findOne({ userId });
         if (!quota) {
@@ -204,11 +205,12 @@ export class QuotaService {
    * Atomically check and decrement AI chatbot quota.
    */
   async checkAndDecrementAiChatbotQuota(userId: ObjectId, messageCount: number = 1, planType: 'free' | 'pro' | 'enterprise' = 'free'): Promise<{ allowed: boolean; remaining: number; reason?: string }> {
-    let quota = await this.db.collection('user_quotas').findOne({ userId });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let quota: any = await this.db.collection('user_quotas').findOne({ userId });
     // Auto-initialize quota on first use — no quota record = new user, not an error
     if (!quota) {
       try {
-        quota = (await this.initializeUserQuota(userId, planType)) as unknown as typeof quota;
+        quota = await this.initializeUserQuota(userId, planType);
       } catch (_err) {
         // If init fails (e.g. race condition already inserted), try fetching again
         quota = await this.db.collection('user_quotas').findOne({ userId });
