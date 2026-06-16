@@ -5,6 +5,14 @@ import { ObjectId } from 'mongodb'
 
 export async function GET(request: NextRequest) {
   return requireAuth(request, async (_req, user) => {
+    // Restrict to pro and enterprise plans only
+    if (user.plan !== 'pro' && user.plan !== 'enterprise') {
+      return NextResponse.json(
+        { success: false, error: 'Pro or Enterprise plan required to access Advanced Analytics.' },
+        { status: 403 }
+      )
+    }
+
     try {
       const { searchParams } = new URL(request.url)
       const timeRange = searchParams.get('timeRange') || '30d'
