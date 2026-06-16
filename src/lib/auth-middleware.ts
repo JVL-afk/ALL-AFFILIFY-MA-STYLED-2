@@ -25,8 +25,8 @@ export interface AuthenticatedUser {
 type AuthenticatedHandler = (request: NextRequest, user: AuthenticatedUser) => Promise<NextResponse | Response>;
 
 /**
- * Authenticate a raw request and return the user, or an error.
- * Accepts both NextRequest and native Request (Next.js 16 compatibility).
+ * Authenticate a request. Accepts native Request or NextRequest.
+ * Reads token from Authorization header or cookies.
  */
 export async function authenticateRequest(
   request: Request
@@ -34,17 +34,17 @@ export async function authenticateRequest(
   try {
     let token: string | null = null;
 
-    // Check Authorization header (Bearer token)
+    // 1. Authorization: Bearer <token>
     const authHeader = request.headers.get('Authorization');
     if (authHeader?.startsWith('Bearer ')) {
       token = authHeader.substring(7);
     }
 
-    // Parse cookies from header (works for both NextRequest and native Request)
+    // 2. Cookies - parse from raw header (works for any Request type)
     if (!token) {
       const cookieHeader = request.headers.get('cookie') || '';
       const parseCookie = (name: string): string | undefined => {
-        const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
+        const match = cookieHeader.match(new RegExp('(?:^|;\\s*)' + name + '=([^;]*)'));
         return match ? decodeURIComponent(match[1]) : undefined;
       };
       token =
@@ -54,7 +54,7 @@ export async function authenticateRequest(
         parseCookie('jwt') ||
         null;
 
-      // Also try NextRequest.cookies if the object supports it
+      // Also try NextRequest.cookies API if available
       if (!token && typeof (request as any).cookies?.get === 'function') {
         const nreq = request as NextRequest;
         token =
@@ -118,74 +118,98 @@ export async function authenticateRequest(
 }
 
 /**
- * requireAuth(request, handler) — authenticates and runs handler if valid.
+ * requireAuth - supports two call patterns, detected via typeof (NOT instanceof):
  *
- * ROOT CAUSE FIX (Next.js 16):
- * The previous implementation used `instanceof NextRequest` to detect which
- * calling convention was being used. In Next.js 16 App Router, the request
- * passed to route handlers is NOT always a true NextRequest instance — it is
- * a native Web API Request subclass. The instanceof check therefore evaluated
- * to false, causing requireAuth to fall into the curried path and return a
- * FUNCTION instead of a Response. Next.js then logged:
- *   "No response is returned from route handler"
- * across every single API route using this middleware.
+ *   Curried:  export const GET = requireAuth(handler)
+ *   Direct:   export async function GET(req) { return requireAuth(req, handler) }
  *
- * Fix: The function now has a single, unambiguous signature — it always takes
- * (request, handler) and always returns a Promise<Response>. No overloading,
- * no instanceof, no runtime dispatch. The call sites already use this pattern.
+ * Using typeof instead of instanceof NextRequest because Next.js 16 App Router
+ * passes native Request subclasses that fail instanceof checks at runtime.
  */
-export async function requireAuth(
-  request: Request,
-  handler: AuthenticatedHandler
-): Promise<NextResponse | Response> {
-  const authResult = await authenticateRequest(request);
-  if (!authResult.success) {
-    return NextResponse.json(
-      { error: authResult.error || 'Authentication required' },
-      { status: 401 }
-    );
+export function requireAuth(handler: AuthenticatedHandler): (request: Request) => Promise<NextResponse | Response>;
+export function requireAuth(request: Request, handler: AuthenticatedHandler): Promise<NextResponse | Response>;
+export function requireAuth(
+  requestOrHandler: Request | AuthenticatedHandler,
+  handler?: AuthenticatedHandler
+): any {
+  // Curried pattern: first arg is a function
+  if (typeof requestOrHandler === 'function') {
+    const h = requestOrHandler;
+    return async (request: Request): Promise<NextResponse | Response> => {
+      const authResult = await authenticateRequest(request);
+      if (!authResult.success) {
+        return NextResponse.json({ error: authResult.error || 'Authentication required' }, { status: 401 });
+      }
+      return h(request as NextRequest, authResult.user!);
+    };
   }
-  return handler(request as NextRequest, authResult.user!);
+
+  // Direct pattern: first arg is a Request
+  return (async () => {
+    const authResult = await authenticateRequest(requestOrHandler);
+    if (!authResult.success) {
+      return NextResponse.json({ error: authResult.error || 'Authentication required' }, { status: 401 });
+    }
+    return handler!(requestOrHandler as NextRequest, authResult.user!);
+  })();
 }
 
 /**
- * requirePremium — restricts to pro or enterprise users only.
+ * requirePremium - restricts to pro or enterprise users.
+ * Supports both curried and direct call patterns.
  */
-export async function requirePremium(
-  request: Request,
-  handler: AuthenticatedHandler
-): Promise<NextResponse | Response> {
-  const authResult = await authenticateRequest(request);
-  if (!authResult.success) {
-    return NextResponse.json(
-      { error: authResult.error || 'Authentication required' },
-      { status: 401 }
-    );
+export function requirePremium(handler: AuthenticatedHandler): (request: Request) => Promise<NextResponse | Response>;
+export function requirePremium(request: Request, handler: AuthenticatedHandler): Promise<NextResponse | Response>;
+export function requirePremium(
+  requestOrHandler: Request | AuthenticatedHandler,
+  handler?: AuthenticatedHandler
+): any {
+  const check = async (request: Request, h: AuthenticatedHandler): Promise<NextResponse | Response> => {
+    const authResult = await authenticateRequest(request);
+    if (!authResult.success) {
+      return NextResponse.json({ error: authResult.error || 'Authentication required' }, { status: 401 });
+    }
+    const user = authResult.user!;
+    if (user.plan !== 'pro' && user.plan !== 'enterprise') {
+      return NextResponse.json({ error: 'Premium plan required' }, { status: 403 });
+    }
+    return h(request as NextRequest, user);
+  };
+
+  if (typeof requestOrHandler === 'function') {
+    const h = requestOrHandler;
+    return async (request: Request) => check(request, h);
   }
-  const user = authResult.user!;
-  if (user.plan !== 'pro' && user.plan !== 'enterprise') {
-    return NextResponse.json({ error: 'Premium plan required' }, { status: 403 });
-  }
-  return handler(request as NextRequest, user);
+
+  return check(requestOrHandler, handler!);
 }
 
 /**
- * requireEnterprise — restricts to enterprise users only.
+ * requireEnterprise - restricts to enterprise users only.
+ * Supports both curried and direct call patterns.
  */
-export async function requireEnterprise(
-  request: Request,
-  handler: AuthenticatedHandler
-): Promise<NextResponse | Response> {
-  const authResult = await authenticateRequest(request);
-  if (!authResult.success) {
-    return NextResponse.json(
-      { error: authResult.error || 'Authentication required' },
-      { status: 401 }
-    );
+export function requireEnterprise(handler: AuthenticatedHandler): (request: Request) => Promise<NextResponse | Response>;
+export function requireEnterprise(request: Request, handler: AuthenticatedHandler): Promise<NextResponse | Response>;
+export function requireEnterprise(
+  requestOrHandler: Request | AuthenticatedHandler,
+  handler?: AuthenticatedHandler
+): any {
+  const check = async (request: Request, h: AuthenticatedHandler): Promise<NextResponse | Response> => {
+    const authResult = await authenticateRequest(request);
+    if (!authResult.success) {
+      return NextResponse.json({ error: authResult.error || 'Authentication required' }, { status: 401 });
+    }
+    const user = authResult.user!;
+    if (user.plan !== 'enterprise') {
+      return NextResponse.json({ error: 'Enterprise plan required' }, { status: 403 });
+    }
+    return h(request as NextRequest, user);
+  };
+
+  if (typeof requestOrHandler === 'function') {
+    const h = requestOrHandler;
+    return async (request: Request) => check(request, h);
   }
-  const user = authResult.user!;
-  if (user.plan !== 'enterprise') {
-    return NextResponse.json({ error: 'Enterprise plan required' }, { status: 403 });
-  }
-  return handler(request as NextRequest, user);
+
+  return check(requestOrHandler, handler!);
 }
