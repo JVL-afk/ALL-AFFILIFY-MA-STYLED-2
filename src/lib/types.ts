@@ -6,6 +6,7 @@ export interface AuthenticatedUser {
   name: string;
   email: string;
   plan: 'basic' | 'pro' | 'enterprise';
+  role?: string;
   websitesCreated: number;
   websiteLimit: number;
   analysesUsed: number;
