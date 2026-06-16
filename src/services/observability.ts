@@ -2,8 +2,27 @@ import { Db } from 'mongodb';
 import { logger } from '@/lib/debug-logger';
 
 /**
+ * SpanStatusCode enum — mirrors OpenTelemetry's SpanStatusCode for compatibility.
+ */
+export enum SpanStatusCode {
+  UNSET = 0,
+  OK = 1,
+  ERROR = 2,
+}
+
+/**
+ * Minimal Span interface used by withSpan callbacks.
+ */
+export interface Span {
+  setAttributes(attrs: Record<string, any>): void;
+  setAttribute(key: string, value: any): void;
+  recordException(error: any): void;
+  setStatus(status: { code: SpanStatusCode; message?: string }): void;
+}
+
+/**
  * Observability Service
- * 
+ *
  * Tracks metrics and events for monitoring and observability:
  * - Email send metrics (success, failure, latency)
  * - Queue metrics (pending, processing, completed, DLQ)
@@ -29,9 +48,60 @@ export interface ErrorEvent {
 
 export class ObservabilityService {
   private db: Db;
+  private static instance: ObservabilityService | null = null;
 
-  constructor(db: Db) {
-    this.db = db;
+  constructor(db?: Db) {
+    // Allow construction without a db for singleton usage in contexts where db
+    // is not yet available (e.g. module-level singletons in API routes).
+    this.db = db as Db;
+  }
+
+  /**
+   * Get or create the singleton instance.
+   * Optionally pass a Db to initialise the instance on first call.
+   */
+  public static getInstance(db?: Db): ObservabilityService {
+    if (!ObservabilityService.instance) {
+      ObservabilityService.instance = new ObservabilityService(db);
+    } else if (db && !ObservabilityService.instance.db) {
+      ObservabilityService.instance.db = db;
+    }
+    return ObservabilityService.instance;
+  }
+
+  /**
+   * Execute a callback within a named span, providing a Span object for
+   * recording attributes, exceptions, and status.
+   * This is a lightweight implementation; swap for OpenTelemetry if needed.
+   */
+  async withSpan<T>(name: string, callback: (span: Span) => Promise<T>): Promise<T> {
+    const span: Span = {
+      setAttributes(_attrs: Record<string, any>) {
+        // No-op — extend with OpenTelemetry SDK if distributed tracing is required.
+      },
+      setAttribute(_key: string, _value: any) {
+        // No-op
+      },
+      recordException(error: any) {
+        logger.error(
+          'ObservabilityService',
+          name,
+          'span.recordException',
+          String(error?.message ?? error),
+        );
+      },
+      setStatus(status: { code: SpanStatusCode; message?: string }) {
+        if (status.code === SpanStatusCode.ERROR) {
+          logger.warn(
+            'ObservabilityService',
+            name,
+            'span.setStatus',
+            `Span ended with ERROR status${status.message ? ': ' + status.message : ''}`,
+          );
+        }
+      },
+    };
+    return callback(span);
   }
 
   /**

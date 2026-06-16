@@ -7,10 +7,10 @@ import { logger } from '@/lib/production-logger';
 import { ObjectId } from 'mongodb';
 
 export async function GET(req: NextRequest) {
-  return requireAuth(req, async (user) => {
+  return requireAuth(req, async (_req, user) => {
     try {
       const { db } = await connectToDatabase();
-      const tenantDb = new TenantAwareDb(db, { userId: user.id, userPlan: user.plan, role: user.role });
+      const tenantDb = new TenantAwareDb(db, { userId: user.id, userPlan: (user.plan === 'basic' ? 'free' : user.plan) as 'free' | 'pro' | 'enterprise', role: (user.role || 'user') as 'user' | 'admin' });
       const sessionsCol = tenantDb.collection('chat_sessions');
 
       const sessions = await sessionsCol.find({});
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  return requireAuth(req, async (user) => {
+  return requireAuth(req, async (_req, user) => {
     try {
       const body = await req.json();
       const validation = SessionCreateSchema.safeParse(body);
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       }
 
       const { db } = await connectToDatabase();
-      const tenantDb = new TenantAwareDb(db, { userId: user.id, userPlan: user.plan, role: user.role });
+      const tenantDb = new TenantAwareDb(db, { userId: user.id, userPlan: (user.plan === 'basic' ? 'free' : user.plan) as 'free' | 'pro' | 'enterprise', role: (user.role || 'user') as 'user' | 'admin' });
       const sessionsCol = tenantDb.collection('chat_sessions');
 
       const sessionId = await sessionsCol.insertOne({

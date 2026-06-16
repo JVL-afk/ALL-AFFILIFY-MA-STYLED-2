@@ -25,7 +25,7 @@ const AdvancedAnalyticsRequestSchema = z.object({
     start: z.string().datetime(),
     end: z.string().datetime(),
   }),
-  filters: z.record(z.any()).optional(),
+  filters: z.record(z.string(), z.any()).optional(),
 })
 
 type AdvancedAnalyticsRequest = z.infer<typeof AdvancedAnalyticsRequestSchema>
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     // 1. Extract and validate tenant context
     let tenantContext
     try {
-      tenantContext = getTenantContextFromHeaders(request.headers)
+      tenantContext = await getTenantContextFromHeaders(request.headers)
     } catch (error) {
       console.error(`[ADVANCED_ANALYTICS] Tenant context extraction failed. Trace: ${traceId}`, error)
       metrics.apiError(route, 'POST', 'TENANT_ISOLATION_VIOLATION', traceId)

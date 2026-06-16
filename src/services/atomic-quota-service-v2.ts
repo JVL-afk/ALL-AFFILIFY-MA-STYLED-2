@@ -62,12 +62,13 @@ export class AtomicQuotaServiceV2 {
         { upsert: true, returnDocument: 'after' }
       );
 
-      if (!result.value) {
+      // MongoDB driver v6+: findOneAndUpdate returns the document directly (not wrapped in .value)
+      // Use nullish coalescing to handle both old and new driver behaviour safely.
+      const updatedDoc = (result as any)?.value ?? (result as any);
+      if (!updatedDoc) {
         console.warn(`[ATOMIC_QUOTA] Quota deduction failed - no result. TenantId: ${tenantId}, Tier: ${tier}, TraceId: ${traceId}`);
         return false;
       }
-
-      const updatedDoc = result.value as any;
 
       // Check if quota was exceeded BEFORE the increment
       if ((updatedDoc.aiAuditsUsed || 0) >= quotaLimit) {

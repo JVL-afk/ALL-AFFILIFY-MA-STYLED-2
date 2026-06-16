@@ -10,6 +10,7 @@ export interface AuthenticatedUser {
   name: string;
   email: string;
   plan: 'basic' | 'pro' | 'enterprise';
+  role?: string;
   websitesCreated: number;
   websiteLimit: number;
   analysesUsed: number;
@@ -22,7 +23,7 @@ export interface AuthenticatedUser {
   isVerified: boolean;
 }
 
-type AuthenticatedHandler = (request: NextRequest, user: AuthenticatedUser) => Promise<NextResponse>;
+type AuthenticatedHandler = (request: NextRequest, user: AuthenticatedUser) => Promise<NextResponse | Response>;
 
 // Best-in-Class: Robust authentication middleware that handles multiple token sources
 export async function authenticateRequest(request: NextRequest): Promise<{ success: boolean; user?: AuthenticatedUser; error?: string }> {
@@ -69,23 +70,24 @@ export async function authenticateRequest(request: NextRequest): Promise<{ succe
     }
 
     // 4. Return authenticated user
-const user: AuthenticatedUser = {
-  _id: userDoc._id.toString(),
-  id: userDoc._id.toString(),
-  name: userDoc.name || '',
-  email: userDoc.email || '',
-  plan: (userDoc.plan as any) || 'basic',
-  websitesCreated: userDoc.websitesCreated || 0,
-  websiteLimit: userDoc.websiteLimit || 3,
-  analysesUsed: userDoc.analysesUsed || 0,
-  analysisLimit: userDoc.analysisLimit || 10,
-  stripeCustomerId: userDoc.stripeCustomerId,
-  subscriptionId: userDoc.subscriptionId,
-  subscriptionStatus: userDoc.subscriptionStatus,
-  createdAt: userDoc.createdAt || new Date(),
-  updatedAt: userDoc.updatedAt || new Date(),
-  isVerified: userDoc.isVerified || false,
-}
+    const user: AuthenticatedUser = {
+      _id: userDoc._id.toString(),
+      id: userDoc._id.toString(),
+      name: userDoc.name || '',
+      email: userDoc.email || '',
+      plan: (userDoc.plan as any) || 'basic',
+      role: userDoc.role || 'user',
+      websitesCreated: userDoc.websitesCreated || 0,
+      websiteLimit: userDoc.websiteLimit || 3,
+      analysesUsed: userDoc.analysesUsed || 0,
+      analysisLimit: userDoc.analysisLimit || 10,
+      stripeCustomerId: userDoc.stripeCustomerId,
+      subscriptionId: userDoc.subscriptionId,
+      subscriptionStatus: userDoc.subscriptionStatus,
+      createdAt: userDoc.createdAt || new Date(),
+      updatedAt: userDoc.updatedAt || new Date(),
+      isVerified: userDoc.isVerified || false,
+    };
 
     return { success: true, user };
   } catch (error) {
@@ -94,50 +96,92 @@ const user: AuthenticatedUser = {
   }
 }
 
-// Best-in-Class: Higher-order function for basic authentication
-export const requireAuth = (handler: AuthenticatedHandler) => async (request: NextRequest) => {
-  const authResult = await authenticateRequest(request);
-
-  if (!authResult.success) {
-    return NextResponse.json({ error: authResult.error || 'Authentication required' }, { status: 401 });
+/**
+ * requireAuth supports two calling conventions:
+ *   1. Curried:  requireAuth(handler)(request)
+ *   2. Direct:   requireAuth(request, handler)
+ */
+export function requireAuth(
+  requestOrHandler: NextRequest | AuthenticatedHandler,
+  handler?: AuthenticatedHandler
+): any {
+  // Convention 2: requireAuth(request, handler)
+  if (requestOrHandler instanceof NextRequest && handler) {
+    return (async () => {
+      const authResult = await authenticateRequest(requestOrHandler);
+      if (!authResult.success) {
+        return NextResponse.json({ error: authResult.error || 'Authentication required' }, { status: 401 });
+      }
+      return handler(requestOrHandler, authResult.user!);
+    })();
   }
 
-  return handler(request, authResult.user!);
-};
+  // Convention 1: requireAuth(handler) — returns async (request) => ...
+  const h = requestOrHandler as AuthenticatedHandler;
+  return async (request: NextRequest) => {
+    const authResult = await authenticateRequest(request);
+    if (!authResult.success) {
+      return NextResponse.json({ error: authResult.error || 'Authentication required' }, { status: 401 });
+    }
+    return h(request, authResult.user!);
+  };
+}
 
-// Best-in-Class: Higher-order function for premium plan requirement
-export const requirePremium = (handler: AuthenticatedHandler) => async (request: NextRequest) => {
-  const authResult = await authenticateRequest(request);
+/**
+ * requirePremium supports two calling conventions:
+ *   1. Curried:  requirePremium(handler)(request)
+ *   2. Direct:   requirePremium(request, handler)
+ */
+export function requirePremium(
+  requestOrHandler: NextRequest | AuthenticatedHandler,
+  handler?: AuthenticatedHandler
+): any {
+  const check = async (request: NextRequest, h: AuthenticatedHandler) => {
+    const authResult = await authenticateRequest(request);
+    if (!authResult.success) {
+      return NextResponse.json({ error: authResult.error || 'Authentication required' }, { status: 401 });
+    }
+    const user = authResult.user!;
+    const isPremium = user.plan === 'pro' || user.plan === 'enterprise';
+    if (!isPremium) {
+      return NextResponse.json({ error: 'Premium plan required' }, { status: 403 });
+    }
+    return h(request, user);
+  };
 
-  if (!authResult.success) {
-    return NextResponse.json({ error: authResult.error || 'Authentication required' }, { status: 401 });
+  if (requestOrHandler instanceof NextRequest && handler) {
+    return check(requestOrHandler, handler);
   }
 
-  const user = authResult.user!;
-  const isPremium = user.plan === 'pro' || user.plan === 'enterprise';
+  const h = requestOrHandler as AuthenticatedHandler;
+  return async (request: NextRequest) => check(request, h);
+}
 
-  if (!isPremium) {
-    return NextResponse.json({ error: 'Premium plan required' }, { status: 403 });
+/**
+ * requireEnterprise supports two calling conventions:
+ *   1. Curried:  requireEnterprise(handler)(request)
+ *   2. Direct:   requireEnterprise(request, handler)
+ */
+export function requireEnterprise(
+  requestOrHandler: NextRequest | AuthenticatedHandler,
+  handler?: AuthenticatedHandler
+): any {
+  const check = async (request: NextRequest, h: AuthenticatedHandler) => {
+    const authResult = await authenticateRequest(request);
+    if (!authResult.success) {
+      return NextResponse.json({ error: authResult.error || 'Authentication required' }, { status: 401 });
+    }
+    const user = authResult.user!;
+    if (user.plan !== 'enterprise') {
+      return NextResponse.json({ error: 'Enterprise plan required' }, { status: 403 });
+    }
+    return h(request, user);
+  };
+
+  if (requestOrHandler instanceof NextRequest && handler) {
+    return check(requestOrHandler, handler);
   }
 
-  return handler(request, user);
-};
-
-// Best-in-Class: Higher-order function for enterprise plan requirement
-export const requireEnterprise = (handler: AuthenticatedHandler) => async (request: NextRequest) => {
-  const authResult = await authenticateRequest(request);
-
-  if (!authResult.success) {
-    return NextResponse.json({ error: authResult.error || 'Authentication required' }, { status: 401 });
-  }
-
-  const user = authResult.user!;
-  const isEnterprise = user.plan === 'enterprise';
-
-  if (!isEnterprise) {
-    return NextResponse.json({ error: 'Enterprise plan required' }, { status: 403 });
-  }
-
-  return handler(request, user);
-};
-
+  const h = requestOrHandler as AuthenticatedHandler;
+  return async (request: NextRequest) => check(request, h);
+}

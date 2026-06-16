@@ -84,7 +84,7 @@ describe('Team Collaboration Service', () => {
       userId: new ObjectId().toString(),
       email: 'test@example.com',
       role: 'user',
-    };
+    } as any;
     traceId = `trace-${Date.now()}`;
   });
 
@@ -126,11 +126,11 @@ describe('Team Collaboration Service', () => {
     it('should prevent non-members from viewing team projects', async () => {
       const { team } = await service.createTeam(testUser, 'Test Team', traceId);
 
-      const otherUser: VerifiedJWTPayload = {
+      const otherUser = {
         userId: new ObjectId().toString(),
         email: 'other@example.com',
         role: 'user',
-      };
+      } as any as VerifiedJWTPayload;
 
       await expect(service.getTeamProjects(otherUser, team._id!.toString(), traceId)).rejects.toThrow(
         'You are not a member of this team'
@@ -140,11 +140,11 @@ describe('Team Collaboration Service', () => {
     it('should enforce that only team members can create projects', async () => {
       const { team } = await service.createTeam(testUser, 'Test Team', traceId);
 
-      const nonMember: VerifiedJWTPayload = {
+      const nonMember = {
         userId: new ObjectId().toString(),
         email: 'nonmember@example.com',
         role: 'user',
-      };
+      } as any as VerifiedJWTPayload;
 
       await expect(
         service.createProject(nonMember, team._id!.toString(), { name: 'Project', description: 'Desc' }, traceId)
@@ -154,11 +154,11 @@ describe('Team Collaboration Service', () => {
     it('should enforce that only owners can remove members', async () => {
       const { team } = await service.createTeam(testUser, 'Test Team', traceId);
 
-      const editor: VerifiedJWTPayload = {
+      const editor = {
         userId: new ObjectId().toString(),
         email: 'editor@example.com',
         role: 'user',
-      };
+      } as any as VerifiedJWTPayload;
 
       // Add editor as a member
       await service.addTeamMember(testUser, team._id!.toString(), editor.email, 'editor', traceId);

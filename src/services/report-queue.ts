@@ -1,11 +1,14 @@
-import { Queue } from 'bullmq';
+import { Queue, ConnectionOptions } from 'bullmq';
 import IORedis from 'ioredis';
 import { ObservabilityService } from './observability';
 import { getTraceId } from '@/lib/trace-context';
 
+// The top-level ioredis Redis instance is compatible with bullmq's ConnectionOptions
+// at runtime; the type cast resolves the structural mismatch between the two ioredis
+// versions (bullmq bundles its own copy).
 const redisConnection = new IORedis(process.env.REDIS_URL || 'redis://localhost:6379', {
   maxRetriesPerRequest: null,
-});
+}) as unknown as ConnectionOptions;
 
 export const reportQueue = new Queue('report-generation', {
   connection: redisConnection,

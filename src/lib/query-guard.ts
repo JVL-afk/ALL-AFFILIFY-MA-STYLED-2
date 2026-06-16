@@ -31,7 +31,10 @@ export class TenantAwareCollection<T extends { tenantId?: string }> {
     console.log(
       `[QUERY_GUARD] find() - TenantId: ${this.options.tenantId}, Filter: ${JSON.stringify(guardedFilter)}, TraceId: ${this.options.traceId}`
     );
-    return this.collection.find(guardedFilter as Filter<T>).toArray();
+    // MongoDB's find().toArray() returns WithId<T>[] — cast to T[] which is safe
+    // because WithId<T> extends T with an _id field.
+    const docs = await this.collection.find(guardedFilter as Filter<T>).toArray();
+    return docs as unknown as T[];
   }
 
   /**
@@ -42,7 +45,9 @@ export class TenantAwareCollection<T extends { tenantId?: string }> {
     console.log(
       `[QUERY_GUARD] findOne() - TenantId: ${this.options.tenantId}, Filter: ${JSON.stringify(guardedFilter)}, TraceId: ${this.options.traceId}`
     );
-    return this.collection.findOne(guardedFilter as Filter<T>);
+    // MongoDB's findOne() returns WithId<T> | null — cast to T | null
+    const doc = await this.collection.findOne(guardedFilter as Filter<T>);
+    return doc as unknown as T | null;
   }
 
   /**
@@ -88,7 +93,9 @@ export class TenantAwareCollection<T extends { tenantId?: string }> {
     console.log(
       `[QUERY_GUARD] aggregate() - TenantId: ${this.options.tenantId}, Pipeline: ${JSON.stringify(guardedPipeline)}, TraceId: ${this.options.traceId}`
     );
-    return this.collection.aggregate(guardedPipeline).toArray();
+    // aggregate().toArray() returns Document[] — cast to T[]
+    const docs = await this.collection.aggregate(guardedPipeline).toArray();
+    return docs as unknown as T[];
   }
 }
 

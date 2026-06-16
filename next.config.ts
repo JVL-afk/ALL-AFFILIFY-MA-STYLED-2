@@ -1,6 +1,9 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  // Prevent Next.js from bundling Node.js-only packages that use worker_threads
+  serverExternalPackages: ['pino', 'pino-pretty', 'thread-stream', 'bullmq', 'ioredis'],
+
   typescript: {
     ignoreBuildErrors: false,
   },

@@ -71,7 +71,7 @@ export class EmailSendingService {
     };
 
     // Check quota for the entire campaign
-    const quotaCheck = await this.quotaService.checkAndDecrementQuota(userId, request.recipients.length);
+    const quotaCheck = await this.quotaService.checkAndDecrementEmailQuota(userId, request.recipients.length);
 
     if (!quotaCheck.allowed) {
       logger.error('EmailSendingService', 'sendCampaign', 'Quota check failed', 'Quota check failed', {

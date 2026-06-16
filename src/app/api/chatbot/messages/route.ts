@@ -7,7 +7,7 @@ import { logger } from '@/lib/production-logger';
 import { ObjectId } from 'mongodb';
 
 export async function GET(req: NextRequest) {
-  return requireAuth(req, async (user) => {
+  return requireAuth(req, async (_req, user) => {
     try {
       const { searchParams } = new URL(req.url);
       const sessionId = searchParams.get('sessionId');
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
       }
 
       const { db } = await connectToDatabase();
-      const tenantDb = new TenantAwareDb(db, { userId: user.id, userPlan: user.plan, role: user.role });
+      const tenantDb = new TenantAwareDb(db, { userId: user.id, userPlan: (user.plan === 'basic' ? 'free' : user.plan) as 'free' | 'pro' | 'enterprise', role: (user.role || 'user') as 'user' | 'admin' });
       const messagesCol = tenantDb.collection('chat_messages');
 
       const messages = await messagesCol.find({ sessionId: new ObjectId(sessionId) });
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  return requireAuth(req, async (user) => {
+  return requireAuth(req, async (_req, user) => {
     try {
       const body = await req.json();
       const validation = MessageRatingSchema.safeParse(body);
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
 
       const { messageId, rating } = validation.data;
       const { db } = await connectToDatabase();
-      const tenantDb = new TenantAwareDb(db, { userId: user.id, userPlan: user.plan, role: user.role });
+      const tenantDb = new TenantAwareDb(db, { userId: user.id, userPlan: (user.plan === 'basic' ? 'free' : user.plan) as 'free' | 'pro' | 'enterprise', role: (user.role || 'user') as 'user' | 'admin' });
       const messagesCol = tenantDb.collection('chat_messages');
 
       await messagesCol.updateOne(

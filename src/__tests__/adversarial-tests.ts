@@ -55,11 +55,11 @@ describe('Adversarial Test Suite', () => {
       mockDb.collection('user_quotas').findOne = mockFindOne;
 
       // First request: try to send 10 emails (should succeed)
-      const result1 = await quotaService.checkAndDecrementQuota(userId, 10);
+      const result1 = await quotaService.checkAndDecrementEmailQuota(userId, 10);
       expect(result1.allowed).toBe(true);
 
       // Second request: try to send 10 emails (should fail due to atomic operation)
-      const result2 = await quotaService.checkAndDecrementQuota(userId, 10);
+      const result2 = await quotaService.checkAndDecrementEmailQuota(userId, 10);
       expect(result2.allowed).toBe(false);
       expect(result2.reason).toContain('quota');
     });
@@ -81,7 +81,7 @@ describe('Adversarial Test Suite', () => {
       mockDb.collection('user_quotas').findOne = mockFindOne;
 
       // Should fail because daily quota was not reset
-      const result = await quotaService.checkAndDecrementQuota(userId, 10);
+      const result = await quotaService.checkAndDecrementEmailQuota(userId, 10);
       expect(result.allowed).toBe(false);
     });
   });
@@ -193,7 +193,7 @@ describe('Adversarial Test Suite', () => {
       const traceId = 'trace123';
 
       expect(() => {
-        enforcePermission(userPayload, { action: 'create', resource: 'campaign' }, traceId);
+        enforcePermission(userPayload as any, { action: 'create', resource: 'campaign' }, traceId);
       }).not.toThrow();
     });
 
@@ -207,7 +207,7 @@ describe('Adversarial Test Suite', () => {
       const traceId = 'trace123';
 
       expect(() => {
-        enforcePermission(userPayload, { action: 'delete', resource: 'user' }, traceId);
+        enforcePermission(userPayload as any, { action: 'delete', resource: 'user' }, traceId);
       }).toThrow();
     });
 
@@ -221,7 +221,7 @@ describe('Adversarial Test Suite', () => {
       const traceId = 'trace123';
 
       expect(() => {
-        enforcePermission(adminPayload, { action: 'delete', resource: 'user' }, traceId);
+        enforcePermission(adminPayload as any, { action: 'delete', resource: 'user' }, traceId);
       }).not.toThrow();
     });
   });

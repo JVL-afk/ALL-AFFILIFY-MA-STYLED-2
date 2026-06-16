@@ -1,6 +1,6 @@
 /**
  * TenantContext Middleware - Hardened Multi-Tenant Isolation
- * 
+ *
  * INVARIANT: Every request must have a valid tenantId extracted from JWT
  * INVARIANT: TenantId must be validated against JWT claims
  * INVARIANT: Application fails at startup if JWT_SECRET is not configured
@@ -18,10 +18,12 @@ export interface TenantContext {
 }
 
 /**
- * Extract and validate tenant context from request headers
- * Fails closed: throws immediately if any validation fails
+ * Extract and validate tenant context from request headers.
+ * Fails closed: throws immediately if any validation fails.
+ *
+ * NOTE: This function is async because jwtVerify() returns a Promise.
  */
-export function getTenantContextFromHeaders(headers: Headers): TenantContext {
+export async function getTenantContextFromHeaders(headers: Headers): Promise<TenantContext> {
   // 1. Extract authorization header
   const authHeader = headers.get('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -39,7 +41,8 @@ export function getTenantContextFromHeaders(headers: Headers): TenantContext {
   let decoded;
   try {
     const secret = new TextEncoder().encode(jwtSecret);
-    const verified = jwtVerify(token, secret);
+    // jwtVerify is async — must be awaited to access .payload
+    const verified = await jwtVerify(token, secret);
     decoded = verified.payload;
   } catch (error) {
     throw new Error(`TENANT_ISOLATION_VIOLATION: Invalid JWT token - ${(error as any).message}`);
@@ -79,13 +82,13 @@ export function getTenantContextFromHeaders(headers: Headers): TenantContext {
 }
 
 /**
- * Middleware to inject tenant context into request headers
- * This is typically used in Next.js API routes
+ * Middleware to inject tenant context into request headers.
+ * This is typically used in Next.js API routes.
  */
 export function withTenantContext(handler: any) {
   return async (request: any, context: any) => {
     try {
-      const tenantContext = getTenantContextFromHeaders(request.headers);
+      const tenantContext = await getTenantContextFromHeaders(request.headers);
       // Inject context into request for downstream handlers
       request.tenantContext = tenantContext;
       return handler(request, context);

@@ -28,19 +28,19 @@ describe('A/B Testing Adversarial Suite', () => {
     
     // Mock Collections
     mockEventsCollection = {
-      updateOne: jest.fn().mockResolvedValue({ matchedCount: 0, modifiedCount: 0, upsertedId: new ObjectId() }),
-    };
+      updateOne: (jest.fn as any)().mockResolvedValue({ matchedCount: 0, modifiedCount: 0, upsertedId: new ObjectId() }),
+    } as any;
 
     mockExperimentsCollection = {
-      find: jest.fn().mockReturnValue({
-        sort: jest.fn().mockReturnValue({
-          toArray: jest.fn().mockResolvedValue([]),
+      find: (jest.fn as any)().mockReturnValue({
+        sort: (jest.fn as any)().mockReturnValue({
+          toArray: (jest.fn as any)().mockResolvedValue([]),
         }),
       }),
-      findOne: jest.fn().mockResolvedValue(null),
-      insertOne: jest.fn().mockResolvedValue({ insertedId: new ObjectId() }),
-      updateOne: jest.fn().mockResolvedValue({ matchedCount: 1, modifiedCount: 1 }),
-    };
+      findOne: (jest.fn as any)().mockResolvedValue(null),
+      insertOne: (jest.fn as any)().mockResolvedValue({ insertedId: new ObjectId() }),
+      updateOne: (jest.fn as any)().mockResolvedValue({ matchedCount: 1, modifiedCount: 1 }),
+    } as any;
 
     // Mock MongoDB database
     mockDb = {

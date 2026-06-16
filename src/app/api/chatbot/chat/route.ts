@@ -10,17 +10,18 @@ import { ChatRequestSchema } from '@/lib/validation/chat-schemas';
 import { logger } from '@/lib/production-logger';
 import { ObjectId } from 'mongodb';
 
-const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY || '');
+// @google/genai v1+ requires { apiKey } options object
+const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 const SYSTEM_INSTRUCTION = `You are the AFFILIFY AI Assistant, a world-class expert in affiliate marketing, digital entrepreneurship, and performance tracking.
 Your goal is to provide actionable, data-driven advice to help users scale their affiliate businesses.
 Always be professional, concise, and focused on ROI.`;
 
 export async function POST(req: NextRequest) {
-  return requirePremium(req, async (user) => {
+  return requirePremium(req, async (_req, user) => {
     try {
       const body = await req.json();
-      
+
       // 1. Validation
       const validation = ChatRequestSchema.safeParse(body);
       if (!validation.success) {
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
 
       // 3. Database & Quota Setup
       const { db } = await connectToDatabase();
-      const tenantDb = new TenantAwareDb(db, { userId: user.id, userPlan: user.plan, role: user.role });
+      const tenantDb = new TenantAwareDb(db, { userId: user.id, userPlan: (user.plan === 'basic' ? 'free' : user.plan) as 'free' | 'pro' | 'enterprise', role: (user.role || 'user') as 'user' | 'admin' });
       const quotaService = new QuotaService(db);
 
       // 4. Atomic Quota Check
@@ -47,23 +48,22 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: 'Quota exceeded', reason: quotaCheck.reason }, { status: 429 });
       }
 
-      // 5. AI Execution
-      const model = genAI.getGenerativeModel({ 
+      // 5. AI Execution — use the @google/genai v1 Chats API
+      const chat = genAI.chats.create({
         model: 'gemini-2.5-flash',
-        systemInstruction: SYSTEM_INSTRUCTION 
+        config: {
+          systemInstruction: SYSTEM_INSTRUCTION,
+        },
+        history: history as any,
       });
 
-      const chat = model.startChat({
-        history: history,
-      });
-
-      const result = await chat.sendMessage(redactedMessage);
-      const responseText = result.response.text();
+      const result = await chat.sendMessage({ message: redactedMessage });
+      const responseText = result.text ?? '';
 
       // 6. Persistence
       if (sessionId) {
         const messagesCol = tenantDb.collection('chat_messages');
-        
+
         // Save User Message
         const userMsgId = new ObjectId();
         await messagesCol.insertOne({
@@ -98,8 +98,8 @@ export async function POST(req: NextRequest) {
             id: aiMsgId.toString(),
             type: 'model',
             content: responseText,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         });
       }
 

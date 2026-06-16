@@ -33,7 +33,7 @@ export const ReportSchema = z.object({
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
   userId: z.string().optional(),
-  traceContext: z.record(z.any()).optional(),
+  traceContext: z.record(z.string(), z.any()).optional(),
 });
 
 export type Report = z.infer<typeof ReportSchema>;

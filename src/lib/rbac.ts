@@ -125,3 +125,36 @@ export function canModifyResource(
   });
   return true; // Temporary
 }
+
+/**
+ * Check whether a user's plan meets or exceeds the required plan tier.
+ *
+ * Accepts either a raw plan string (e.g. from `user.plan`) or a
+ * VerifiedJWTPayload (for compatibility with auth-strict.ts callers).
+ *
+ * Plan hierarchy: basic (0) < pro (1) < enterprise (2)
+ * 'free' is treated as an alias for 'basic'.
+ */
+export function hasPlanOrHigher(
+  planOrPayload: string | VerifiedJWTPayload,
+  requiredPlan: 'free' | 'basic' | 'pro' | 'enterprise',
+): boolean {
+  const planHierarchy: Record<string, number> = {
+    free: 0,
+    basic: 0,
+    pro: 1,
+    enterprise: 2,
+  };
+
+  let userPlan: string;
+  if (typeof planOrPayload === 'string') {
+    userPlan = planOrPayload;
+  } else {
+    // VerifiedJWTPayload — use userPlan field
+    userPlan = (planOrPayload as any).userPlan ?? (planOrPayload as any).plan ?? 'basic';
+  }
+
+  const userLevel = planHierarchy[userPlan] ?? 0;
+  const requiredLevel = planHierarchy[requiredPlan] ?? 0;
+  return userLevel >= requiredLevel;
+}
