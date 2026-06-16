@@ -86,12 +86,19 @@ export class QuotaService {
    * 
    * If quota is insufficient, the operation fails and no decrement occurs.
    */
-  async checkAndDecrementEmailQuota(userId: ObjectId, emailCount: number = 1): Promise<{ allowed: boolean; remaining: number; reason?: string }> {
-    // First, ensure quota record exists
-    const quota = await this.db.collection('user_quotas').findOne({ userId });
+  async checkAndDecrementEmailQuota(userId: ObjectId, emailCount: number = 1, planType: 'free' | 'pro' | 'enterprise' = 'free'): Promise<{ allowed: boolean; remaining: number; reason?: string }> {
+    // Auto-initialize quota on first use — no quota record = new user, not an error
+    let quota = await this.db.collection('user_quotas').findOne({ userId });
     if (!quota) {
-      logger.warn('QuotaService', 'checkAndDecrementQuota', 'User quota not found', 'User quota not found', { userId: userId.toString() });
-      return { allowed: false, remaining: 0, reason: 'Quota not initialized' };
+      try {
+        quota = await this.initializeUserQuota(userId, planType);
+      } catch {
+        quota = await this.db.collection('user_quotas').findOne({ userId });
+        if (!quota) {
+          logger.warn('QuotaService', 'checkAndDecrementQuota', 'User quota not found after init attempt', 'User quota not found', { userId: userId.toString() });
+          return { allowed: false, remaining: 0, reason: 'Quota initialization failed' };
+        }
+      }
     }
 
     // Check if daily reset is needed
@@ -196,10 +203,19 @@ export class QuotaService {
   /**
    * Atomically check and decrement AI chatbot quota.
    */
-  async checkAndDecrementAiChatbotQuota(userId: ObjectId, messageCount: number = 1): Promise<{ allowed: boolean; remaining: number; reason?: string }> {
-    const quota = await this.db.collection('user_quotas').findOne({ userId });
+  async checkAndDecrementAiChatbotQuota(userId: ObjectId, messageCount: number = 1, planType: 'free' | 'pro' | 'enterprise' = 'free'): Promise<{ allowed: boolean; remaining: number; reason?: string }> {
+    let quota = await this.db.collection('user_quotas').findOne({ userId });
+    // Auto-initialize quota on first use — no quota record = new user, not an error
     if (!quota) {
-      return { allowed: false, remaining: 0, reason: 'Quota not initialized' };
+      try {
+        quota = await this.initializeUserQuota(userId, planType);
+      } catch {
+        // If init fails (e.g. race condition already inserted), try fetching again
+        quota = await this.db.collection('user_quotas').findOne({ userId });
+        if (!quota) {
+          return { allowed: false, remaining: 0, reason: 'Quota initialization failed' };
+        }
+      }
     }
 
     const today = new Date();
