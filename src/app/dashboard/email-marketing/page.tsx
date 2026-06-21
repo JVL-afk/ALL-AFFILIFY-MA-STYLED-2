@@ -89,6 +89,13 @@ export default function EmailMarketingPage() {
     clickRate: 0,
     revenue: 0
   })
+  // Create campaign form state
+  const [createForm, setCreateForm] = useState({
+    name: '',
+    subject: '',
+    type: 'newsletter' as 'newsletter' | 'promotional' | 'automated',
+  })
+  const [isCreating, setIsCreating] = useState(false)
 
   useEffect(() => {
     loadAllData()
@@ -97,7 +104,12 @@ export default function EmailMarketingPage() {
   const loadAllData = async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/email-marketing/data')
+      const token = typeof document !== 'undefined'
+        ? (() => { const m = document.cookie.match(/(?:^|;\s*)(?:auth-token|token|authToken|jwt)=([^;]+)/); return m ? decodeURIComponent(m[1]) : null })()
+        : null
+      const headers: Record<string, string> = {}
+      if (token) headers['Authorization'] = `Bearer ${token}`
+      const response = await fetch('/api/email-marketing/data', { headers })
       if (response.ok) {
         const result = await response.json()
         setCampaigns(result.data.campaigns || [])
@@ -125,6 +137,66 @@ export default function EmailMarketingPage() {
   }
 
   // Removed: loadCampaigns, loadTemplates, loadSubscribers - now using loadAllData
+
+  // Helper: get auth token from cookie to pass as Bearer header for strict auth routes
+  const getAuthToken = (): string | null => {
+    if (typeof document === 'undefined') return null
+    const match = document.cookie.match(/(?:^|;\s*)(?:auth-token|token|authToken|jwt)=([^;]+)/)
+    return match ? decodeURIComponent(match[1]) : null
+  }
+
+  const createCampaign = async () => {
+    if (!createForm.name.trim()) { setError('Campaign name is required'); return }
+    if (!createForm.subject.trim()) { setError('Subject line is required'); return }
+    setIsCreating(true)
+    setError('')
+    try {
+      const token = getAuthToken()
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (token) headers['Authorization'] = `Bearer ${token}`
+
+      const response = await fetch('/api/email-marketing/campaigns', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          name: createForm.name,
+          subject: createForm.subject,
+          type: createForm.type,
+        }),
+      })
+      const data = await response.json()
+      if (response.ok) {
+        setShowCreateModal(false)
+        setSuccess(`Campaign "${createForm.name}" created successfully!`)
+        setCreateForm({ name: '', subject: '', type: 'newsletter' })
+        await loadAllData()
+      } else {
+        setError(data.error || 'Failed to create campaign')
+      }
+    } catch {
+      setError('Network error. Please try again.')
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
+  const deleteCampaign = async (campaignId: string) => {
+    setError('')
+    try {
+      const response = await fetch(`/api/email-marketing/campaigns/${campaignId}`, {
+        method: 'DELETE',
+      })
+      if (response.ok) {
+        setSuccess('Campaign deleted successfully')
+        await loadAllData()
+      } else {
+        const data = await response.json()
+        setError(data.error || 'Failed to delete campaign')
+      }
+    } catch {
+      setError('Network error. Please try again.')
+    }
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -903,6 +975,8 @@ export default function EmailMarketingPage() {
                     <label className="block text-sm font-medium text-teal-200 mb-2">Campaign Name</label>
                     <Input 
                       placeholder="e.g., Summer Sale 2024" 
+                      value={createForm.name}
+                      onChange={(e) => setCreateForm(prev => ({ ...prev, name: e.target.value }))}
                       className="bg-black/50 border-teal-500/30 text-white placeholder:text-teal-300/50 h-12"
                     />
                   </div>
@@ -911,14 +985,18 @@ export default function EmailMarketingPage() {
                     <label className="block text-sm font-medium text-teal-200 mb-2">Subject Line</label>
                     <Input 
                       placeholder="e.g., 🔥 Don't Miss Our Summer Sale!" 
+                      value={createForm.subject}
+                      onChange={(e) => setCreateForm(prev => ({ ...prev, subject: e.target.value }))}
                       className="bg-black/50 border-teal-500/30 text-white placeholder:text-teal-300/50 h-12"
                     />
                   </div>
                   
                   <div>
                     <label className="block text-sm font-medium text-teal-200 mb-2">Campaign Type</label>
-                    <select className="w-full p-3 border border-teal-500/30 rounded-lg bg-black/50 text-white h-12">
-                      <option value="">Select type</option>
+                    <select 
+                      value={createForm.type}
+                      onChange={(e) => setCreateForm(prev => ({ ...prev, type: e.target.value as any }))}
+                      className="w-full p-3 border border-teal-500/30 rounded-lg bg-black/50 text-white h-12">
                       <option value="newsletter">Newsletter</option>
                       <option value="promotional">Promotional</option>
                       <option value="automated">Automated</option>
@@ -960,14 +1038,15 @@ export default function EmailMarketingPage() {
                     Cancel
                   </Button>
                   <Button
-                    onClick={() => {
-                      setShowCreateModal(false)
-                      setSuccess('Campaign created successfully!')
-                    }}
-                    className="flex-1 bg-gradient-to-r from-teal-500 to-green-600 hover:from-teal-600 hover:to-green-700 text-white"
+                    onClick={createCampaign}
+                    disabled={isCreating}
+                    className="flex-1 bg-gradient-to-r from-teal-500 to-green-600 hover:from-teal-600 hover:to-green-700 text-white disabled:opacity-60"
                   >
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Create Campaign
+                    {isCreating ? (
+                      <><div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />Creating...</>
+                    ) : (
+                      <><Sparkles className="w-4 h-4 mr-2" />Create Campaign</>
+                    )}
                   </Button>
                 </div>
               </motion.div>

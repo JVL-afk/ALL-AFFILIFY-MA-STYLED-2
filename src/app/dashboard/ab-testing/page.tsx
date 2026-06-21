@@ -91,6 +91,17 @@ export default function ABTestingPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [hasEnterpriseAccess, setHasEnterpriseAccess] = useState(false)
+  // Create test form state
+  const [createForm, setCreateForm] = useState({
+    name: '',
+    description: '',
+    type: 'headline',
+    primaryGoal: 'conversions',
+    duration: '14',
+    websiteId: '',
+    websiteName: '',
+  })
+  const [isCreating, setIsCreating] = useState(false)
 
   useEffect(() => {
     const initializeData = async () => {
@@ -137,10 +148,80 @@ export default function ABTestingPage() {
       const response = await fetch('/api/ab-tests/stats')
       if (response.ok) {
         const data = await response.json()
-        setStats(data.stats)
+        // API returns { success, stats } or { success, totalTests, runningTests, ... }
+        setStats(data.stats || {
+          totalTests: data.totalTests || 0,
+          runningTests: data.runningTests || 0,
+          completedTests: data.completedTests || 0,
+          totalVisitors: data.totalVisitors || 0,
+          averageUplift: data.averageUplift || 0,
+          significantWins: data.significantWins || 0,
+        })
       }
     } catch (error) {
       console.error('Error loading stats:', error)
+    }
+  }
+
+  // Helper: get auth token from cookie to pass as Bearer header
+  const getAuthToken = (): string | null => {
+    if (typeof document === 'undefined') return null
+    const match = document.cookie.match(/(?:^|;\s*)(?:auth-token|token|authToken|jwt)=([^;]+)/)
+    return match ? decodeURIComponent(match[1]) : null
+  }
+
+  const createTest = async () => {
+    if (!createForm.name.trim()) {
+      setError('Test name is required')
+      return
+    }
+    setIsCreating(true)
+    setError('')
+    try {
+      const token = getAuthToken()
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (token) headers['Authorization'] = `Bearer ${token}`
+
+      const payload = {
+        name: createForm.name,
+        description: createForm.description,
+        type: createForm.type,
+        websiteId: createForm.websiteId || '000000000000000000000001',
+        websiteName: createForm.websiteName || 'My Website',
+        metrics: {
+          primaryGoal: createForm.primaryGoal,
+          confidenceLevel: 0.95,
+          statisticalSignificance: false,
+        },
+        schedule: {
+          duration: parseInt(createForm.duration) || 14,
+        },
+        variants: [
+          { id: crypto.randomUUID(), name: 'Control', description: 'Original version', trafficAllocation: 5000, isControl: true },
+          { id: crypto.randomUUID(), name: 'Variant A', description: 'New version', trafficAllocation: 5000, isControl: false },
+        ],
+      }
+
+      const response = await fetch('/api/ab-tests/create', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      })
+
+      const data = await response.json()
+      if (response.ok) {
+        setShowCreateModal(false)
+        setSuccess(`A/B test "${createForm.name}" created successfully! Configure variants and start testing.`)
+        setCreateForm({ name: '', description: '', type: 'headline', primaryGoal: 'conversions', duration: '14', websiteId: '', websiteName: '' })
+        await loadTests()
+        await loadStats()
+      } else {
+        setError(data.error || data.details?.name?._errors?.[0] || 'Failed to create test')
+      }
+    } catch (err) {
+      setError('Network error. Please try again.')
+    } finally {
+      setIsCreating(false)
     }
   }
 
@@ -860,6 +941,8 @@ export default function ABTestingPage() {
                     <label className="block text-sm font-medium text-blue-200 mb-2">Test Name</label>
                     <Input 
                       placeholder="e.g., Homepage Headline Test" 
+                      value={createForm.name}
+                      onChange={(e) => setCreateForm(prev => ({ ...prev, name: e.target.value }))}
                       className="bg-black/50 border-blue-500/30 text-white placeholder:text-blue-300/50 h-12"
                     />
                   </div>
@@ -868,13 +951,18 @@ export default function ABTestingPage() {
                     <label className="block text-sm font-medium text-blue-200 mb-2">Description</label>
                     <Input 
                       placeholder="Brief description of what you're testing" 
+                      value={createForm.description}
+                      onChange={(e) => setCreateForm(prev => ({ ...prev, description: e.target.value }))}
                       className="bg-black/50 border-blue-500/30 text-white placeholder:text-blue-300/50 h-12"
                     />
                   </div>
                   
                   <div>
                     <label className="block text-sm font-medium text-blue-200 mb-2">Test Type</label>
-                    <select className="w-full p-3 border border-blue-500/30 rounded-lg bg-black/50 text-white">
+                    <select 
+                      value={createForm.type}
+                      onChange={(e) => setCreateForm(prev => ({ ...prev, type: e.target.value }))}
+                      className="w-full p-3 border border-blue-500/30 rounded-lg bg-black/50 text-white">
                       <option value="headline">Headline Test</option>
                       <option value="cta">Call-to-Action Test</option>
                       <option value="layout">Layout Test</option>
@@ -886,7 +974,10 @@ export default function ABTestingPage() {
                   
                   <div>
                     <label className="block text-sm font-medium text-blue-200 mb-2">Primary Goal</label>
-                    <select className="w-full p-3 border border-blue-500/30 rounded-lg bg-black/50 text-white">
+                    <select 
+                      value={createForm.primaryGoal}
+                      onChange={(e) => setCreateForm(prev => ({ ...prev, primaryGoal: e.target.value }))}
+                      className="w-full p-3 border border-blue-500/30 rounded-lg bg-black/50 text-white">
                       <option value="clicks">Clicks</option>
                       <option value="conversions">Conversions</option>
                       <option value="revenue">Revenue</option>
@@ -900,7 +991,9 @@ export default function ABTestingPage() {
                       type="number" 
                       placeholder="14" 
                       min="1" 
-                      max="90" 
+                      max="90"
+                      value={createForm.duration}
+                      onChange={(e) => setCreateForm(prev => ({ ...prev, duration: e.target.value }))}
                       className="bg-black/50 border-blue-500/30 text-white h-12"
                     />
                   </div>
@@ -980,14 +1073,15 @@ export default function ABTestingPage() {
                     Cancel
                   </Button>
                   <Button
-                    onClick={() => {
-                      setShowCreateModal(false)
-                      setSuccess('A/B test created successfully! Configure variants and start testing.')
-                    }}
-                    className="flex-1 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white"
+                    onClick={createTest}
+                    disabled={isCreating}
+                    className="flex-1 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white disabled:opacity-60"
                   >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Create Test
+                    {isCreating ? (
+                      <><div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />Creating...</>
+                    ) : (
+                      <><CheckCircle className="w-4 h-4 mr-2" />Create Test</>
+                    )}
                   </Button>
                 </div>
               </motion.div>

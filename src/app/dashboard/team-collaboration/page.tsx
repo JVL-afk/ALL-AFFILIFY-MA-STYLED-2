@@ -87,6 +87,9 @@ export default function TeamCollaborationPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  // Invite form state
+  const [inviteForm, setInviteForm] = useState({ email: '', role: 'editor' as 'admin' | 'editor' | 'viewer' })
+  const [isInviting, setIsInviting] = useState(false)
 
   useEffect(() => {
     loadTeamData()
@@ -114,6 +117,53 @@ export default function TeamCollaborationPage() {
       setActivities([])
     } finally {
       setLoading(false)
+    }
+  }
+
+  const inviteMember = async () => {
+    if (!inviteForm.email.trim()) { setError('Email address is required'); return }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteForm.email)) { setError('Please enter a valid email address'); return }
+    setIsInviting(true)
+    setError('')
+    try {
+      const response = await fetch('/api/team/members', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: inviteForm.email, role: inviteForm.role }),
+      })
+      const data = await response.json()
+      if (response.ok) {
+        setShowInviteModal(false)
+        setSuccess(data.message || `Invitation sent to ${inviteForm.email}!`)
+        setInviteForm({ email: '', role: 'editor' })
+        await loadTeamData()
+      } else {
+        setError(data.error || 'Failed to send invitation')
+      }
+    } catch {
+      setError('Network error. Please try again.')
+    } finally {
+      setIsInviting(false)
+    }
+  }
+
+  const removeMember = async (memberId: string) => {
+    setError('')
+    try {
+      const response = await fetch('/api/team/members', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberId }),
+      })
+      const data = await response.json()
+      if (response.ok) {
+        setSuccess('Team member removed successfully')
+        await loadTeamData()
+      } else {
+        setError(data.error || 'Failed to remove member')
+      }
+    } catch {
+      setError('Network error. Please try again.')
     }
   }
 
@@ -915,14 +965,15 @@ export default function TeamCollaborationPage() {
                     Cancel
                   </Button>
                   <Button
-                    onClick={() => {
-                      setShowInviteModal(false)
-                      setSuccess('Invitation sent successfully!')
-                    }}
-                    className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white"
+                    onClick={inviteMember}
+                    disabled={isInviting}
+                    className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white disabled:opacity-60"
                   >
-                    <Mail className="w-4 h-4 mr-2" />
-                    Send Invitation
+                    {isInviting ? (
+                      <><div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />Sending...</>
+                    ) : (
+                      <><Mail className="w-4 h-4 mr-2" />Send Invitation</>
+                    )}
                   </Button>
                 </div>
               </motion.div>
